@@ -267,7 +267,7 @@
           "id": "Q6HtSu",
           "name": "Label",
           "fill": "$ink",
-          "content": "時辰（選填）",
+          "content": "出生時辰（選填）",
           "lineHeight": 1.45,
           "fontFamily": "$font-body",
           "fontSize": 13,
@@ -344,7 +344,7 @@
           "id": "wFMkg",
           "name": "Label",
           "fill": "$ink",
-          "content": "這次想看",
+          "content": "問事宮位（排盤焦點）",
           "lineHeight": 1.45,
           "fontFamily": "$font-body",
           "fontSize": 13,
@@ -646,7 +646,7 @@
               "width": "fill_container",
               "descendants": {
                 "u43al": {
-                  "content": "暱稱"
+                  "content": "命主暱稱"
                 },
                 "tgWA0": {
                   "content": "小圓"
@@ -661,7 +661,7 @@
               "width": "fill_container",
               "descendants": {
                 "u43al": {
-                  "content": "生日"
+                  "content": "生辰公曆（國曆）"
                 },
                 "tgWA0": {
                   "content": "1993-07-12",
@@ -794,7 +794,7 @@
               "width": "fill_container",
               "descendants": {
                 "aBGDW": {
-                  "content": "暱稱"
+                  "content": "命主暱稱"
                 },
                 "d25uF": {
                   "content": "請填寫暱稱。"
@@ -809,7 +809,7 @@
               "width": "fill_container",
               "descendants": {
                 "aBGDW": {
-                  "content": "生日"
+                  "content": "生辰公曆（國曆）"
                 },
                 "d25uF": {
                   "content": "請填寫生日。"
@@ -941,7 +941,7 @@
               "width": "fill_container",
               "descendants": {
                 "u43al": {
-                  "content": "暱稱"
+                  "content": "命主暱稱"
                 },
                 "tgWA0": {
                   "content": "小圓"
@@ -956,7 +956,7 @@
               "width": "fill_container",
               "descendants": {
                 "u43al": {
-                  "content": "生日"
+                  "content": "生辰公曆（國曆）"
                 },
                 "tgWA0": {
                   "content": "1993-07-12",
@@ -1065,32 +1065,15 @@
                       }
                     }
                   ]
-                },
-                {
-                  "type": "text",
-                  "id": "Fdw4f",
-                  "name": "Tags",
-                  "fill": "$ink-soft",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "〔 命主：小圓 ｜ 未知時辰（準確度較低） ｜ 聚焦：工作（官祿宮） 〕",
-                  "lineHeight": 1.45,
-                  "fontFamily": "$font-mono",
-                  "fontSize": 12,
-                  "fontWeight": "500"
-                },
-                {
-                  "type": "text",
-                  "id": "Uu5r8",
-                  "name": "Date",
-                  "fill": "$ink-soft",
-                  "content": "西元 1993-07-12・癸酉年生",
-                  "lineHeight": 1.45,
-                  "fontFamily": "$font-mono",
-                  "fontSize": 13,
-                  "fontWeight": "normal"
                 }
               ]
+            },
+            {
+              "id": "gM0qi",
+              "type": "ref",
+              "ref": "hFQMl",
+              "name": "ChartMatrixInstance",
+              "width": "fill_container"
             },
             {
               "type": "frame",
@@ -1105,7 +1088,7 @@
                   "id": "b0SCnj",
                   "name": "整體提醒L",
                   "fill": "$ink",
-                  "content": "【 原局總覽 】",
+                  "content": "【 原局總覽 】  〔 局象：守成蓄勢 〕",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-heading",
                   "fontSize": 14,
@@ -1128,6 +1111,14 @@
             },
             {
               "type": "frame",
+              "id": "TNbVI",
+              "name": "Divider1",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$line-subtle"
+            },
+            {
+              "type": "frame",
               "id": "HVX0i",
               "name": "工作",
               "width": "fill_container",
@@ -1139,7 +1130,7 @@
                   "id": "DV1iB",
                   "name": "工作L",
                   "fill": "$ink",
-                  "content": "【 官祿事業 】",
+                  "content": "【 官祿事業 】  〔 象意：重在實證 〕",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-heading",
                   "fontSize": 14,
@@ -1162,6 +1153,14 @@
             },
             {
               "type": "frame",
+              "id": "M593Pk",
+              "name": "Divider2",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$line-subtle"
+            },
+            {
+              "type": "frame",
               "id": "zT7N0",
               "name": "關係",
               "width": "fill_container",
@@ -1173,7 +1172,7 @@
                   "id": "X6WMgw",
                   "name": "關係L",
                   "fill": "$ink",
-                  "content": "【 夫妻交友 】",
+                  "content": "【 夫妻交友 】  〔 象意：界線明晰 〕",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-heading",
                   "fontSize": 14,
@@ -1195,13 +1194,21 @@
               ]
             },
             {
+              "type": "frame",
+              "id": "QiNhr",
+              "name": "Divider3",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$line-subtle"
+            },
+            {
               "type": "text",
               "id": "H2tAq1",
               "name": "ActionHint",
               "fill": "$ink",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "【 行動指引 】 先完成一件能展示的小交付。",
+              "content": "【 行動指引・破局之著 】  先完成一件能展示的小交付。",
               "lineHeight": 1.7,
               "fontFamily": "$font-body",
               "fontSize": 14,
@@ -1383,32 +1390,15 @@
                       }
                     }
                   ]
-                },
-                {
-                  "type": "text",
-                  "id": "mX8Wl",
-                  "name": "Tags",
-                  "fill": "$ink-soft",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "〔 命主：小圓 ｜ 未知時辰（準確度較低） ｜ 聚焦：工作（官祿宮） 〕",
-                  "lineHeight": 1.45,
-                  "fontFamily": "$font-mono",
-                  "fontSize": 12,
-                  "fontWeight": "500"
-                },
-                {
-                  "type": "text",
-                  "id": "fkh5q",
-                  "name": "Date",
-                  "fill": "$ink-soft",
-                  "content": "西元 1993-07-12・癸酉年生",
-                  "lineHeight": 1.45,
-                  "fontFamily": "$font-mono",
-                  "fontSize": 13,
-                  "fontWeight": "normal"
                 }
               ]
+            },
+            {
+              "id": "ZViNa",
+              "type": "ref",
+              "ref": "hFQMl",
+              "name": "ChartMatrixInstance",
+              "width": "fill_container"
             },
             {
               "type": "frame",
@@ -1423,7 +1413,7 @@
                   "id": "CKye2",
                   "name": "整體提醒L",
                   "fill": "$ink",
-                  "content": "【 原局總覽 】",
+                  "content": "【 原局總覽 】  〔 局象：守成蓄勢 〕",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-heading",
                   "fontSize": 14,
@@ -1446,6 +1436,14 @@
             },
             {
               "type": "frame",
+              "id": "CwKca",
+              "name": "Divider1",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$line-subtle"
+            },
+            {
+              "type": "frame",
               "id": "NstTJ",
               "name": "工作",
               "width": "fill_container",
@@ -1457,7 +1455,7 @@
                   "id": "MKpPE",
                   "name": "工作L",
                   "fill": "$ink",
-                  "content": "【 官祿事業 】",
+                  "content": "【 官祿事業 】  〔 象意：重在實證 〕",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-heading",
                   "fontSize": 14,
@@ -1480,6 +1478,14 @@
             },
             {
               "type": "frame",
+              "id": "U2R6B",
+              "name": "Divider2",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$line-subtle"
+            },
+            {
+              "type": "frame",
               "id": "AgqUb",
               "name": "關係",
               "width": "fill_container",
@@ -1491,7 +1497,7 @@
                   "id": "z3wlc",
                   "name": "關係L",
                   "fill": "$ink",
-                  "content": "【 夫妻交友 】",
+                  "content": "【 夫妻交友 】  〔 象意：界線明晰 〕",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-heading",
                   "fontSize": 14,
@@ -1513,13 +1519,21 @@
               ]
             },
             {
+              "type": "frame",
+              "id": "qYHkZ",
+              "name": "Divider3",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$line-subtle"
+            },
+            {
               "type": "text",
               "id": "Nw24h",
               "name": "ActionHint",
               "fill": "$ink",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "【 行動指引 】 先完成一件能展示的小交付。",
+              "content": "【 行動指引・破局之著 】  先完成一件能展示的小交付。",
               "lineHeight": 1.7,
               "fontFamily": "$font-body",
               "fontSize": 14,
@@ -1989,7 +2003,7 @@
               "width": "fill_container",
               "descendants": {
                 "u43al": {
-                  "content": "暱稱"
+                  "content": "命主暱稱"
                 },
                 "tgWA0": {
                   "content": "小圓"
@@ -2004,7 +2018,7 @@
               "width": "fill_container",
               "descendants": {
                 "u43al": {
-                  "content": "生日"
+                  "content": "生辰公曆（國曆）"
                 },
                 "tgWA0": {
                   "content": "1993-07-12",
@@ -2137,7 +2151,7 @@
               "width": "fill_container",
               "descendants": {
                 "aBGDW": {
-                  "content": "暱稱"
+                  "content": "命主暱稱"
                 },
                 "d25uF": {
                   "content": "請填寫暱稱。"
@@ -2152,7 +2166,7 @@
               "width": "fill_container",
               "descendants": {
                 "aBGDW": {
-                  "content": "生日"
+                  "content": "生辰公曆（國曆）"
                 },
                 "d25uF": {
                   "content": "請填寫生日。"
@@ -2284,7 +2298,7 @@
               "width": "fill_container",
               "descendants": {
                 "u43al": {
-                  "content": "暱稱"
+                  "content": "命主暱稱"
                 },
                 "tgWA0": {
                   "content": "小圓"
@@ -2299,7 +2313,7 @@
               "width": "fill_container",
               "descendants": {
                 "u43al": {
-                  "content": "生日"
+                  "content": "生辰公曆（國曆）"
                 },
                 "tgWA0": {
                   "content": "1993-07-12",
@@ -2408,32 +2422,15 @@
                       }
                     }
                   ]
-                },
-                {
-                  "type": "text",
-                  "id": "NXXz4",
-                  "name": "Tags",
-                  "fill": "$ink-soft",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "〔 命主：小圓 ｜ 未知時辰（準確度較低） ｜ 聚焦：工作（官祿宮） 〕",
-                  "lineHeight": 1.45,
-                  "fontFamily": "$font-mono",
-                  "fontSize": 12,
-                  "fontWeight": "500"
-                },
-                {
-                  "type": "text",
-                  "id": "suVcv",
-                  "name": "Date",
-                  "fill": "$ink-soft",
-                  "content": "西元 1993-07-12・癸酉年生",
-                  "lineHeight": 1.45,
-                  "fontFamily": "$font-mono",
-                  "fontSize": 13,
-                  "fontWeight": "normal"
                 }
               ]
+            },
+            {
+              "id": "vRqXq",
+              "type": "ref",
+              "ref": "hFQMl",
+              "name": "ChartMatrixInstance",
+              "width": "fill_container"
             },
             {
               "type": "frame",
@@ -2448,7 +2445,7 @@
                   "id": "gq0y2",
                   "name": "整體提醒L",
                   "fill": "$ink",
-                  "content": "【 原局總覽 】",
+                  "content": "【 原局總覽 】  〔 局象：守成蓄勢 〕",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-heading",
                   "fontSize": 14,
@@ -2471,6 +2468,14 @@
             },
             {
               "type": "frame",
+              "id": "mhZfl",
+              "name": "Divider1",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$line-subtle"
+            },
+            {
+              "type": "frame",
               "id": "Kr7s3",
               "name": "工作",
               "width": "fill_container",
@@ -2482,7 +2487,7 @@
                   "id": "bgZlY",
                   "name": "工作L",
                   "fill": "$ink",
-                  "content": "【 官祿事業 】",
+                  "content": "【 官祿事業 】  〔 象意：重在實證 〕",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-heading",
                   "fontSize": 14,
@@ -2505,6 +2510,14 @@
             },
             {
               "type": "frame",
+              "id": "u30JR",
+              "name": "Divider2",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$line-subtle"
+            },
+            {
+              "type": "frame",
               "id": "wtYZC",
               "name": "關係",
               "width": "fill_container",
@@ -2516,7 +2529,7 @@
                   "id": "oxTtM",
                   "name": "關係L",
                   "fill": "$ink",
-                  "content": "【 夫妻交友 】",
+                  "content": "【 夫妻交友 】  〔 象意：界線明晰 〕",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-heading",
                   "fontSize": 14,
@@ -2538,13 +2551,21 @@
               ]
             },
             {
+              "type": "frame",
+              "id": "vNsGR",
+              "name": "Divider3",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$line-subtle"
+            },
+            {
               "type": "text",
               "id": "e9SVX",
               "name": "ActionHint",
               "fill": "$ink",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "【 行動指引 】 先完成一件能展示的小交付。",
+              "content": "【 行動指引・破局之著 】  先完成一件能展示的小交付。",
               "lineHeight": 1.7,
               "fontFamily": "$font-body",
               "fontSize": 14,
@@ -2726,32 +2747,15 @@
                       }
                     }
                   ]
-                },
-                {
-                  "type": "text",
-                  "id": "wYLRo",
-                  "name": "Tags",
-                  "fill": "$ink-soft",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "〔 命主：小圓 ｜ 未知時辰（準確度較低） ｜ 聚焦：工作（官祿宮） 〕",
-                  "lineHeight": 1.45,
-                  "fontFamily": "$font-mono",
-                  "fontSize": 12,
-                  "fontWeight": "500"
-                },
-                {
-                  "type": "text",
-                  "id": "tP4GR",
-                  "name": "Date",
-                  "fill": "$ink-soft",
-                  "content": "西元 1993-07-12・癸酉年生",
-                  "lineHeight": 1.45,
-                  "fontFamily": "$font-mono",
-                  "fontSize": 13,
-                  "fontWeight": "normal"
                 }
               ]
+            },
+            {
+              "id": "pvvFS",
+              "type": "ref",
+              "ref": "hFQMl",
+              "name": "ChartMatrixInstance",
+              "width": "fill_container"
             },
             {
               "type": "frame",
@@ -2766,7 +2770,7 @@
                   "id": "UYPY8",
                   "name": "整體提醒L",
                   "fill": "$ink",
-                  "content": "【 原局總覽 】",
+                  "content": "【 原局總覽 】  〔 局象：守成蓄勢 〕",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-heading",
                   "fontSize": 14,
@@ -2789,6 +2793,14 @@
             },
             {
               "type": "frame",
+              "id": "o7ZLfb",
+              "name": "Divider1",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$line-subtle"
+            },
+            {
+              "type": "frame",
               "id": "tWcC0",
               "name": "工作",
               "width": "fill_container",
@@ -2800,7 +2812,7 @@
                   "id": "WNLP5",
                   "name": "工作L",
                   "fill": "$ink",
-                  "content": "【 官祿事業 】",
+                  "content": "【 官祿事業 】  〔 象意：重在實證 〕",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-heading",
                   "fontSize": 14,
@@ -2823,6 +2835,14 @@
             },
             {
               "type": "frame",
+              "id": "G4QsbF",
+              "name": "Divider2",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$line-subtle"
+            },
+            {
+              "type": "frame",
               "id": "RCcKz",
               "name": "關係",
               "width": "fill_container",
@@ -2834,7 +2854,7 @@
                   "id": "D9k4Gi",
                   "name": "關係L",
                   "fill": "$ink",
-                  "content": "【 夫妻交友 】",
+                  "content": "【 夫妻交友 】  〔 象意：界線明晰 〕",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-heading",
                   "fontSize": 14,
@@ -2856,13 +2876,21 @@
               ]
             },
             {
+              "type": "frame",
+              "id": "E11PW9",
+              "name": "Divider3",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$line-subtle"
+            },
+            {
               "type": "text",
               "id": "iKPLH",
               "name": "ActionHint",
               "fill": "$ink",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "【 行動指引 】 先完成一件能展示的小交付。",
+              "content": "【 行動指引・破局之著 】  先完成一件能展示的小交付。",
               "lineHeight": 1.7,
               "fontFamily": "$font-body",
               "fontSize": 14,
@@ -3192,13 +3220,13 @@
       "y": 0,
       "name": "SealStamp",
       "reusable": true,
-      "width": 36,
-      "height": 36,
+      "width": 38,
+      "height": 38,
       "fill": "$seal",
-      "cornerRadius": 2,
-      "stroke": "$seal-deep",
-      "strokeWidth": 1,
-      "padding": 4,
+      "cornerRadius": 1,
+      "stroke": "$seal-deeper",
+      "strokeWidth": 2,
+      "padding": 3,
       "justifyContent": "center",
       "alignItems": "center",
       "children": [
@@ -3214,24 +3242,153 @@
           "fontWeight": "700"
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "hFQMl",
+      "x": 440,
+      "y": 0,
+      "name": "ChartMatrix",
+      "reusable": true,
+      "width": 528,
+      "fill": "$paper",
+      "cornerRadius": 2,
+      "stroke": "$line",
+      "strokeWidth": 1,
+      "layout": "vertical",
+      "gap": 10,
+      "padding": [
+        12,
+        16
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "hLMMX",
+          "name": "MatrixHeader",
+          "width": "fill_container",
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "utpgp",
+              "name": "MatrixTitle",
+              "fill": "$ink",
+              "content": "【 紫微原局・排盤總目 】",
+              "fontFamily": "$font-heading",
+              "fontSize": 13,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "JI1I1",
+              "name": "MatrixBureau",
+              "fill": "$seal",
+              "content": "水二局・暫定命盤",
+              "fontFamily": "$font-heading",
+              "fontSize": 12,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Bakdz",
+          "name": "MatrixLine",
+          "width": "fill_container",
+          "height": 1,
+          "fill": "$line-subtle"
+        },
+        {
+          "type": "frame",
+          "id": "X1kZaf",
+          "name": "MatrixGrid",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 4,
+          "children": [
+            {
+              "type": "frame",
+              "id": "AYZCJ",
+              "name": "Row1",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "NtoUP",
+                  "name": "Cell1",
+                  "fill": "$ink-soft",
+                  "content": "命主：小圓（女命）",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "L6vjrt",
+                  "name": "Cell2",
+                  "fill": "$ink-soft",
+                  "content": "生辰：西元1993年7月12日",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "izLNs",
+              "name": "Row2",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "eZJ6R",
+                  "name": "Cell3",
+                  "fill": "$ink-soft",
+                  "content": "歲次：癸酉年（劍鋒金）",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "dSGiQ",
+                  "name": "Cell4",
+                  "fill": "$ink",
+                  "content": "問事焦點：官祿宮（工作事業）",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
     "paper": {
       "type": "color",
-      "value": "#E8E2D4"
+      "value": "#E5DEC9"
     },
     "sheet": {
       "type": "color",
-      "value": "#F7F4EC"
+      "value": "#F9F5EA"
     },
     "ink": {
       "type": "color",
-      "value": "#1E2430"
+      "value": "#1B212C"
     },
     "ink-soft": {
       "type": "color",
-      "value": "#5C6573"
+      "value": "#555F70"
     },
     "seal": {
       "type": "color",
@@ -3255,7 +3412,7 @@
     },
     "line": {
       "type": "color",
-      "value": "#C9C2B3"
+      "value": "#C2BAA6"
     },
     "ok": {
       "type": "color",
@@ -3312,6 +3469,14 @@
     "disclaimer": {
       "type": "number",
       "value": 14
+    },
+    "line-subtle": {
+      "type": "color",
+      "value": "#D8D0BC"
+    },
+    "paper-dark": {
+      "type": "color",
+      "value": "#ECE5D4"
     }
   },
   "fileToken": "5a2eca12-b65c-4848-97db-f35b13b85b29"
