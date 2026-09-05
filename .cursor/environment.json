@@ -1,0 +1,17 @@
+{
+  "name": "ziwei-ai-report",
+  "install": "npm ci",
+  "terminals": [
+    {
+      "name": "dev",
+      "command": "npm run dev",
+      "description": "Next.js 16 dev server (webpack) on http://localhost:3000. Runs in mock AI mode by default; no external keys required."
+    }
+  ],
+  "ports": [
+    {
+      "name": "web",
+      "port": 3000
+    }
+  ]
+}
