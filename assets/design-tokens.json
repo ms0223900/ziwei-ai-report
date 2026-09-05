@@ -1,0 +1,162 @@
+{
+  "$schema": "https://design-tokens.org/schema.json",
+  "_meta": {
+    "name": "ziwei-ink-paper",
+    "theme": "墨箋夜讀",
+    "version": "1.0.0",
+    "source": "docs/design-brief.md",
+    "darkMode": false
+  },
+  "primitive": {
+    "color": {
+      "paper": { "$value": "#E8E2D4", "$type": "color" },
+      "sheet": { "$value": "#F7F4EC", "$type": "color" },
+      "ink": { "$value": "#1E2430", "$type": "color" },
+      "ink-soft": { "$value": "#5C6573", "$type": "color" },
+      "seal": { "$value": "#8E1F2F", "$type": "color" },
+      "seal-deep": { "$value": "#721926", "$type": "color" },
+      "seal-deeper": { "$value": "#5C1420", "$type": "color" },
+      "night": { "$value": "#2A3344", "$type": "color" },
+      "night-bar": { "$value": "#3D4758", "$type": "color" },
+      "line": { "$value": "#C9C2B3", "$type": "color" },
+      "ok": { "$value": "#2F6F4E", "$type": "color" },
+      "warn": { "$value": "#8A5A12", "$type": "color" }
+    },
+    "spacing": {
+      "0": { "$value": "0", "$type": "dimension" },
+      "1": { "$value": "0.25rem", "$type": "dimension" },
+      "2": { "$value": "0.5rem", "$type": "dimension" },
+      "3": { "$value": "0.75rem", "$type": "dimension" },
+      "4": { "$value": "1rem", "$type": "dimension" },
+      "5": { "$value": "1.25rem", "$type": "dimension" },
+      "6": { "$value": "1.5rem", "$type": "dimension" },
+      "8": { "$value": "2rem", "$type": "dimension" },
+      "10": { "$value": "2.5rem", "$type": "dimension" },
+      "12": { "$value": "3rem", "$type": "dimension" }
+    },
+    "fontFamily": {
+      "heading": { "$value": "\"Noto Serif TC\", serif", "$type": "fontFamily" },
+      "body": { "$value": "\"Noto Sans TC\", sans-serif", "$type": "fontFamily" },
+      "mono": { "$value": "\"IBM Plex Mono\", ui-monospace, monospace", "$type": "fontFamily" }
+    },
+    "fontSize": {
+      "label": { "$value": "0.8125rem", "$type": "dimension" },
+      "label-lg": { "$value": "0.875rem", "$type": "dimension" },
+      "body": { "$value": "1.0625rem", "$type": "dimension" },
+      "button": { "$value": "1.0625rem", "$type": "dimension" },
+      "display": { "$value": "1.875rem", "$type": "dimension" }
+    },
+    "fontWeight": {
+      "regular": { "$value": "400", "$type": "fontWeight" },
+      "medium": { "$value": "500", "$type": "fontWeight" },
+      "bold": { "$value": "700", "$type": "fontWeight" }
+    },
+    "lineHeight": {
+      "display": { "$value": "1.25", "$type": "number" },
+      "body": { "$value": "1.7", "$type": "number" },
+      "label": { "$value": "1.45", "$type": "number" },
+      "button": { "$value": "1.3", "$type": "number" }
+    },
+    "radius": {
+      "none": { "$value": "0", "$type": "dimension" },
+      "control": { "$value": "0.125rem", "$type": "dimension" },
+      "sheet": { "$value": "0.25rem", "$type": "dimension" }
+    },
+    "borderWidth": {
+      "hairline": { "$value": "1px", "$type": "dimension" },
+      "focus": { "$value": "2px", "$type": "dimension" }
+    },
+    "size": {
+      "touch": { "$value": "2.75rem", "$type": "dimension" },
+      "sheet-max": { "$value": "36rem", "$type": "dimension" }
+    },
+    "duration": {
+      "fade": { "$value": "200ms", "$type": "duration" },
+      "hover": { "$value": "150ms", "$type": "duration" },
+      "none": { "$value": "0ms", "$type": "duration" }
+    },
+    "motion": {
+      "seal-rotate": { "$value": "-2deg" }
+    }
+  },
+  "semantic": {
+    "color": {
+      "background": { "$value": "{primitive.color.paper}", "$type": "color" },
+      "foreground": { "$value": "{primitive.color.ink}", "$type": "color" },
+      "on-background": { "$value": "{primitive.color.ink}", "$type": "color" },
+      "paper": { "$value": "{primitive.color.paper}", "$type": "color" },
+      "sheet": { "$value": "{primitive.color.sheet}", "$type": "color" },
+      "ink": { "$value": "{primitive.color.ink}", "$type": "color" },
+      "ink-soft": { "$value": "{primitive.color.ink-soft}", "$type": "color" },
+      "seal": { "$value": "{primitive.color.seal}", "$type": "color" },
+      "night": { "$value": "{primitive.color.night}", "$type": "color" },
+      "line": { "$value": "{primitive.color.line}", "$type": "color" },
+      "primary": { "$value": "{primitive.color.seal}", "$type": "color" },
+      "primary-hover": { "$value": "{primitive.color.seal-deep}", "$type": "color" },
+      "primary-active": { "$value": "{primitive.color.seal-deeper}", "$type": "color" },
+      "primary-foreground": { "$value": "{primitive.color.sheet}", "$type": "color" },
+      "muted-foreground": { "$value": "{primitive.color.ink-soft}", "$type": "color" },
+      "border": { "$value": "{primitive.color.line}", "$type": "color" },
+      "ring": { "$value": "{primitive.color.seal}", "$type": "color" },
+      "ok": { "$value": "{primitive.color.ok}", "$type": "color" },
+      "warn": { "$value": "{primitive.color.warn}", "$type": "color" },
+      "on-night": { "$value": "{primitive.color.sheet}", "$type": "color" }
+    },
+    "spacing": {
+      "page-x": { "$value": "{primitive.spacing.5}", "$type": "dimension" },
+      "page-x-lg": { "$value": "{primitive.spacing.6}", "$type": "dimension" },
+      "section": { "$value": "{primitive.spacing.8}", "$type": "dimension" },
+      "component": { "$value": "{primitive.spacing.4}", "$type": "dimension" }
+    },
+    "fontFamily": {
+      "heading": { "$value": "{primitive.fontFamily.heading}", "$type": "fontFamily" },
+      "body": { "$value": "{primitive.fontFamily.body}", "$type": "fontFamily" },
+      "mono": { "$value": "{primitive.fontFamily.mono}", "$type": "fontFamily" }
+    }
+  },
+  "component": {
+    "button": {
+      "bg": { "$value": "{semantic.color.primary}", "$type": "color" },
+      "fg": { "$value": "{semantic.color.primary-foreground}", "$type": "color" },
+      "hover-bg": { "$value": "{semantic.color.primary-hover}", "$type": "color" },
+      "active-bg": { "$value": "{semantic.color.primary-active}", "$type": "color" },
+      "padding-x": { "$value": "{primitive.spacing.5}", "$type": "dimension" },
+      "padding-y": { "$value": "{primitive.spacing.3}", "$type": "dimension" },
+      "radius": { "$value": "{primitive.radius.control}", "$type": "dimension" },
+      "font-size": { "$value": "{primitive.fontSize.button}", "$type": "dimension" },
+      "font-weight": { "$value": "{primitive.fontWeight.medium}", "$type": "fontWeight" },
+      "min-height": { "$value": "{primitive.size.touch}", "$type": "dimension" }
+    },
+    "input": {
+      "bg": { "$value": "{semantic.color.sheet}", "$type": "color" },
+      "fg": { "$value": "{semantic.color.ink}", "$type": "color" },
+      "border": { "$value": "{semantic.color.border}", "$type": "color" },
+      "focus-ring": { "$value": "{semantic.color.ring}", "$type": "color" },
+      "error-border": { "$value": "{semantic.color.warn}", "$type": "color" },
+      "error-fg": { "$value": "{semantic.color.warn}", "$type": "color" },
+      "padding-x": { "$value": "{primitive.spacing.3}", "$type": "dimension" },
+      "padding-y": { "$value": "{primitive.spacing.2}", "$type": "dimension" },
+      "radius": { "$value": "{primitive.radius.control}", "$type": "dimension" },
+      "font-size": { "$value": "{primitive.fontSize.body}", "$type": "dimension" }
+    },
+    "sheet": {
+      "bg": { "$value": "{semantic.color.sheet}", "$type": "color" },
+      "fg": { "$value": "{semantic.color.ink}", "$type": "color" },
+      "border": { "$value": "{semantic.color.border}", "$type": "color" },
+      "radius": { "$value": "{primitive.radius.sheet}", "$type": "dimension" },
+      "max-width": { "$value": "{primitive.size.sheet-max}", "$type": "dimension" },
+      "padding": { "$value": "{primitive.spacing.6}", "$type": "dimension" },
+      "shadow": { "$value": "none", "$type": "shadow" }
+    },
+    "seal-strip": {
+      "bg": { "$value": "{semantic.color.seal}", "$type": "color" },
+      "fg": { "$value": "{semantic.color.primary-foreground}", "$type": "color" },
+      "rotate": { "$value": "{primitive.motion.seal-rotate}" }
+    },
+    "locked": {
+      "bg": { "$value": "{semantic.color.night}", "$type": "color" },
+      "fg": { "$value": "{semantic.color.on-night}", "$type": "color" },
+      "bar": { "$value": "{primitive.color.night-bar}", "$type": "color" }
+    }
+  }
+}

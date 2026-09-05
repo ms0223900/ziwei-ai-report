@@ -21,7 +21,7 @@ alwaysApply: false
 
 ## UI
 
-- Tailwind + 紫微 M3 token；基本 a11y（語意標籤、`aria-*` 若適用）。
+- Tailwind + 墨箋夜讀 token（`docs/design-brief.md`、`assets/design-tokens.json`）；基本 a11y（語意標籤、`aria-*` 若適用）。本版不做暗色模式。
 - 表單結果放 state，不依賴 localStorage。
 
 ## Do / Don't

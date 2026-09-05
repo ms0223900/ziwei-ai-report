@@ -5,11 +5,11 @@
 ## 1. 技術選型(定案)
 
 - **框架**:Next.js App Router(Next 16、React 19、TypeScript),build/dev 一律 `--webpack`(與藍本一致,避免 dev/CI 行為分歧)
-- **樣式**:Tailwind CSS 4;紫微色彩沿用 stock-tracker-dashboard 的 M3 token 結構(紫 `#6a3fb5` / 深色 `#cfb9ff`、金 amber `#a05e03` / `#ffb959`)
+- **樣式**:Tailwind CSS 4；視覺以 [`docs/design-brief.md`](design-brief.md) 與 [`docs/brand-guidelines.md`](brand-guidelines.md) 為準（墨箋夜讀）。Token：[`assets/design-tokens.json`](../assets/design-tokens.json)。本版不做暗色模式。scaffold 時期的紫 M3（`#6a3fb5`）已廢棄。
 - **資料庫 / Auth**:Supabase(Postgres + RLS);本版只用 service_role 後端寫入;單元 2 起接 Auth
 - **AI**:自串 OpenRouter REST(`openrouter.ai/api/v1/chat/completions`),主模型 + 備援模型;`AI_PROVIDER=mock|openrouter` 讓課程可離線示範
 - **部署**:Vercel(production);route handler 設 `maxDuration`
-- **字型**:Noto Sans TC(`next/font/google`,`preload:false`)
+- **字型**:Noto Serif TC（Display）／Noto Sans TC（Body）／IBM Plex Mono（僅日期與 `report_id`）；`next/font/google`，`preload:false`
 
 ## 2. 完整目標檔案樹(Phase A)
 
@@ -18,10 +18,16 @@ ziwei-ai-report/
 ├── README.md                       # 定位 + 規格來源連結 + 文件索引(已建立)
 ├── docs/
 │   ├── spec.md                     # 規格書(已建立)
-│   └── architecture.md             # 本檔
+│   ├── architecture.md             # 本檔
+│   ├── design-brief.md             # 單元 1 畫面規範（視覺／交互）
+│   └── brand-guidelines.md         # 墨箋夜讀 guideline
 │
 ├── AGENTS.md                       # AI 工具鏈:模式(mock/live)切換指示(course 習慣)
 ├── .env.example                    # 分區環境變數(見 spec.md §6)
+├── assets/
+│   ├── design-tokens.json          # 三層 token（primitive → semantic → component）
+│   └── design-tokens.css           # 由 JSON 生成；勿手改
+│
 ├── vercel.json                     # 無 crons(Vercel Hobby 限制)
 ├── package.json                    # scripts 覆寫為 next dev/build --webpack
 │
@@ -68,9 +74,9 @@ ziwei-ai-report/
 │                                   # 永不帶出 advanced_json
 │
 ├── app/
-│   ├── layout.tsx                  # Noto Sans TC(preload:false)
+│   ├── layout.tsx                  # Noto Serif TC + Noto Sans TC + IBM Plex Mono
 │   ├── page.tsx                    # Server Component;單頁 wizard(表單→結果同頁切換)
-│   ├── globals.css                 # 紫微 M3 token(紫 #6a3fb5 / 金 #a05e03 + 深色覆寫)
+│   ├── globals.css                 # 墨箋夜讀 @theme（import assets/design-tokens.css）
 │   └── api/
 │       └── reports/
 │           └── route.ts            # POST + force-dynamic:驗證→高風險掃描→生成(重試/備援)
@@ -104,7 +110,7 @@ ziwei-ai-report/
 
 | 藍本專案 | 參考檔 | 用途 |
 |---|---|---|
-| `stock-tracker-dashboard` | `app/globals.css` | M3 token 結構;改紫微色(紫 `#6a3fb5`/金 `#a05e03`) |
+| `stock-tracker-dashboard` | `app/globals.css` | 僅參考 Tailwind `@theme` 寫法；**色票改走墨箋夜讀，不要抄紫／金 M3** |
 | | `lib/telegram.ts` | 錯誤類別寫法 |
 | | `lib/cron-auth.ts` + `app/api/cron/check-prices/route.ts` | 受控後端 route 模式;單元 4 簽章閘門藍本 |
 | | AGENTS.md / agents/ | course 模式切換工具鏈 |
@@ -123,7 +129,7 @@ ziwei-ai-report/
 
 | CP | 內容 | 驗收 |
 |---|---|---|
-| A1 | scaffold + globals.css 紫微 token + layout + vercel.json + .env.example + AI 工具鏈 | `next build` 過 |
+| A1 | scaffold + 墨箋夜讀 token + layout 三字型 + vercel.json + .env.example + AI 工具鏈 | `next build` 過 |
 | A2 | 001 SQL 上 Supabase + lib/supabase + validation + high-risk | 表存在、RLS on |
 | A3 | schema + ajv + prompt v1 + mock 三模式 + provider + errors | 三種 mock 皆可產出 |
 | A4 | `POST /api/reports` 全流程 + store + masking | `MOCK_AI_MODE=invalid-json` 時 DB 無新列;輸入錯誤 4xx |

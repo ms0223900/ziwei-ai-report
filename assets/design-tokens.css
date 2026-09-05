@@ -1,0 +1,122 @@
+/* Design Tokens - Auto-generated */
+/* Do not edit directly - modify tokens.json instead */
+
+/* === PRIMITIVES === */
+:root {
+  --primitive-color-paper: #E8E2D4;
+  --primitive-color-sheet: #F7F4EC;
+  --primitive-color-ink: #1E2430;
+  --primitive-color-ink-soft: #5C6573;
+  --primitive-color-seal: #8E1F2F;
+  --primitive-color-seal-deep: #721926;
+  --primitive-color-seal-deeper: #5C1420;
+  --primitive-color-night: #2A3344;
+  --primitive-color-night-bar: #3D4758;
+  --primitive-color-line: #C9C2B3;
+  --primitive-color-ok: #2F6F4E;
+  --primitive-color-warn: #8A5A12;
+  --primitive-spacing-0: 0;
+  --primitive-spacing-1: 0.25rem;
+  --primitive-spacing-2: 0.5rem;
+  --primitive-spacing-3: 0.75rem;
+  --primitive-spacing-4: 1rem;
+  --primitive-spacing-5: 1.25rem;
+  --primitive-spacing-6: 1.5rem;
+  --primitive-spacing-8: 2rem;
+  --primitive-spacing-10: 2.5rem;
+  --primitive-spacing-12: 3rem;
+  --primitive-fontFamily-heading: "Noto Serif TC", serif;
+  --primitive-fontFamily-body: "Noto Sans TC", sans-serif;
+  --primitive-fontFamily-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --primitive-fontSize-label: 0.8125rem;
+  --primitive-fontSize-label-lg: 0.875rem;
+  --primitive-fontSize-body: 1.0625rem;
+  --primitive-fontSize-button: 1.0625rem;
+  --primitive-fontSize-display: 1.875rem;
+  --primitive-fontWeight-regular: 400;
+  --primitive-fontWeight-medium: 500;
+  --primitive-fontWeight-bold: 700;
+  --primitive-lineHeight-display: 1.25;
+  --primitive-lineHeight-body: 1.7;
+  --primitive-lineHeight-label: 1.45;
+  --primitive-lineHeight-button: 1.3;
+  --primitive-radius-none: 0;
+  --primitive-radius-control: 0.125rem;
+  --primitive-radius-sheet: 0.25rem;
+  --primitive-borderWidth-hairline: 1px;
+  --primitive-borderWidth-focus: 2px;
+  --primitive-size-touch: 2.75rem;
+  --primitive-size-sheet-max: 36rem;
+  --primitive-duration-fade: 200ms;
+  --primitive-duration-hover: 150ms;
+  --primitive-duration-none: 0ms;
+  --primitive-motion-seal-rotate: -2deg;
+}
+
+/* === SEMANTIC === */
+:root {
+  --color-background: #E8E2D4;
+  --color-foreground: #1E2430;
+  --color-on-background: #1E2430;
+  --color-paper: #E8E2D4;
+  --color-sheet: #F7F4EC;
+  --color-ink: #1E2430;
+  --color-ink-soft: #5C6573;
+  --color-seal: #8E1F2F;
+  --color-night: #2A3344;
+  --color-line: #C9C2B3;
+  --color-primary: #8E1F2F;
+  --color-primary-hover: #721926;
+  --color-primary-active: #5C1420;
+  --color-primary-foreground: #F7F4EC;
+  --color-muted-foreground: #5C6573;
+  --color-border: #C9C2B3;
+  --color-ring: #8E1F2F;
+  --color-ok: #2F6F4E;
+  --color-warn: #8A5A12;
+  --color-on-night: #F7F4EC;
+  --spacing-page-x: 1.25rem;
+  --spacing-page-x-lg: 1.5rem;
+  --spacing-section: 2rem;
+  --spacing-component: 1rem;
+  --fontFamily-heading: "Noto Serif TC", serif;
+  --fontFamily-body: "Noto Sans TC", sans-serif;
+  --fontFamily-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* === COMPONENTS === */
+:root {
+  --button-bg: #8E1F2F;
+  --button-fg: #F7F4EC;
+  --button-hover-bg: #721926;
+  --button-active-bg: #5C1420;
+  --button-padding-x: 1.25rem;
+  --button-padding-y: 0.75rem;
+  --button-radius: 0.125rem;
+  --button-font-size: 1.0625rem;
+  --button-font-weight: 500;
+  --button-min-height: 2.75rem;
+  --input-bg: #F7F4EC;
+  --input-fg: #1E2430;
+  --input-border: #C9C2B3;
+  --input-focus-ring: #8E1F2F;
+  --input-error-border: #8A5A12;
+  --input-error-fg: #8A5A12;
+  --input-padding-x: 0.75rem;
+  --input-padding-y: 0.5rem;
+  --input-radius: 0.125rem;
+  --input-font-size: 1.0625rem;
+  --sheet-bg: #F7F4EC;
+  --sheet-fg: #1E2430;
+  --sheet-border: #C9C2B3;
+  --sheet-radius: 0.25rem;
+  --sheet-max-width: 36rem;
+  --sheet-padding: 1.5rem;
+  --sheet-shadow: none;
+  --seal-strip-bg: #8E1F2F;
+  --seal-strip-fg: #F7F4EC;
+  --seal-strip-rotate: -2deg;
+  --locked-bg: #2A3344;
+  --locked-fg: #F7F4EC;
+  --locked-bar: #3D4758;
+}

@@ -68,5 +68,5 @@
 
 ## Current State｜現況
 
-- Checkpoint A1：scaffold + 紫微 M3 token + Noto Sans TC + `vercel.json` + `.env.example` + AI 工具鏈。
+- Checkpoint A1：scaffold + 墨箋夜讀 token + Noto Serif TC／Noto Sans TC／IBM Plex Mono + `vercel.json` + `.env.example` + AI 工具鏈。
 - 其餘詳見 `[docs/spec.md](docs/spec.md)`、`[docs/architecture.md](docs/architecture.md)` 與 repo 現況。

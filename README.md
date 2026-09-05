@@ -15,7 +15,10 @@
 
 - [`docs/spec.md`](docs/spec.md) — 規格書(需求、關鍵設計決策、環境變數、驗收標準)
 - [`docs/architecture.md`](docs/architecture.md) — 檔案架構參考(檔案樹、藍本對照、陷阱清單、Checkpoint 規劃)
+- [`docs/design-brief.md`](docs/design-brief.md) — 單元 1 畫面規範（視覺／交互；文案與 schema 仍跟產品 spec）
+- [`docs/brand-guidelines.md`](docs/brand-guidelines.md) — 墨箋夜讀品牌 guideline
+- [`assets/design-tokens.json`](assets/design-tokens.json) — 三層 design token
 
 ## 狀態
 
-**Checkpoint A1 已完成**：Next.js 16 App Router + React 19 + TypeScript + Tailwind 4（`--webpack`）、紫微 M3 token、Noto Sans TC、`vercel.json`、`.env.example`、course AI 工具鏈。後續見 [`docs/architecture.md`](docs/architecture.md) A2–A7。
+**Checkpoint A1 已完成**：Next.js 16 App Router + React 19 + TypeScript + Tailwind 4（`--webpack`）、墨箋夜讀 token、Noto Serif TC／Noto Sans TC／IBM Plex Mono、`vercel.json`、`.env.example`、course AI 工具鏈。後續見 [`docs/architecture.md`](docs/architecture.md) A2–A7。

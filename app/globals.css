@@ -1,146 +1,68 @@
 @import "tailwindcss";
+@import "../assets/design-tokens.css";
 
-@theme {
-  /* ── Background / Surface（紫微 light：淡紫底） ── */
-  --color-background: #f7f2ff;
-  --color-on-background: #1c1b22;
-  --color-surface: #f7f2ff;
-  --color-surface-dim: #e0d6f0;
-  --color-surface-bright: #f7f2ff;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f1e9ff;
-  --color-surface-container: #ebe2f8;
-  --color-surface-container-high: #e5dcf2;
-  --color-surface-container-highest: #dfd6ec;
-  --color-on-surface: #1c1b22;
-  --color-on-surface-variant: #4a4458;
-  --color-inverse-surface: #312f38;
-  --color-inverse-on-surface: #f4eff8;
+/*
+  Tailwind utilities map to 墨箋夜讀 tokens.
+  Hex source of truth: assets/design-tokens.json
+  Do not reintroduce purple M3 or dark-scheme overrides (brief: 本版不做暗色模式).
+*/
+@theme inline {
+  --color-paper: var(--primitive-color-paper);
+  --color-sheet: var(--primitive-color-sheet);
+  --color-ink: var(--primitive-color-ink);
+  --color-ink-soft: var(--primitive-color-ink-soft);
+  --color-seal: var(--primitive-color-seal);
+  --color-seal-deep: var(--primitive-color-seal-deep);
+  --color-seal-deeper: var(--primitive-color-seal-deeper);
+  --color-night: var(--primitive-color-night);
+  --color-night-bar: var(--primitive-color-night-bar);
+  --color-line: var(--primitive-color-line);
+  --color-ok: var(--primitive-color-ok);
+  --color-warn: var(--primitive-color-warn);
+  --color-background: var(--primitive-color-paper);
+  --color-on-background: var(--primitive-color-ink);
+  --color-foreground: var(--primitive-color-ink);
+  --color-primary: var(--primitive-color-seal);
+  --color-primary-hover: var(--primitive-color-seal-deep);
+  --color-primary-foreground: var(--primitive-color-sheet);
+  --color-muted-foreground: var(--primitive-color-ink-soft);
+  --color-border: var(--primitive-color-line);
+  --color-ring: var(--primitive-color-seal);
+  --color-on-night: var(--primitive-color-sheet);
 
-  /* ── Primary（紫 #6a3fb5） ── */
-  --color-primary: #6a3fb5;
-  --color-on-primary: #ffffff;
-  --color-primary-container: #7d52c8;
-  --color-on-primary-container: #fffdff;
-  --color-primary-fixed: #eaddff;
-  --color-primary-fixed-dim: #d0bcff;
-  --color-on-primary-fixed: #24005a;
-  --color-on-primary-fixed-variant: #52209c;
+  --font-sans: var(--font-noto-sans-tc), "Noto Sans TC", sans-serif;
+  --font-serif: var(--font-noto-serif-tc), "Noto Serif TC", serif;
+  --font-mono: var(--font-ibm-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
 
-  /* ── Secondary ── */
-  --color-secondary: #655a75;
-  --color-on-secondary: #ffffff;
-  --color-secondary-container: #ebe2f8;
-  --color-on-secondary-container: #655a75;
+  --text-display: 1.875rem;
+  --text-display--line-height: 1.25;
+  --text-display--font-weight: 700;
 
-  /* ── Tertiary（金 amber #a05e03） ── */
-  --color-tertiary: #a05e03;
-  --color-on-tertiary: #ffffff;
-  --color-tertiary-container: #ffb959;
-  --color-on-tertiary-container: #3e2800;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.7;
+  --text-body--font-weight: 400;
 
-  /* ── Outline ── */
-  --color-outline: #7a7486;
-  --color-outline-variant: #cbc3d6;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.45;
+  --text-label--font-weight: 500;
 
-  /* ── Error ── */
-  --color-error: #ba1a1a;
-  --color-error-container: #ffdad6;
-  --color-on-error: #ffffff;
-  --color-on-error-container: #93000a;
+  --text-button: 1.0625rem;
+  --text-button--line-height: 1.3;
+  --text-button--font-weight: 500;
 
-  /* ── Success ── */
-  --color-success: #eaddff;
-  --color-success-foreground: #24005a;
+  --text-disclaimer: 0.875rem;
+  --text-disclaimer--line-height: 1.6;
+  --text-disclaimer--font-weight: 400;
 
-  /* ── Font ── */
-  --font-sans: "Noto Sans TC", var(--font-noto-sans-tc), sans-serif;
+  --radius-control: 0.125rem;
+  --radius-sheet: 0.25rem;
 
-  /* ── Typography ── */
-  --text-display-lg: 32px;
-  --text-display-lg--line-height: 1.2;
-  --text-display-lg--letter-spacing: -0.02em;
-  --text-display-lg--font-weight: 700;
-
-  --text-headline-md: 24px;
-  --text-headline-md--line-height: 1.3;
-  --text-headline-md--letter-spacing: -0.01em;
-  --text-headline-md--font-weight: 600;
-
-  --text-title-sm: 18px;
-  --text-title-sm--line-height: 1.4;
-  --text-title-sm--letter-spacing: 0em;
-  --text-title-sm--font-weight: 500;
-
-  --text-body-md: 16px;
-  --text-body-md--line-height: 1.5;
-  --text-body-md--letter-spacing: 0em;
-  --text-body-md--font-weight: 400;
-
-  --text-body-sm: 14px;
-  --text-body-sm--line-height: 1.5;
-  --text-body-sm--letter-spacing: 0em;
-  --text-body-sm--font-weight: 400;
-
-  --text-label-caps: 12px;
-  --text-label-caps--line-height: 1;
-  --text-label-caps--letter-spacing: 0.05em;
-  --text-label-caps--font-weight: 600;
-
-  /* ── Radius（不用 --spacing-xl 等名稱，避免覆寫 Tailwind max-w-xl） ── */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.875rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1rem;
+  --max-width-sheet: 36rem;
 }
 
-/* 深色覆寫：须放在基底 @theme 之後，才會盖过浅色 token */
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: #141218;
-    --color-on-background: #e6e0eb;
-    --color-surface: #141218;
-    --color-surface-dim: #141218;
-    --color-surface-bright: #3a383f;
-    --color-surface-container-lowest: #0f0d13;
-    --color-surface-container-low: #1c1b22;
-    --color-surface-container: #201f26;
-    --color-surface-container-high: #2b2930;
-    --color-surface-container-highest: #36343b;
-    --color-on-surface: #e6e0eb;
-    --color-on-surface-variant: #cbc3d6;
-    --color-inverse-surface: #e6e0eb;
-    --color-inverse-on-surface: #312f38;
-
-    --color-primary: #cfb9ff;
-    --color-on-primary: #3b1174;
-    --color-primary-container: #52209c;
-    --color-on-primary-container: #eaddff;
-    --color-primary-fixed: #52209c;
-    --color-primary-fixed-dim: #3b1174;
-    --color-on-primary-fixed: #eaddff;
-    --color-on-primary-fixed-variant: #d0bcff;
-
-    --color-secondary: #cfc3dc;
-    --color-on-secondary: #362d44;
-    --color-secondary-container: #4d445c;
-    --color-on-secondary-container: #ebe2f8;
-
-    --color-tertiary: #ffb959;
-    --color-on-tertiary: #452b00;
-    --color-tertiary-container: #a05e03;
-    --color-on-tertiary-container: #ffdcba;
-
-    --color-outline: #958da0;
-    --color-outline-variant: #4a4458;
-
-    --color-error: #ffb4ab;
-    --color-error-container: #93000a;
-    --color-on-error: #690005;
-    --color-on-error-container: #ffdad6;
-
-    --color-success: #52209c;
-    --color-success-foreground: #eaddff;
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --primitive-duration-fade: 0ms;
   }
 }
 
@@ -148,5 +70,10 @@ body {
   font-family: var(--font-sans);
   background-color: var(--color-background);
   color: var(--color-on-background);
-  color-scheme: light dark;
+  color-scheme: light;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-seal);
+  outline-offset: 2px;
 }

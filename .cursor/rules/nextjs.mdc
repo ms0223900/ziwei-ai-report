@@ -22,7 +22,7 @@ alwaysApply: false
 - 需要 `useState`、瀏覽器 API → `'use client'`。
 - Route Handler：**盡量**回一致 JSON／HTTP status；來不及時也需 **不洩 secret**。
 - 對外組裝只走遮罩層；**永不**把 `advanced_json` 回給前端。
-- Tailwind：**可**將樣式寫在同一元件檔；另拆 CSS module 非必須。
+- Tailwind：**可**將樣式寫在同一元件檔；另拆 CSS module 非必須。視覺跟 [`docs/design-brief.md`](docs/design-brief.md) 與 `assets/design-tokens.json`（墨箋夜讀）；不要用 scaffold 紫 M3。
 
 ## Do / Don't
 
