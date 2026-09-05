@@ -1,0 +1,36 @@
+---
+description: PRODUCTION Next.js—strict server/client split; webpack; no client OpenRouter; masked API responses.
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Next.js（PRODUCTION）
+
+## Server／Client
+
+- 預設 Server Component；**only** `'use client'` 當需要 hooks／瀏覽器／狀態。
+- **`NEXT_PUBLIC_*`** 僅公開值。**禁止** service role、OpenRouter key 出現在 client bundle。
+- Next 16：一律 `await cookies()`。
+
+## 架構與檔案
+
+- build/dev 一律 `--webpack`。
+- Route Handlers：`NextResponse.json`／一致 HTTP semantics；錯誤 body **不包含** secrets。
+- **禁止**在多個元件複製 fetch／DB write／遮罩邏輯；組裝只走 `lib/masking`。
+- 生成：主模型失敗 → 同模型重試一次 → 才切備援。
+
+## UI
+
+- Tailwind + 紫微 M3 token；基本 a11y（語意標籤、`aria-*` 若適用）。
+- 表單結果放 state，不依賴 localStorage。
+
+## Do / Don't
+
+| Do | Don't |
+| --- | --- |
+| 機密與 mutations 留 server | client 呼叫 OpenRouter |
+| 遮罩後再回前端 | 把 `advanced_json` 帶回 client |
+
+## 參照
+
+- [`docs/spec.md`](docs/spec.md)、[`AGENTS.md`](AGENTS.md)

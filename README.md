@@ -18,4 +18,4 @@
 
 ## 狀態
 
-**尚未開始實作**(僅規格與架構文件)。技術選型定案:Next.js App Router + Tailwind 4 + Supabase + OpenRouter + Vercel;全新 repo,藍本參考既有專案(見 architecture.md)。
+**Checkpoint A1 已完成**：Next.js 16 App Router + React 19 + TypeScript + Tailwind 4（`--webpack`）、紫微 M3 token、Noto Sans TC、`vercel.json`、`.env.example`、course AI 工具鏈。後續見 [`docs/architecture.md`](docs/architecture.md) A2–A7。

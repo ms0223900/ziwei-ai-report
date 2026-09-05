@@ -1,0 +1,34 @@
+---
+description: PROTOTYPE Supabase—reports table per spec; validate before write; service role server-only.
+globs: "**/*.{ts,tsx,sql}"
+alwaysApply: false
+---
+
+# Supabase（PROTOTYPE）
+
+## 資料表 `reports`
+
+- 欄位與語意以 [`docs/spec.md`](docs/spec.md) §2 資料模型為準。
+- 本版 **RLS enabled、零 policy**；anon 讀不到；唯一寫入管道是 service_role。
+
+## 絕對底線
+
+- **驗證／ajv 通過後**才 insert；否則 **不寫入**。
+- **高風險短路**：不寫 DB。
+- **`SUPABASE_SERVICE_ROLE_KEY`**：**僅 server**；不可進 client／`NEXT_PUBLIC_*`。
+
+## PROTOTYPE 可取捨
+
+- 本版不建 users／orders／credits。
+- SQL 變更進 `supabase/migrations/`；單元 2／4 預留檔不建立。
+
+## Do / Don't
+
+| Do | Don't |
+| --- | --- |
+| 驗證後寫入 | 無效欄位／schema 失敗入庫 |
+| service role 只在 server | 用 SQL Editor owner 身分當成 RLS 已驗證 |
+
+## 參照
+
+- [`docs/spec.md`](docs/spec.md)、[`AGENTS.md`](AGENTS.md)

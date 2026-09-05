@@ -1,0 +1,40 @@
+---
+description: PRODUCTION Supabase—reports only; RLS on with zero policies; service role server-only; versioned migrations.
+globs: "**/*.{ts,tsx,sql}"
+alwaysApply: false
+---
+
+# Supabase（PRODUCTION）
+
+## Schema
+
+- `reports` 欄位與語意以 [`docs/spec.md`](docs/spec.md) §2 為準；變更 schema **先**更新 spec + migration。
+- 本版不建 users、orders、credits、subscriptions。
+
+## 金鑰
+
+- Browser：**anon** + **RLS**（本版零 policy，anon 讀不到）。
+- Server 特權：**service_role** **僅** server-side module；禁止 import 進 client。
+- Env 缺失：明確錯誤回應／log metadata（無 secret）。
+
+## 寫入行為
+
+- ajv 通過後才同時寫入 `basic_json` + `advanced_json`。
+- 高風險或驗證失敗：**不 insert**。
+- `status='basic'` 只代表未解鎖，不是沒存 advanced。
+
+## SQL／RLS
+
+- 所有 DDL／policy 進 `supabase/migrations/`。
+- 驗證 RLS 須走 anon／雙帳號；**不可**用 SQL Editor owner 身分當成已通過。
+
+## Do / Don't
+
+| Do | Don't |
+| --- | --- |
+| 驗證 → insert | unclean payload 入庫 |
+| 同步 spec + migration | 只改應用不改 DB |
+
+## 參照
+
+- [`docs/spec.md`](docs/spec.md)、[`AGENTS.md`](AGENTS.md)
