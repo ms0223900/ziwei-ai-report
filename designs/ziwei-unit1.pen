@@ -1,0 +1,3086 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "type": "frame",
+      "id": "jUxU9",
+      "x": 0,
+      "y": 0,
+      "name": "Button/Primary",
+      "reusable": true,
+      "height": 44,
+      "fill": "$seal",
+      "cornerRadius": 2,
+      "padding": [
+        12,
+        20
+      ],
+      "justifyContent": "center",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "text",
+          "id": "SvO8a",
+          "name": "Label",
+          "fill": "$sheet",
+          "content": "看基本分析",
+          "lineHeight": 1.3,
+          "fontFamily": "$font-body",
+          "fontSize": 17,
+          "fontWeight": "500"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "NN4cT",
+      "x": 200,
+      "y": 0,
+      "name": "Button/Secondary",
+      "reusable": true,
+      "height": 44,
+      "fill": "$sheet",
+      "cornerRadius": 2,
+      "stroke": "$line",
+      "strokeWidth": 1,
+      "padding": [
+        12,
+        20
+      ],
+      "justifyContent": "center",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "text",
+          "id": "im4xF",
+          "name": "Label",
+          "fill": "$ink",
+          "content": "回表單",
+          "lineHeight": 1.3,
+          "fontFamily": "$font-body",
+          "fontSize": 17,
+          "fontWeight": "500"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "a2YlN",
+      "x": 380,
+      "y": 0,
+      "name": "Button/PrimaryDisabled",
+      "reusable": true,
+      "opacity": 0.45,
+      "height": 44,
+      "fill": "$seal",
+      "cornerRadius": 2,
+      "padding": [
+        12,
+        20
+      ],
+      "justifyContent": "center",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "text",
+          "id": "Ofbak",
+          "name": "Label",
+          "fill": "$sheet",
+          "content": "看基本分析",
+          "lineHeight": 1.3,
+          "fontFamily": "$font-body",
+          "fontSize": 17,
+          "fontWeight": "500"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "beP6x",
+      "x": 0,
+      "y": 80,
+      "name": "Field/Default",
+      "reusable": true,
+      "width": 360,
+      "layout": "vertical",
+      "gap": 6,
+      "children": [
+        {
+          "type": "frame",
+          "id": "el0lC",
+          "name": "LabelRow",
+          "gap": 8,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "u43al",
+              "name": "Label",
+              "fill": "$ink",
+              "content": "暱稱",
+              "lineHeight": 1.45,
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "500"
+            },
+            {
+              "type": "text",
+              "id": "yyzmW",
+              "name": "Required",
+              "fill": "$seal",
+              "content": "必填",
+              "lineHeight": 1.45,
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ZuQXe",
+          "name": "Input",
+          "width": "fill_container",
+          "height": 44,
+          "fill": "$sheet",
+          "cornerRadius": 2,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "padding": [
+            0,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "tgWA0",
+              "name": "Value",
+              "fill": "$ink",
+              "content": "小圓",
+              "lineHeight": 1.7,
+              "fontFamily": "$font-body",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "VSJh9",
+      "x": 400,
+      "y": 80,
+      "name": "Field/Error",
+      "reusable": true,
+      "width": 360,
+      "layout": "vertical",
+      "gap": 6,
+      "children": [
+        {
+          "type": "frame",
+          "id": "hsA53",
+          "name": "LabelRow",
+          "gap": 8,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "aBGDW",
+              "name": "Label",
+              "fill": "$ink",
+              "content": "暱稱",
+              "lineHeight": 1.45,
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "500"
+            },
+            {
+              "type": "text",
+              "id": "sKCA5",
+              "name": "Required",
+              "fill": "$seal",
+              "content": "必填",
+              "lineHeight": 1.45,
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "VDr52",
+          "name": "Input",
+          "width": "fill_container",
+          "height": 44,
+          "fill": "$sheet",
+          "cornerRadius": 2,
+          "stroke": "$warn",
+          "strokeWidth": 1,
+          "padding": [
+            0,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "oUxHJ",
+              "name": "Value",
+              "fill": "$ink",
+              "fontFamily": "$font-body",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "d25uF",
+          "name": "Error",
+          "fill": "$warn",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "請填寫暱稱。",
+          "lineHeight": 1.45,
+          "fontFamily": "$font-body",
+          "fontSize": 13,
+          "fontWeight": "500"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "M7isd",
+      "x": 800,
+      "y": 80,
+      "name": "Field/Select",
+      "reusable": true,
+      "width": 360,
+      "layout": "vertical",
+      "gap": 6,
+      "children": [
+        {
+          "type": "text",
+          "id": "Q6HtSu",
+          "name": "Label",
+          "fill": "$ink",
+          "content": "時辰（選填）",
+          "lineHeight": 1.45,
+          "fontFamily": "$font-body",
+          "fontSize": 13,
+          "fontWeight": "500"
+        },
+        {
+          "type": "frame",
+          "id": "J46uM",
+          "name": "Input",
+          "width": "fill_container",
+          "height": 44,
+          "fill": "$sheet",
+          "cornerRadius": 2,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "padding": [
+            0,
+            12
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "M2H5bk",
+              "name": "Value",
+              "fill": "$ink",
+              "content": "不確定時辰",
+              "lineHeight": 1.7,
+              "fontFamily": "$font-body",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "icon",
+              "id": "J7xWEh",
+              "name": "Chevron",
+              "width": 18,
+              "height": 18,
+              "icon": "chevron-down",
+              "library": "lucide",
+              "fill": "$ink-soft"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "f7zaD",
+          "name": "Hint",
+          "fill": "$ink-soft",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "未填則走未知時辰版，準確度較低。",
+          "lineHeight": 1.45,
+          "fontFamily": "$font-body",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "H3wrP",
+      "x": 0,
+      "y": 260,
+      "name": "FocusSegment",
+      "reusable": true,
+      "width": 360,
+      "layout": "vertical",
+      "gap": 6,
+      "children": [
+        {
+          "type": "text",
+          "id": "wFMkg",
+          "name": "Label",
+          "fill": "$ink",
+          "content": "這次想看",
+          "lineHeight": 1.45,
+          "fontFamily": "$font-body",
+          "fontSize": 13,
+          "fontWeight": "500"
+        },
+        {
+          "type": "frame",
+          "id": "C9e158",
+          "name": "Segments",
+          "width": "fill_container",
+          "gap": 8,
+          "children": [
+            {
+              "type": "frame",
+              "id": "aMJcO",
+              "name": "SegAll",
+              "width": "fill_container",
+              "height": 44,
+              "fill": "$sheet",
+              "cornerRadius": 2,
+              "stroke": "$line",
+              "strokeWidth": 1,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "qY8rK",
+                  "name": "AllLabel",
+                  "fill": "$ink",
+                  "content": "整體",
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "mimCx",
+              "name": "SegWork",
+              "width": "fill_container",
+              "height": 44,
+              "fill": "$seal",
+              "cornerRadius": 2,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "j6FGui",
+                  "name": "WorkLabel",
+                  "fill": "$sheet",
+                  "content": "工作",
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Qt7rC",
+              "name": "SegRel",
+              "width": "fill_container",
+              "height": 44,
+              "fill": "$sheet",
+              "cornerRadius": 2,
+              "stroke": "$line",
+              "strokeWidth": 1,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "i7mrUE",
+                  "name": "RelLabel",
+                  "fill": "$ink",
+                  "content": "關係",
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "cGJVY",
+      "x": 400,
+      "y": 260,
+      "name": "Disclaimer",
+      "reusable": true,
+      "width": 528,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "text",
+          "id": "f8FkoG",
+          "name": "Copy",
+          "fill": "$ink-soft",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "本結果僅供娛樂與自我反思，不作為醫療、法律、財務、投資或重大人生決策依據。",
+          "lineHeight": 1.7,
+          "fontFamily": "$font-body",
+          "fontSize": 14,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "HbKh1",
+      "x": 0,
+      "y": 420,
+      "name": "SealStrip",
+      "reusable": true,
+      "width": 540,
+      "height": 56,
+      "fill": "$sheet",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "ZCBOL",
+          "x": 12,
+          "y": 14,
+          "name": "Bar",
+          "rotation": -2,
+          "width": 508,
+          "height": 28,
+          "fill": "$seal",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "HkhHS",
+              "name": "Stamp",
+              "fill": "$sheet",
+              "content": "未開封",
+              "lineHeight": 1.25,
+              "fontFamily": "$font-heading",
+              "fontSize": 13,
+              "fontWeight": "700"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "f0daE",
+      "x": 580,
+      "y": 420,
+      "name": "LockedBlock",
+      "reusable": true,
+      "width": 528,
+      "fill": "$night",
+      "cornerRadius": 4,
+      "layout": "vertical",
+      "gap": 10,
+      "padding": 16,
+      "children": [
+        {
+          "type": "text",
+          "id": "U8Pa5t",
+          "name": "Title",
+          "fill": "$sheet",
+          "content": "行動建議",
+          "lineHeight": 1.45,
+          "fontFamily": "$font-body",
+          "fontSize": 13,
+          "fontWeight": "500"
+        },
+        {
+          "type": "frame",
+          "id": "w5wHD",
+          "name": "Bar1",
+          "width": "fill_container",
+          "height": 10,
+          "fill": "$night-bar",
+          "cornerRadius": 2
+        },
+        {
+          "type": "frame",
+          "id": "zRW9W",
+          "name": "Bar2",
+          "width": "fill_container",
+          "height": 10,
+          "fill": "$night-bar",
+          "cornerRadius": 2
+        },
+        {
+          "type": "frame",
+          "id": "zvwEN",
+          "name": "Bar3",
+          "width": 280,
+          "height": 10,
+          "fill": "$night-bar",
+          "cornerRadius": 2
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "wdZpK",
+      "x": 0,
+      "y": 600,
+      "name": "Desktop / 01 生辰表單",
+      "clip": true,
+      "width": 1440,
+      "height": 1100,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        56,
+        24
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "BZ0VH",
+          "name": "Sheet",
+          "width": 576,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "x9xKb",
+              "name": "Header",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "MdbYd",
+                  "name": "Product",
+                  "fill": "$ink",
+                  "content": "紫微解讀",
+                  "lineHeight": 1.25,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "QRZhz",
+                  "name": "Lead",
+                  "fill": "$ink-soft",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "輸入生辰，先看基本分析。進階詳批鎖住。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "id": "mcbPd",
+              "type": "ref",
+              "ref": "beP6x",
+              "name": "FieldNickname",
+              "width": "fill_container",
+              "descendants": {
+                "u43al": {
+                  "content": "暱稱"
+                },
+                "tgWA0": {
+                  "content": "小圓"
+                }
+              }
+            },
+            {
+              "id": "tMgVb",
+              "type": "ref",
+              "ref": "beP6x",
+              "name": "FieldBirth",
+              "width": "fill_container",
+              "descendants": {
+                "u43al": {
+                  "content": "生日"
+                },
+                "tgWA0": {
+                  "content": "1993-07-12",
+                  "fontFamily": "$font-mono"
+                }
+              }
+            },
+            {
+              "id": "R0hAv",
+              "type": "ref",
+              "ref": "M7isd",
+              "name": "FieldTime",
+              "width": "fill_container"
+            },
+            {
+              "id": "g0rar",
+              "type": "ref",
+              "ref": "H3wrP",
+              "name": "Focus",
+              "width": "fill_container"
+            },
+            {
+              "id": "anFF8",
+              "type": "ref",
+              "ref": "jUxU9",
+              "name": "Submit",
+              "width": "fill_container"
+            },
+            {
+              "id": "s1IWhQ",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "peez5",
+      "x": 1520,
+      "y": 600,
+      "name": "Desktop / 02 表單驗證錯誤",
+      "clip": true,
+      "width": 1440,
+      "height": 1100,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        56,
+        24
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tOvyX",
+          "name": "Sheet",
+          "width": 576,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "rHa7f",
+              "name": "Header",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Hx2ls",
+                  "name": "Product",
+                  "fill": "$ink",
+                  "content": "紫微解讀",
+                  "lineHeight": 1.25,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "coGzA",
+                  "name": "Lead",
+                  "fill": "$ink-soft",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "輸入生辰，先看基本分析。進階詳批鎖住。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "id": "rsctC",
+              "type": "ref",
+              "ref": "VSJh9",
+              "name": "FieldNickname",
+              "width": "fill_container",
+              "descendants": {
+                "aBGDW": {
+                  "content": "暱稱"
+                },
+                "d25uF": {
+                  "content": "請填寫暱稱。"
+                }
+              }
+            },
+            {
+              "id": "S8kwy",
+              "type": "ref",
+              "ref": "VSJh9",
+              "name": "FieldBirth",
+              "width": "fill_container",
+              "descendants": {
+                "aBGDW": {
+                  "content": "生日"
+                },
+                "d25uF": {
+                  "content": "請填寫生日。"
+                }
+              }
+            },
+            {
+              "id": "q87Jox",
+              "type": "ref",
+              "ref": "M7isd",
+              "name": "FieldTime",
+              "width": "fill_container"
+            },
+            {
+              "id": "Txc57",
+              "type": "ref",
+              "ref": "H3wrP",
+              "name": "Focus",
+              "width": "fill_container"
+            },
+            {
+              "id": "U2jzg",
+              "type": "ref",
+              "ref": "jUxU9",
+              "name": "Submit",
+              "width": "fill_container"
+            },
+            {
+              "id": "L9meI",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "KhFzz",
+      "x": 3040,
+      "y": 600,
+      "name": "Desktop / 03 生成中",
+      "clip": true,
+      "width": 1440,
+      "height": 1100,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        56,
+        24
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "E1KWBk",
+          "name": "Sheet",
+          "width": 576,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "dl8Xl",
+              "name": "Header",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "k9cdo",
+                  "name": "Product",
+                  "fill": "$ink",
+                  "content": "紫微解讀",
+                  "lineHeight": 1.25,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "ByfBy",
+                  "name": "Lead",
+                  "fill": "$ink-soft",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "正在整理你的基本分析…",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "id": "AsNXs",
+              "type": "ref",
+              "ref": "beP6x",
+              "name": "FieldNickname",
+              "width": "fill_container",
+              "descendants": {
+                "u43al": {
+                  "content": "暱稱"
+                },
+                "tgWA0": {
+                  "content": "小圓"
+                }
+              }
+            },
+            {
+              "id": "D4VB49",
+              "type": "ref",
+              "ref": "beP6x",
+              "name": "FieldBirth",
+              "width": "fill_container",
+              "descendants": {
+                "u43al": {
+                  "content": "生日"
+                },
+                "tgWA0": {
+                  "content": "1993-07-12",
+                  "fontFamily": "$font-mono"
+                }
+              }
+            },
+            {
+              "id": "pzpzd",
+              "type": "ref",
+              "ref": "M7isd",
+              "name": "FieldTime",
+              "width": "fill_container"
+            },
+            {
+              "id": "wYjWv",
+              "type": "ref",
+              "ref": "H3wrP",
+              "name": "Focus",
+              "width": "fill_container"
+            },
+            {
+              "id": "LASCJ",
+              "type": "ref",
+              "ref": "a2YlN",
+              "name": "SubmitLoading",
+              "width": "fill_container"
+            },
+            {
+              "id": "b7mPLL",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "WxBWk",
+      "x": 4560,
+      "y": 600,
+      "name": "Desktop / 04 基本分析 畫面 A",
+      "clip": true,
+      "width": 1440,
+      "height": 1680,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        56,
+        24
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "v7jDJ",
+          "name": "Sheet",
+          "width": 576,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 20,
+          "padding": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "L95Jk",
+              "name": "Header",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "QvvZK",
+                  "name": "Title",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "小圓的基本分析",
+                  "lineHeight": 1.25,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Fdw4f",
+                  "name": "Tags",
+                  "fill": "$ink-soft",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "未知時辰，準確度較低、聚焦工作",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "Uu5r8",
+                  "name": "Date",
+                  "fill": "$ink-soft",
+                  "content": "1993-07-12",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-mono",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "DJG2U",
+              "name": "整體提醒",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "b0SCnj",
+                  "name": "整體提醒L",
+                  "fill": "$ink-soft",
+                  "content": "整體提醒",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "k24Oqy",
+                  "name": "整體提醒B",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "（未知時辰，準確度較低）這段時間適合先整理已有能力與成果，而不是一次做大變動。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "HVX0i",
+              "name": "工作",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "DV1iB",
+                  "name": "工作L",
+                  "fill": "$ink-soft",
+                  "content": "工作",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "DZ48g",
+                  "name": "工作B",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "工作上較需要「可被看見的小成果」，而不是更多靈感。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "zT7N0",
+              "name": "關係",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "X6WMgw",
+                  "name": "關係L",
+                  "fill": "$ink-soft",
+                  "content": "關係",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "j1uhF5",
+                  "name": "關係B",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "合作時把範圍講清楚，會比加更多承諾更有幫助。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "H2tAq1",
+              "name": "ActionHint",
+              "fill": "$ink-soft",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "先完成一件能展示的小交付。",
+              "lineHeight": 1.7,
+              "fontFamily": "$font-body",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "id": "D2rqM",
+              "type": "ref",
+              "ref": "HbKh1",
+              "name": "SealStrip",
+              "width": "fill_container"
+            },
+            {
+              "type": "text",
+              "id": "mHJnO",
+              "name": "LockCaption",
+              "fill": "$ink-soft",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "解鎖進階報告後可見 7 天行動方針與兩條路徑比較",
+              "lineHeight": 1.45,
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "500"
+            },
+            {
+              "id": "J0wdc",
+              "type": "ref",
+              "ref": "f0daE",
+              "name": "LockAction",
+              "width": "fill_container",
+              "descendants": {
+                "U8Pa5t": {
+                  "content": "行動建議"
+                }
+              }
+            },
+            {
+              "id": "quPFk",
+              "type": "ref",
+              "ref": "f0daE",
+              "name": "LockRationale",
+              "width": "fill_container",
+              "descendants": {
+                "U8Pa5t": {
+                  "content": "依據"
+                }
+              }
+            },
+            {
+              "id": "r1X0Hx",
+              "type": "ref",
+              "ref": "f0daE",
+              "name": "LockPaths",
+              "width": "fill_container",
+              "descendants": {
+                "U8Pa5t": {
+                  "content": "兩條路徑"
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "qmOR1",
+              "name": "CtaRow",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "LkfjT",
+                  "name": "BtnRow",
+                  "gap": 12,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "id": "HK9aF",
+                      "type": "ref",
+                      "ref": "jUxU9",
+                      "name": "Unlock",
+                      "descendants": {
+                        "SvO8a": {
+                          "content": "解鎖完整報告"
+                        }
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "id": "k2gWi",
+                      "name": "Soon",
+                      "fill": "$ink-soft",
+                      "content": "即將開放",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "oI3J6",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "QG0Kv",
+      "x": 6080,
+      "y": 600,
+      "name": "Desktop / 05 CTA 點擊",
+      "clip": true,
+      "width": 1440,
+      "height": 1680,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        56,
+        24
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "w7T58z",
+          "name": "Sheet",
+          "width": 576,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 20,
+          "padding": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "J5wYl",
+              "name": "Header",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "yAI1r",
+                  "name": "Title",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "小圓的基本分析",
+                  "lineHeight": 1.25,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "mX8Wl",
+                  "name": "Tags",
+                  "fill": "$ink-soft",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "未知時辰，準確度較低、聚焦工作",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "fkh5q",
+                  "name": "Date",
+                  "fill": "$ink-soft",
+                  "content": "1993-07-12",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-mono",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "XyL6A",
+              "name": "整體提醒",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "CKye2",
+                  "name": "整體提醒L",
+                  "fill": "$ink-soft",
+                  "content": "整體提醒",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "MYa8E",
+                  "name": "整體提醒B",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "（未知時辰，準確度較低）這段時間適合先整理已有能力與成果，而不是一次做大變動。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "NstTJ",
+              "name": "工作",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "MKpPE",
+                  "name": "工作L",
+                  "fill": "$ink-soft",
+                  "content": "工作",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "m0qJ23",
+                  "name": "工作B",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "工作上較需要「可被看見的小成果」，而不是更多靈感。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "AgqUb",
+              "name": "關係",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "z3wlc",
+                  "name": "關係L",
+                  "fill": "$ink-soft",
+                  "content": "關係",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "NgskH",
+                  "name": "關係B",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "合作時把範圍講清楚，會比加更多承諾更有幫助。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "Nw24h",
+              "name": "ActionHint",
+              "fill": "$ink-soft",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "先完成一件能展示的小交付。",
+              "lineHeight": 1.7,
+              "fontFamily": "$font-body",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "id": "v5UQZ",
+              "type": "ref",
+              "ref": "HbKh1",
+              "name": "SealStrip",
+              "width": "fill_container"
+            },
+            {
+              "type": "text",
+              "id": "tE6ce",
+              "name": "LockCaption",
+              "fill": "$ink-soft",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "解鎖進階報告後可見 7 天行動方針與兩條路徑比較",
+              "lineHeight": 1.45,
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "500"
+            },
+            {
+              "id": "D2HXOZ",
+              "type": "ref",
+              "ref": "f0daE",
+              "name": "LockAction",
+              "width": "fill_container",
+              "descendants": {
+                "U8Pa5t": {
+                  "content": "行動建議"
+                }
+              }
+            },
+            {
+              "id": "P5XJa",
+              "type": "ref",
+              "ref": "f0daE",
+              "name": "LockRationale",
+              "width": "fill_container",
+              "descendants": {
+                "U8Pa5t": {
+                  "content": "依據"
+                }
+              }
+            },
+            {
+              "id": "lN7Xy",
+              "type": "ref",
+              "ref": "f0daE",
+              "name": "LockPaths",
+              "width": "fill_container",
+              "descendants": {
+                "U8Pa5t": {
+                  "content": "兩條路徑"
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "RT8IW",
+              "name": "CtaRow",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "P3I27",
+                  "name": "BtnRow",
+                  "gap": 12,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "id": "AiuSu",
+                      "type": "ref",
+                      "ref": "a2YlN",
+                      "name": "Unlock",
+                      "descendants": {
+                        "Ofbak": {
+                          "content": "解鎖完整報告"
+                        }
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "id": "USDKY",
+                      "name": "Soon",
+                      "fill": "$ink-soft",
+                      "content": "即將開放",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "DOpLd",
+                  "name": "CtaNote",
+                  "fill": "$warn",
+                  "content": "解鎖即將開放，本版不收費。",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "id": "X0cQx",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "o3dfM",
+      "x": 7600,
+      "y": 600,
+      "name": "Desktop / 06 生成失敗",
+      "clip": true,
+      "width": 1440,
+      "height": 800,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        56,
+        24
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "PXxWW",
+          "name": "Sheet",
+          "width": 576,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 24,
+          "children": [
+            {
+              "type": "text",
+              "id": "ZddeJ",
+              "name": "Title",
+              "fill": "$ink",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "這次沒有寫成報告，你可以再試一次。",
+              "lineHeight": 1.25,
+              "fontFamily": "$font-heading",
+              "fontSize": 24,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "AAZ0M",
+              "name": "Hint",
+              "fill": "$ink-soft",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "生成失敗，請再試一次。",
+              "lineHeight": 1.7,
+              "fontFamily": "$font-body",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "q14nqA",
+              "name": "Actions",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "id": "TbxKe",
+                  "type": "ref",
+                  "ref": "jUxU9",
+                  "name": "Retry",
+                  "descendants": {
+                    "SvO8a": {
+                      "content": "再試一次"
+                    }
+                  }
+                },
+                {
+                  "id": "C2LBWg",
+                  "type": "ref",
+                  "ref": "NN4cT",
+                  "name": "Back"
+                }
+              ]
+            },
+            {
+              "id": "O2DGI",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "bpuBw",
+      "x": 9120,
+      "y": 600,
+      "name": "Desktop / 07 高風險",
+      "clip": true,
+      "width": 1440,
+      "height": 800,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        56,
+        24
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "KgiMN",
+          "name": "Sheet",
+          "width": 576,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 24,
+          "children": [
+            {
+              "type": "text",
+              "id": "a5r4V2",
+              "name": "Title",
+              "fill": "$ink",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "這題我不能用命盤作答",
+              "lineHeight": 1.25,
+              "fontFamily": "$font-heading",
+              "fontSize": 24,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "XXiWA",
+              "name": "Financial",
+              "fill": "$ink",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "這題涉及財務與投資決策，我不能用命盤或運勢給判斷。請尋求合格的金融／專業意見。",
+              "lineHeight": 1.7,
+              "fontFamily": "$font-body",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "id": "X0ttUv",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            },
+            {
+              "id": "qchYB",
+              "type": "ref",
+              "ref": "NN4cT",
+              "name": "BackForm",
+              "descendants": {
+                "im4xF": {
+                  "content": "回表單"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ZXTEr",
+      "x": 10640,
+      "y": 600,
+      "name": "Note / 其餘高風險固定句",
+      "width": 440,
+      "fill": "$sheet",
+      "cornerRadius": 4,
+      "stroke": "$line",
+      "strokeWidth": 1,
+      "layout": "vertical",
+      "gap": 12,
+      "padding": 16,
+      "children": [
+        {
+          "type": "text",
+          "id": "fYzqt",
+          "name": "NoteTitle",
+          "fill": "$ink",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "本版另四類固定句（不另開畫面）",
+          "lineHeight": 1.45,
+          "fontFamily": "$font-body",
+          "fontSize": 13,
+          "fontWeight": "500"
+        },
+        {
+          "type": "text",
+          "id": "E8cyVx",
+          "name": "Line",
+          "fill": "$ink-soft",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "健康：這題涉及健康與醫療判斷，我不能用命盤作答。請尋求合格醫療專業人員協助。",
+          "lineHeight": 1.45,
+          "fontFamily": "$font-body",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "OkO98",
+          "name": "Line",
+          "fill": "$ink-soft",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "法律：這題涉及法律諮詢，我不能用運勢作答。請尋求合格律師或法律援助。",
+          "lineHeight": 1.45,
+          "fontFamily": "$font-body",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "QSrF6",
+          "name": "Line",
+          "fill": "$ink-soft",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "孕產：這題涉及孕產與身體安全，我不能用命盤作答。請尋求合格醫療專業人員協助。",
+          "lineHeight": 1.45,
+          "fontFamily": "$font-body",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "Z5Ssg",
+          "name": "Line",
+          "fill": "$ink-soft",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "自傷／傷害他人：若你正處於危險中，請立即尋求現場專業協助。命盤解讀不能處理這類情況。",
+          "lineHeight": 1.45,
+          "fontFamily": "$font-body",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MeMfL",
+      "x": 0,
+      "y": 2400,
+      "name": "Mobile / 01 生辰表單",
+      "clip": true,
+      "width": 390,
+      "height": 1100,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        40,
+        20
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "r5QYZ",
+          "name": "Sheet",
+          "width": 350,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "a6gl3l",
+              "name": "Header",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "tYQza",
+                  "name": "Product",
+                  "fill": "$ink",
+                  "content": "紫微解讀",
+                  "lineHeight": 1.25,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "x8B7Yg",
+                  "name": "Lead",
+                  "fill": "$ink-soft",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "輸入生辰，先看基本分析。進階詳批鎖住。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "id": "i82h2N",
+              "type": "ref",
+              "ref": "beP6x",
+              "name": "FieldNickname",
+              "width": "fill_container",
+              "descendants": {
+                "u43al": {
+                  "content": "暱稱"
+                },
+                "tgWA0": {
+                  "content": "小圓"
+                }
+              }
+            },
+            {
+              "id": "u95WZ",
+              "type": "ref",
+              "ref": "beP6x",
+              "name": "FieldBirth",
+              "width": "fill_container",
+              "descendants": {
+                "u43al": {
+                  "content": "生日"
+                },
+                "tgWA0": {
+                  "content": "1993-07-12",
+                  "fontFamily": "$font-mono"
+                }
+              }
+            },
+            {
+              "id": "rEUrm",
+              "type": "ref",
+              "ref": "M7isd",
+              "name": "FieldTime",
+              "width": "fill_container"
+            },
+            {
+              "id": "yj1vT",
+              "type": "ref",
+              "ref": "H3wrP",
+              "name": "Focus",
+              "width": "fill_container"
+            },
+            {
+              "id": "hy2mb",
+              "type": "ref",
+              "ref": "jUxU9",
+              "name": "Submit",
+              "width": "fill_container"
+            },
+            {
+              "id": "Sh2Ps",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "hjM8E",
+      "x": 470,
+      "y": 2400,
+      "name": "Mobile / 02 表單驗證錯誤",
+      "clip": true,
+      "width": 390,
+      "height": 1100,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        40,
+        20
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "RfHxK",
+          "name": "Sheet",
+          "width": 350,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "isvFN",
+              "name": "Header",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "DuCZp",
+                  "name": "Product",
+                  "fill": "$ink",
+                  "content": "紫微解讀",
+                  "lineHeight": 1.25,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "LIGEr",
+                  "name": "Lead",
+                  "fill": "$ink-soft",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "輸入生辰，先看基本分析。進階詳批鎖住。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "id": "k1NL4W",
+              "type": "ref",
+              "ref": "VSJh9",
+              "name": "FieldNickname",
+              "width": "fill_container",
+              "descendants": {
+                "aBGDW": {
+                  "content": "暱稱"
+                },
+                "d25uF": {
+                  "content": "請填寫暱稱。"
+                }
+              }
+            },
+            {
+              "id": "vQsBx",
+              "type": "ref",
+              "ref": "VSJh9",
+              "name": "FieldBirth",
+              "width": "fill_container",
+              "descendants": {
+                "aBGDW": {
+                  "content": "生日"
+                },
+                "d25uF": {
+                  "content": "請填寫生日。"
+                }
+              }
+            },
+            {
+              "id": "EZPVe",
+              "type": "ref",
+              "ref": "M7isd",
+              "name": "FieldTime",
+              "width": "fill_container"
+            },
+            {
+              "id": "B4mMLh",
+              "type": "ref",
+              "ref": "H3wrP",
+              "name": "Focus",
+              "width": "fill_container"
+            },
+            {
+              "id": "fsZcW",
+              "type": "ref",
+              "ref": "jUxU9",
+              "name": "Submit",
+              "width": "fill_container"
+            },
+            {
+              "id": "e6t5S",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "n6ZXcD",
+      "x": 940,
+      "y": 2400,
+      "name": "Mobile / 03 生成中",
+      "clip": true,
+      "width": 390,
+      "height": 1100,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        40,
+        20
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "a31zs",
+          "name": "Sheet",
+          "width": 350,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "HFlll",
+              "name": "Header",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "u5wvRB",
+                  "name": "Product",
+                  "fill": "$ink",
+                  "content": "紫微解讀",
+                  "lineHeight": 1.25,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "a5SceA",
+                  "name": "Lead",
+                  "fill": "$ink-soft",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "正在整理你的基本分析…",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "id": "Wd6E0",
+              "type": "ref",
+              "ref": "beP6x",
+              "name": "FieldNickname",
+              "width": "fill_container",
+              "descendants": {
+                "u43al": {
+                  "content": "暱稱"
+                },
+                "tgWA0": {
+                  "content": "小圓"
+                }
+              }
+            },
+            {
+              "id": "U9Xgs6",
+              "type": "ref",
+              "ref": "beP6x",
+              "name": "FieldBirth",
+              "width": "fill_container",
+              "descendants": {
+                "u43al": {
+                  "content": "生日"
+                },
+                "tgWA0": {
+                  "content": "1993-07-12",
+                  "fontFamily": "$font-mono"
+                }
+              }
+            },
+            {
+              "id": "z63LX",
+              "type": "ref",
+              "ref": "M7isd",
+              "name": "FieldTime",
+              "width": "fill_container"
+            },
+            {
+              "id": "hGqG0",
+              "type": "ref",
+              "ref": "H3wrP",
+              "name": "Focus",
+              "width": "fill_container"
+            },
+            {
+              "id": "xO13P",
+              "type": "ref",
+              "ref": "a2YlN",
+              "name": "SubmitLoading",
+              "width": "fill_container"
+            },
+            {
+              "id": "m2VOR6",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tRlMI",
+      "x": 1410,
+      "y": 2400,
+      "name": "Mobile / 04 基本分析 畫面 A",
+      "clip": true,
+      "width": 390,
+      "height": 1800,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        40,
+        20
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "Oamad",
+          "name": "Sheet",
+          "width": 350,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 20,
+          "padding": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "d8QbKg",
+              "name": "Header",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "wU5bU",
+                  "name": "Title",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "小圓的基本分析",
+                  "lineHeight": 1.25,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "NXXz4",
+                  "name": "Tags",
+                  "fill": "$ink-soft",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "未知時辰，準確度較低、聚焦工作",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "suVcv",
+                  "name": "Date",
+                  "fill": "$ink-soft",
+                  "content": "1993-07-12",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-mono",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "NXLE3",
+              "name": "整體提醒",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "gq0y2",
+                  "name": "整體提醒L",
+                  "fill": "$ink-soft",
+                  "content": "整體提醒",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "P2PKp",
+                  "name": "整體提醒B",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "（未知時辰，準確度較低）這段時間適合先整理已有能力與成果，而不是一次做大變動。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Kr7s3",
+              "name": "工作",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "bgZlY",
+                  "name": "工作L",
+                  "fill": "$ink-soft",
+                  "content": "工作",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "GNCd5",
+                  "name": "工作B",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "工作上較需要「可被看見的小成果」，而不是更多靈感。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "wtYZC",
+              "name": "關係",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "oxTtM",
+                  "name": "關係L",
+                  "fill": "$ink-soft",
+                  "content": "關係",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "xNLDw",
+                  "name": "關係B",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "合作時把範圍講清楚，會比加更多承諾更有幫助。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "e9SVX",
+              "name": "ActionHint",
+              "fill": "$ink-soft",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "先完成一件能展示的小交付。",
+              "lineHeight": 1.7,
+              "fontFamily": "$font-body",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "id": "qjlSw",
+              "type": "ref",
+              "ref": "HbKh1",
+              "name": "SealStrip",
+              "width": "fill_container"
+            },
+            {
+              "type": "text",
+              "id": "pyQQ1",
+              "name": "LockCaption",
+              "fill": "$ink-soft",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "解鎖進階報告後可見 7 天行動方針與兩條路徑比較",
+              "lineHeight": 1.45,
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "500"
+            },
+            {
+              "id": "j6ubCw",
+              "type": "ref",
+              "ref": "f0daE",
+              "name": "LockAction",
+              "width": "fill_container",
+              "descendants": {
+                "U8Pa5t": {
+                  "content": "行動建議"
+                }
+              }
+            },
+            {
+              "id": "CbBYs",
+              "type": "ref",
+              "ref": "f0daE",
+              "name": "LockRationale",
+              "width": "fill_container",
+              "descendants": {
+                "U8Pa5t": {
+                  "content": "依據"
+                }
+              }
+            },
+            {
+              "id": "yrvwW",
+              "type": "ref",
+              "ref": "f0daE",
+              "name": "LockPaths",
+              "width": "fill_container",
+              "descendants": {
+                "U8Pa5t": {
+                  "content": "兩條路徑"
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "I20wRl",
+              "name": "CtaRow",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "y4SjD",
+                  "name": "BtnRow",
+                  "gap": 12,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "id": "MKYPn",
+                      "type": "ref",
+                      "ref": "jUxU9",
+                      "name": "Unlock",
+                      "descendants": {
+                        "SvO8a": {
+                          "content": "解鎖完整報告"
+                        }
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "id": "K6szc",
+                      "name": "Soon",
+                      "fill": "$ink-soft",
+                      "content": "即將開放",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "eNAzH",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "CzYCX",
+      "x": 1880,
+      "y": 2400,
+      "name": "Mobile / 05 CTA 點擊",
+      "clip": true,
+      "width": 390,
+      "height": 1800,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        40,
+        20
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "OWuIi",
+          "name": "Sheet",
+          "width": 350,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 20,
+          "padding": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "cyoQr",
+              "name": "Header",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "AtX1m",
+                  "name": "Title",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "小圓的基本分析",
+                  "lineHeight": 1.25,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "wYLRo",
+                  "name": "Tags",
+                  "fill": "$ink-soft",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "未知時辰，準確度較低、聚焦工作",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "tP4GR",
+                  "name": "Date",
+                  "fill": "$ink-soft",
+                  "content": "1993-07-12",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-mono",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "nbaf3",
+              "name": "整體提醒",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "UYPY8",
+                  "name": "整體提醒L",
+                  "fill": "$ink-soft",
+                  "content": "整體提醒",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "M0Cjxv",
+                  "name": "整體提醒B",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "（未知時辰，準確度較低）這段時間適合先整理已有能力與成果，而不是一次做大變動。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "tWcC0",
+              "name": "工作",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "WNLP5",
+                  "name": "工作L",
+                  "fill": "$ink-soft",
+                  "content": "工作",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "vcxOq",
+                  "name": "工作B",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "工作上較需要「可被看見的小成果」，而不是更多靈感。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "RCcKz",
+              "name": "關係",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "D9k4Gi",
+                  "name": "關係L",
+                  "fill": "$ink-soft",
+                  "content": "關係",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "Q3IFhz",
+                  "name": "關係B",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "合作時把範圍講清楚，會比加更多承諾更有幫助。",
+                  "lineHeight": 1.7,
+                  "fontFamily": "$font-body",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "iKPLH",
+              "name": "ActionHint",
+              "fill": "$ink-soft",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "先完成一件能展示的小交付。",
+              "lineHeight": 1.7,
+              "fontFamily": "$font-body",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "id": "TiZT8",
+              "type": "ref",
+              "ref": "HbKh1",
+              "name": "SealStrip",
+              "width": "fill_container"
+            },
+            {
+              "type": "text",
+              "id": "Z4MAn",
+              "name": "LockCaption",
+              "fill": "$ink-soft",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "解鎖進階報告後可見 7 天行動方針與兩條路徑比較",
+              "lineHeight": 1.45,
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "500"
+            },
+            {
+              "id": "m9DhU",
+              "type": "ref",
+              "ref": "f0daE",
+              "name": "LockAction",
+              "width": "fill_container",
+              "descendants": {
+                "U8Pa5t": {
+                  "content": "行動建議"
+                }
+              }
+            },
+            {
+              "id": "ZHIIs",
+              "type": "ref",
+              "ref": "f0daE",
+              "name": "LockRationale",
+              "width": "fill_container",
+              "descendants": {
+                "U8Pa5t": {
+                  "content": "依據"
+                }
+              }
+            },
+            {
+              "id": "QRFZB",
+              "type": "ref",
+              "ref": "f0daE",
+              "name": "LockPaths",
+              "width": "fill_container",
+              "descendants": {
+                "U8Pa5t": {
+                  "content": "兩條路徑"
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "dSyXl",
+              "name": "CtaRow",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "b1FWDm",
+                  "name": "BtnRow",
+                  "gap": 12,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "id": "TQQeI",
+                      "type": "ref",
+                      "ref": "a2YlN",
+                      "name": "Unlock",
+                      "descendants": {
+                        "Ofbak": {
+                          "content": "解鎖完整報告"
+                        }
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "id": "tfgr0",
+                      "name": "Soon",
+                      "fill": "$ink-soft",
+                      "content": "即將開放",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "JnI8u",
+                  "name": "CtaNote",
+                  "fill": "$warn",
+                  "content": "解鎖即將開放，本版不收費。",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "id": "dk8yr",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Cxm3m",
+      "x": 2350,
+      "y": 2400,
+      "name": "Mobile / 06 生成失敗",
+      "clip": true,
+      "width": 390,
+      "height": 900,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        40,
+        20
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "D6hIvI",
+          "name": "Sheet",
+          "width": 350,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 24,
+          "children": [
+            {
+              "type": "text",
+              "id": "qV6qc",
+              "name": "Title",
+              "fill": "$ink",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "這次沒有寫成報告，你可以再試一次。",
+              "lineHeight": 1.25,
+              "fontFamily": "$font-heading",
+              "fontSize": 24,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "GheGN",
+              "name": "Hint",
+              "fill": "$ink-soft",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "生成失敗，請再試一次。",
+              "lineHeight": 1.7,
+              "fontFamily": "$font-body",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "ZbAiQ",
+              "name": "Actions",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "id": "C9Fie",
+                  "type": "ref",
+                  "ref": "jUxU9",
+                  "name": "Retry",
+                  "descendants": {
+                    "SvO8a": {
+                      "content": "再試一次"
+                    }
+                  }
+                },
+                {
+                  "id": "rKIEA",
+                  "type": "ref",
+                  "ref": "NN4cT",
+                  "name": "Back"
+                }
+              ]
+            },
+            {
+              "id": "mk2CP",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "lZDtR",
+      "x": 2820,
+      "y": 2400,
+      "name": "Mobile / 07 高風險",
+      "clip": true,
+      "width": 390,
+      "height": 900,
+      "fill": "$paper",
+      "layout": "vertical",
+      "padding": [
+        40,
+        20
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "P36hrV",
+          "name": "Sheet",
+          "width": 350,
+          "fill": "$sheet",
+          "cornerRadius": 4,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 24,
+          "children": [
+            {
+              "type": "text",
+              "id": "hgniR",
+              "name": "Title",
+              "fill": "$ink",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "這題我不能用命盤作答",
+              "lineHeight": 1.25,
+              "fontFamily": "$font-heading",
+              "fontSize": 24,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "kOxhP",
+              "name": "Financial",
+              "fill": "$ink",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "這題涉及財務與投資決策，我不能用命盤或運勢給判斷。請尋求合格的金融／專業意見。",
+              "lineHeight": 1.7,
+              "fontFamily": "$font-body",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "id": "W2JUE",
+              "type": "ref",
+              "ref": "cGJVY",
+              "name": "Disclaimer",
+              "width": "fill_container"
+            },
+            {
+              "id": "Ftv4p",
+              "type": "ref",
+              "ref": "NN4cT",
+              "name": "BackForm",
+              "descendants": {
+                "im4xF": {
+                  "content": "回表單"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Z8hFXr",
+      "x": 960,
+      "y": 260,
+      "name": "Sheet",
+      "reusable": true,
+      "width": 576,
+      "fill": "$sheet",
+      "cornerRadius": 4,
+      "stroke": "$line",
+      "strokeWidth": 1,
+      "layout": "vertical",
+      "gap": 24,
+      "padding": 24,
+      "children": [
+        {
+          "type": "text",
+          "id": "p5QvVp",
+          "name": "SlotHint",
+          "fill": "$ink-soft",
+          "content": "箋本",
+          "fontFamily": "$font-body",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "paper": {
+      "type": "color",
+      "value": "#E8E2D4"
+    },
+    "sheet": {
+      "type": "color",
+      "value": "#F7F4EC"
+    },
+    "ink": {
+      "type": "color",
+      "value": "#1E2430"
+    },
+    "ink-soft": {
+      "type": "color",
+      "value": "#5C6573"
+    },
+    "seal": {
+      "type": "color",
+      "value": "#8E1F2F"
+    },
+    "seal-deep": {
+      "type": "color",
+      "value": "#721926"
+    },
+    "seal-deeper": {
+      "type": "color",
+      "value": "#5C1420"
+    },
+    "night": {
+      "type": "color",
+      "value": "#2A3344"
+    },
+    "night-bar": {
+      "type": "color",
+      "value": "#3D4758"
+    },
+    "line": {
+      "type": "color",
+      "value": "#C9C2B3"
+    },
+    "ok": {
+      "type": "color",
+      "value": "#2F6F4E"
+    },
+    "warn": {
+      "type": "color",
+      "value": "#8A5A12"
+    },
+    "font-heading": {
+      "type": "string",
+      "value": "Noto Serif TC"
+    },
+    "font-body": {
+      "type": "string",
+      "value": "Noto Sans TC"
+    },
+    "font-mono": {
+      "type": "string",
+      "value": "IBM Plex Mono"
+    },
+    "radius-sheet": {
+      "type": "number",
+      "value": 4
+    },
+    "radius-control": {
+      "type": "number",
+      "value": 2
+    },
+    "space-8": {
+      "type": "number",
+      "value": 8
+    },
+    "touch": {
+      "type": "number",
+      "value": 44
+    },
+    "sheet-max": {
+      "type": "number",
+      "value": 576
+    },
+    "display": {
+      "type": "number",
+      "value": 30
+    },
+    "body": {
+      "type": "number",
+      "value": 17
+    },
+    "label": {
+      "type": "number",
+      "value": 13
+    },
+    "disclaimer": {
+      "type": "number",
+      "value": 14
+    }
+  },
+  "fileToken": "5a2eca12-b65c-4848-97db-f35b13b85b29"
+}
