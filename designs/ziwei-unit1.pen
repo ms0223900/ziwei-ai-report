@@ -295,10 +295,10 @@
               "id": "M2H5bk",
               "name": "Value",
               "fill": "$ink",
-              "content": "不確定時辰",
+              "content": "不確定時辰（走未知時辰盤）",
               "lineHeight": 1.7,
               "fontFamily": "$font-body",
-              "fontSize": 17,
+              "fontSize": 15,
               "fontWeight": "normal"
             },
             {
@@ -320,7 +320,7 @@
           "fill": "$ink-soft",
           "textGrowth": "fixed-width",
           "width": "fill_container",
-          "content": "未填則走未知時辰版，準確度較低。",
+          "content": "未填時辰走未知時辰盤，準確度較低；知曉生時請選十二時辰（如卯時 05-07）。",
           "lineHeight": 1.45,
           "fontFamily": "$font-body",
           "fontSize": 13,
@@ -375,9 +375,9 @@
                   "id": "qY8rK",
                   "name": "AllLabel",
                   "fill": "$ink",
-                  "content": "整體",
+                  "content": "整體・命身",
                   "fontFamily": "$font-body",
-                  "fontSize": 17,
+                  "fontSize": 14,
                   "fontWeight": "500"
                 }
               ]
@@ -398,9 +398,9 @@
                   "id": "j6FGui",
                   "name": "WorkLabel",
                   "fill": "$sheet",
-                  "content": "工作",
+                  "content": "工作・官祿",
                   "fontFamily": "$font-body",
-                  "fontSize": 17,
+                  "fontSize": 14,
                   "fontWeight": "500"
                 }
               ]
@@ -423,9 +423,9 @@
                   "id": "i7mrUE",
                   "name": "RelLabel",
                   "fill": "$ink",
-                  "content": "關係",
+                  "content": "關係・夫妻",
                   "fontFamily": "$font-body",
-                  "fontSize": 17,
+                  "fontSize": 14,
                   "fontWeight": "500"
                 }
               ]
@@ -592,15 +592,36 @@
               "gap": 8,
               "children": [
                 {
-                  "type": "text",
-                  "id": "MdbYd",
-                  "name": "Product",
-                  "fill": "$ink",
-                  "content": "紫微解讀",
-                  "lineHeight": 1.25,
-                  "fontFamily": "$font-heading",
-                  "fontSize": 30,
-                  "fontWeight": "700"
+                  "type": "frame",
+                  "id": "IrlKN",
+                  "name": "TitleRow",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "BITBM",
+                      "name": "Product",
+                      "fill": "$ink",
+                      "content": "紫微解讀",
+                      "lineHeight": 1.25,
+                      "fontFamily": "$font-heading",
+                      "fontSize": 30,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "ablT1",
+                      "type": "ref",
+                      "ref": "uLReX",
+                      "name": "Seal",
+                      "descendants": {
+                        "PVSYm": {
+                          "content": "起盤"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -609,7 +630,7 @@
                   "fill": "$ink-soft",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "輸入生辰，先看基本分析。進階詳批鎖住。",
+                  "content": "依生辰起紫微原局，先批基本命理。進階詳批封存。",
                   "lineHeight": 1.7,
                   "fontFamily": "$font-body",
                   "fontSize": 17,
@@ -719,15 +740,36 @@
               "gap": 8,
               "children": [
                 {
-                  "type": "text",
-                  "id": "Hx2ls",
-                  "name": "Product",
-                  "fill": "$ink",
-                  "content": "紫微解讀",
-                  "lineHeight": 1.25,
-                  "fontFamily": "$font-heading",
-                  "fontSize": 30,
-                  "fontWeight": "700"
+                  "type": "frame",
+                  "id": "XmJD7",
+                  "name": "TitleRow",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "DFDB1",
+                      "name": "Product",
+                      "fill": "$ink",
+                      "content": "紫微解讀",
+                      "lineHeight": 1.25,
+                      "fontFamily": "$font-heading",
+                      "fontSize": 30,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "XqHn0",
+                      "type": "ref",
+                      "ref": "uLReX",
+                      "name": "Seal",
+                      "descendants": {
+                        "PVSYm": {
+                          "content": "起盤"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -736,7 +778,7 @@
                   "fill": "$ink-soft",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "輸入生辰，先看基本分析。進階詳批鎖住。",
+                  "content": "依生辰起紫微原局，先批基本命理。進階詳批封存。",
                   "lineHeight": 1.7,
                   "fontFamily": "$font-body",
                   "fontSize": 17,
@@ -845,15 +887,36 @@
               "gap": 8,
               "children": [
                 {
-                  "type": "text",
-                  "id": "k9cdo",
-                  "name": "Product",
-                  "fill": "$ink",
-                  "content": "紫微解讀",
-                  "lineHeight": 1.25,
-                  "fontFamily": "$font-heading",
-                  "fontSize": 30,
-                  "fontWeight": "700"
+                  "type": "frame",
+                  "id": "F1ujT",
+                  "name": "TitleRow",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "f5Igz3",
+                      "name": "Product",
+                      "fill": "$ink",
+                      "content": "紫微解讀",
+                      "lineHeight": 1.25,
+                      "fontFamily": "$font-heading",
+                      "fontSize": 30,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "oqnXi",
+                      "type": "ref",
+                      "ref": "uLReX",
+                      "name": "Seal",
+                      "descendants": {
+                        "PVSYm": {
+                          "content": "排盤"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -862,7 +925,7 @@
                   "fill": "$ink-soft",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "正在整理你的基本分析…",
+                  "content": "正在依生辰起紫微命盤，定局排星中…",
                   "lineHeight": 1.7,
                   "fontFamily": "$font-body",
                   "fontSize": 17,
@@ -972,17 +1035,36 @@
               "gap": 8,
               "children": [
                 {
-                  "type": "text",
-                  "id": "QvvZK",
-                  "name": "Title",
-                  "fill": "$ink",
-                  "textGrowth": "fixed-width",
+                  "type": "frame",
+                  "id": "piFtY",
+                  "name": "TitleRow",
                   "width": "fill_container",
-                  "content": "小圓的基本分析",
-                  "lineHeight": 1.25,
-                  "fontFamily": "$font-heading",
-                  "fontSize": 30,
-                  "fontWeight": "700"
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "nuTYB",
+                      "name": "Title",
+                      "fill": "$ink",
+                      "content": "小圓的基本分析",
+                      "lineHeight": 1.25,
+                      "fontFamily": "$font-heading",
+                      "fontSize": 30,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "v2BTM4",
+                      "type": "ref",
+                      "ref": "uLReX",
+                      "name": "Seal",
+                      "descendants": {
+                        "PVSYm": {
+                          "content": "定局"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -991,10 +1073,10 @@
                   "fill": "$ink-soft",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "未知時辰，準確度較低、聚焦工作",
+                  "content": "〔 命主：小圓 ｜ 未知時辰（準確度較低） ｜ 聚焦：工作（官祿宮） 〕",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
                   "fontWeight": "500"
                 },
                 {
@@ -1002,7 +1084,7 @@
                   "id": "Uu5r8",
                   "name": "Date",
                   "fill": "$ink-soft",
-                  "content": "1993-07-12",
+                  "content": "西元 1993-07-12・癸酉年生",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-mono",
                   "fontSize": 13,
@@ -1022,12 +1104,12 @@
                   "type": "text",
                   "id": "b0SCnj",
                   "name": "整體提醒L",
-                  "fill": "$ink-soft",
-                  "content": "整體提醒",
+                  "fill": "$ink",
+                  "content": "【 原局總覽 】",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
-                  "fontWeight": "500"
+                  "fontFamily": "$font-heading",
+                  "fontSize": 14,
+                  "fontWeight": "700"
                 },
                 {
                   "type": "text",
@@ -1056,12 +1138,12 @@
                   "type": "text",
                   "id": "DV1iB",
                   "name": "工作L",
-                  "fill": "$ink-soft",
-                  "content": "工作",
+                  "fill": "$ink",
+                  "content": "【 官祿事業 】",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
-                  "fontWeight": "500"
+                  "fontFamily": "$font-heading",
+                  "fontSize": 14,
+                  "fontWeight": "700"
                 },
                 {
                   "type": "text",
@@ -1090,12 +1172,12 @@
                   "type": "text",
                   "id": "X6WMgw",
                   "name": "關係L",
-                  "fill": "$ink-soft",
-                  "content": "關係",
+                  "fill": "$ink",
+                  "content": "【 夫妻交友 】",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
-                  "fontWeight": "500"
+                  "fontFamily": "$font-heading",
+                  "fontSize": 14,
+                  "fontWeight": "700"
                 },
                 {
                   "type": "text",
@@ -1116,14 +1198,14 @@
               "type": "text",
               "id": "H2tAq1",
               "name": "ActionHint",
-              "fill": "$ink-soft",
+              "fill": "$ink",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "先完成一件能展示的小交付。",
+              "content": "【 行動指引 】 先完成一件能展示的小交付。",
               "lineHeight": 1.7,
               "fontFamily": "$font-body",
               "fontSize": 14,
-              "fontWeight": "normal"
+              "fontWeight": "500"
             },
             {
               "id": "D2rqM",
@@ -1139,7 +1221,7 @@
               "fill": "$ink-soft",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "解鎖進階報告後可見 7 天行動方針與兩條路徑比較",
+              "content": "解鎖進階命書後，即啟七日行事方針與吉凶路徑析理",
               "lineHeight": 1.45,
               "fontFamily": "$font-body",
               "fontSize": 13,
@@ -1153,7 +1235,7 @@
               "width": "fill_container",
               "descendants": {
                 "U8Pa5t": {
-                  "content": "行動建議"
+                  "content": "【 七日轉化方略 】・密批封存"
                 }
               }
             },
@@ -1165,7 +1247,7 @@
               "width": "fill_container",
               "descendants": {
                 "U8Pa5t": {
-                  "content": "依據"
+                  "content": "【 星曜格局析理 】・密批封存"
                 }
               }
             },
@@ -1177,7 +1259,7 @@
               "width": "fill_container",
               "descendants": {
                 "U8Pa5t": {
-                  "content": "兩條路徑"
+                  "content": "【 順逆兩局抉擇 】・密批封存"
                 }
               }
             },
@@ -1271,17 +1353,36 @@
               "gap": 8,
               "children": [
                 {
-                  "type": "text",
-                  "id": "yAI1r",
-                  "name": "Title",
-                  "fill": "$ink",
-                  "textGrowth": "fixed-width",
+                  "type": "frame",
+                  "id": "XGiix",
+                  "name": "TitleRow",
                   "width": "fill_container",
-                  "content": "小圓的基本分析",
-                  "lineHeight": 1.25,
-                  "fontFamily": "$font-heading",
-                  "fontSize": 30,
-                  "fontWeight": "700"
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "W0qGp",
+                      "name": "Title",
+                      "fill": "$ink",
+                      "content": "小圓的基本分析",
+                      "lineHeight": 1.25,
+                      "fontFamily": "$font-heading",
+                      "fontSize": 30,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "F60Wu",
+                      "type": "ref",
+                      "ref": "uLReX",
+                      "name": "Seal",
+                      "descendants": {
+                        "PVSYm": {
+                          "content": "定局"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -1290,10 +1391,10 @@
                   "fill": "$ink-soft",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "未知時辰，準確度較低、聚焦工作",
+                  "content": "〔 命主：小圓 ｜ 未知時辰（準確度較低） ｜ 聚焦：工作（官祿宮） 〕",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
                   "fontWeight": "500"
                 },
                 {
@@ -1301,7 +1402,7 @@
                   "id": "fkh5q",
                   "name": "Date",
                   "fill": "$ink-soft",
-                  "content": "1993-07-12",
+                  "content": "西元 1993-07-12・癸酉年生",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-mono",
                   "fontSize": 13,
@@ -1321,12 +1422,12 @@
                   "type": "text",
                   "id": "CKye2",
                   "name": "整體提醒L",
-                  "fill": "$ink-soft",
-                  "content": "整體提醒",
+                  "fill": "$ink",
+                  "content": "【 原局總覽 】",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
-                  "fontWeight": "500"
+                  "fontFamily": "$font-heading",
+                  "fontSize": 14,
+                  "fontWeight": "700"
                 },
                 {
                   "type": "text",
@@ -1355,12 +1456,12 @@
                   "type": "text",
                   "id": "MKpPE",
                   "name": "工作L",
-                  "fill": "$ink-soft",
-                  "content": "工作",
+                  "fill": "$ink",
+                  "content": "【 官祿事業 】",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
-                  "fontWeight": "500"
+                  "fontFamily": "$font-heading",
+                  "fontSize": 14,
+                  "fontWeight": "700"
                 },
                 {
                   "type": "text",
@@ -1389,12 +1490,12 @@
                   "type": "text",
                   "id": "z3wlc",
                   "name": "關係L",
-                  "fill": "$ink-soft",
-                  "content": "關係",
+                  "fill": "$ink",
+                  "content": "【 夫妻交友 】",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
-                  "fontWeight": "500"
+                  "fontFamily": "$font-heading",
+                  "fontSize": 14,
+                  "fontWeight": "700"
                 },
                 {
                   "type": "text",
@@ -1415,14 +1516,14 @@
               "type": "text",
               "id": "Nw24h",
               "name": "ActionHint",
-              "fill": "$ink-soft",
+              "fill": "$ink",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "先完成一件能展示的小交付。",
+              "content": "【 行動指引 】 先完成一件能展示的小交付。",
               "lineHeight": 1.7,
               "fontFamily": "$font-body",
               "fontSize": 14,
-              "fontWeight": "normal"
+              "fontWeight": "500"
             },
             {
               "id": "v5UQZ",
@@ -1438,7 +1539,7 @@
               "fill": "$ink-soft",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "解鎖進階報告後可見 7 天行動方針與兩條路徑比較",
+              "content": "解鎖進階命書後，即啟七日行事方針與吉凶路徑析理",
               "lineHeight": 1.45,
               "fontFamily": "$font-body",
               "fontSize": 13,
@@ -1452,7 +1553,7 @@
               "width": "fill_container",
               "descendants": {
                 "U8Pa5t": {
-                  "content": "行動建議"
+                  "content": "【 七日轉化方略 】・密批封存"
                 }
               }
             },
@@ -1464,7 +1565,7 @@
               "width": "fill_container",
               "descendants": {
                 "U8Pa5t": {
-                  "content": "依據"
+                  "content": "【 星曜格局析理 】・密批封存"
                 }
               }
             },
@@ -1476,7 +1577,7 @@
               "width": "fill_container",
               "descendants": {
                 "U8Pa5t": {
-                  "content": "兩條路徑"
+                  "content": "【 順逆兩局抉擇 】・密批封存"
                 }
               }
             },
@@ -1834,15 +1935,36 @@
               "gap": 8,
               "children": [
                 {
-                  "type": "text",
-                  "id": "tYQza",
-                  "name": "Product",
-                  "fill": "$ink",
-                  "content": "紫微解讀",
-                  "lineHeight": 1.25,
-                  "fontFamily": "$font-heading",
-                  "fontSize": 30,
-                  "fontWeight": "700"
+                  "type": "frame",
+                  "id": "TK3V0",
+                  "name": "TitleRow",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "N6Oi5",
+                      "name": "Product",
+                      "fill": "$ink",
+                      "content": "紫微解讀",
+                      "lineHeight": 1.25,
+                      "fontFamily": "$font-heading",
+                      "fontSize": 26,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "Icfx0",
+                      "type": "ref",
+                      "ref": "uLReX",
+                      "name": "Seal",
+                      "descendants": {
+                        "PVSYm": {
+                          "content": "起盤"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -1851,7 +1973,7 @@
                   "fill": "$ink-soft",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "輸入生辰，先看基本分析。進階詳批鎖住。",
+                  "content": "依生辰起紫微原局，先批基本命理。進階詳批封存。",
                   "lineHeight": 1.7,
                   "fontFamily": "$font-body",
                   "fontSize": 17,
@@ -1961,15 +2083,36 @@
               "gap": 8,
               "children": [
                 {
-                  "type": "text",
-                  "id": "DuCZp",
-                  "name": "Product",
-                  "fill": "$ink",
-                  "content": "紫微解讀",
-                  "lineHeight": 1.25,
-                  "fontFamily": "$font-heading",
-                  "fontSize": 30,
-                  "fontWeight": "700"
+                  "type": "frame",
+                  "id": "Af2c2",
+                  "name": "TitleRow",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "oELGc",
+                      "name": "Product",
+                      "fill": "$ink",
+                      "content": "紫微解讀",
+                      "lineHeight": 1.25,
+                      "fontFamily": "$font-heading",
+                      "fontSize": 26,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "tdbAR",
+                      "type": "ref",
+                      "ref": "uLReX",
+                      "name": "Seal",
+                      "descendants": {
+                        "PVSYm": {
+                          "content": "起盤"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -1978,7 +2121,7 @@
                   "fill": "$ink-soft",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "輸入生辰，先看基本分析。進階詳批鎖住。",
+                  "content": "依生辰起紫微原局，先批基本命理。進階詳批封存。",
                   "lineHeight": 1.7,
                   "fontFamily": "$font-body",
                   "fontSize": 17,
@@ -2087,15 +2230,36 @@
               "gap": 8,
               "children": [
                 {
-                  "type": "text",
-                  "id": "u5wvRB",
-                  "name": "Product",
-                  "fill": "$ink",
-                  "content": "紫微解讀",
-                  "lineHeight": 1.25,
-                  "fontFamily": "$font-heading",
-                  "fontSize": 30,
-                  "fontWeight": "700"
+                  "type": "frame",
+                  "id": "AZpRh",
+                  "name": "TitleRow",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "twwUx",
+                      "name": "Product",
+                      "fill": "$ink",
+                      "content": "紫微解讀",
+                      "lineHeight": 1.25,
+                      "fontFamily": "$font-heading",
+                      "fontSize": 26,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "wrHHT",
+                      "type": "ref",
+                      "ref": "uLReX",
+                      "name": "Seal",
+                      "descendants": {
+                        "PVSYm": {
+                          "content": "排盤"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -2104,7 +2268,7 @@
                   "fill": "$ink-soft",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "正在整理你的基本分析…",
+                  "content": "正在依生辰起紫微命盤，定局排星中…",
                   "lineHeight": 1.7,
                   "fontFamily": "$font-body",
                   "fontSize": 17,
@@ -2214,17 +2378,36 @@
               "gap": 8,
               "children": [
                 {
-                  "type": "text",
-                  "id": "wU5bU",
-                  "name": "Title",
-                  "fill": "$ink",
-                  "textGrowth": "fixed-width",
+                  "type": "frame",
+                  "id": "VsEhl",
+                  "name": "TitleRow",
                   "width": "fill_container",
-                  "content": "小圓的基本分析",
-                  "lineHeight": 1.25,
-                  "fontFamily": "$font-heading",
-                  "fontSize": 30,
-                  "fontWeight": "700"
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "pdIcu",
+                      "name": "Title",
+                      "fill": "$ink",
+                      "content": "小圓的基本分析",
+                      "lineHeight": 1.25,
+                      "fontFamily": "$font-heading",
+                      "fontSize": 26,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "d4e57w",
+                      "type": "ref",
+                      "ref": "uLReX",
+                      "name": "Seal",
+                      "descendants": {
+                        "PVSYm": {
+                          "content": "定局"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -2233,10 +2416,10 @@
                   "fill": "$ink-soft",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "未知時辰，準確度較低、聚焦工作",
+                  "content": "〔 命主：小圓 ｜ 未知時辰（準確度較低） ｜ 聚焦：工作（官祿宮） 〕",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
                   "fontWeight": "500"
                 },
                 {
@@ -2244,7 +2427,7 @@
                   "id": "suVcv",
                   "name": "Date",
                   "fill": "$ink-soft",
-                  "content": "1993-07-12",
+                  "content": "西元 1993-07-12・癸酉年生",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-mono",
                   "fontSize": 13,
@@ -2264,12 +2447,12 @@
                   "type": "text",
                   "id": "gq0y2",
                   "name": "整體提醒L",
-                  "fill": "$ink-soft",
-                  "content": "整體提醒",
+                  "fill": "$ink",
+                  "content": "【 原局總覽 】",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
-                  "fontWeight": "500"
+                  "fontFamily": "$font-heading",
+                  "fontSize": 14,
+                  "fontWeight": "700"
                 },
                 {
                   "type": "text",
@@ -2298,12 +2481,12 @@
                   "type": "text",
                   "id": "bgZlY",
                   "name": "工作L",
-                  "fill": "$ink-soft",
-                  "content": "工作",
+                  "fill": "$ink",
+                  "content": "【 官祿事業 】",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
-                  "fontWeight": "500"
+                  "fontFamily": "$font-heading",
+                  "fontSize": 14,
+                  "fontWeight": "700"
                 },
                 {
                   "type": "text",
@@ -2332,12 +2515,12 @@
                   "type": "text",
                   "id": "oxTtM",
                   "name": "關係L",
-                  "fill": "$ink-soft",
-                  "content": "關係",
+                  "fill": "$ink",
+                  "content": "【 夫妻交友 】",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
-                  "fontWeight": "500"
+                  "fontFamily": "$font-heading",
+                  "fontSize": 14,
+                  "fontWeight": "700"
                 },
                 {
                   "type": "text",
@@ -2358,14 +2541,14 @@
               "type": "text",
               "id": "e9SVX",
               "name": "ActionHint",
-              "fill": "$ink-soft",
+              "fill": "$ink",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "先完成一件能展示的小交付。",
+              "content": "【 行動指引 】 先完成一件能展示的小交付。",
               "lineHeight": 1.7,
               "fontFamily": "$font-body",
               "fontSize": 14,
-              "fontWeight": "normal"
+              "fontWeight": "500"
             },
             {
               "id": "qjlSw",
@@ -2381,7 +2564,7 @@
               "fill": "$ink-soft",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "解鎖進階報告後可見 7 天行動方針與兩條路徑比較",
+              "content": "解鎖進階命書後，即啟七日行事方針與吉凶路徑析理",
               "lineHeight": 1.45,
               "fontFamily": "$font-body",
               "fontSize": 13,
@@ -2395,7 +2578,7 @@
               "width": "fill_container",
               "descendants": {
                 "U8Pa5t": {
-                  "content": "行動建議"
+                  "content": "【 七日轉化方略 】・密批封存"
                 }
               }
             },
@@ -2407,7 +2590,7 @@
               "width": "fill_container",
               "descendants": {
                 "U8Pa5t": {
-                  "content": "依據"
+                  "content": "【 星曜格局析理 】・密批封存"
                 }
               }
             },
@@ -2419,7 +2602,7 @@
               "width": "fill_container",
               "descendants": {
                 "U8Pa5t": {
-                  "content": "兩條路徑"
+                  "content": "【 順逆兩局抉擇 】・密批封存"
                 }
               }
             },
@@ -2513,17 +2696,36 @@
               "gap": 8,
               "children": [
                 {
-                  "type": "text",
-                  "id": "AtX1m",
-                  "name": "Title",
-                  "fill": "$ink",
-                  "textGrowth": "fixed-width",
+                  "type": "frame",
+                  "id": "DGh0A",
+                  "name": "TitleRow",
                   "width": "fill_container",
-                  "content": "小圓的基本分析",
-                  "lineHeight": 1.25,
-                  "fontFamily": "$font-heading",
-                  "fontSize": 30,
-                  "fontWeight": "700"
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "v98lMN",
+                      "name": "Title",
+                      "fill": "$ink",
+                      "content": "小圓的基本分析",
+                      "lineHeight": 1.25,
+                      "fontFamily": "$font-heading",
+                      "fontSize": 26,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "bHbyB",
+                      "type": "ref",
+                      "ref": "uLReX",
+                      "name": "Seal",
+                      "descendants": {
+                        "PVSYm": {
+                          "content": "定局"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -2532,10 +2734,10 @@
                   "fill": "$ink-soft",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "未知時辰，準確度較低、聚焦工作",
+                  "content": "〔 命主：小圓 ｜ 未知時辰（準確度較低） ｜ 聚焦：工作（官祿宮） 〕",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
                   "fontWeight": "500"
                 },
                 {
@@ -2543,7 +2745,7 @@
                   "id": "tP4GR",
                   "name": "Date",
                   "fill": "$ink-soft",
-                  "content": "1993-07-12",
+                  "content": "西元 1993-07-12・癸酉年生",
                   "lineHeight": 1.45,
                   "fontFamily": "$font-mono",
                   "fontSize": 13,
@@ -2563,12 +2765,12 @@
                   "type": "text",
                   "id": "UYPY8",
                   "name": "整體提醒L",
-                  "fill": "$ink-soft",
-                  "content": "整體提醒",
+                  "fill": "$ink",
+                  "content": "【 原局總覽 】",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
-                  "fontWeight": "500"
+                  "fontFamily": "$font-heading",
+                  "fontSize": 14,
+                  "fontWeight": "700"
                 },
                 {
                   "type": "text",
@@ -2597,12 +2799,12 @@
                   "type": "text",
                   "id": "WNLP5",
                   "name": "工作L",
-                  "fill": "$ink-soft",
-                  "content": "工作",
+                  "fill": "$ink",
+                  "content": "【 官祿事業 】",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
-                  "fontWeight": "500"
+                  "fontFamily": "$font-heading",
+                  "fontSize": 14,
+                  "fontWeight": "700"
                 },
                 {
                   "type": "text",
@@ -2631,12 +2833,12 @@
                   "type": "text",
                   "id": "D9k4Gi",
                   "name": "關係L",
-                  "fill": "$ink-soft",
-                  "content": "關係",
+                  "fill": "$ink",
+                  "content": "【 夫妻交友 】",
                   "lineHeight": 1.45,
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
-                  "fontWeight": "500"
+                  "fontFamily": "$font-heading",
+                  "fontSize": 14,
+                  "fontWeight": "700"
                 },
                 {
                   "type": "text",
@@ -2657,14 +2859,14 @@
               "type": "text",
               "id": "iKPLH",
               "name": "ActionHint",
-              "fill": "$ink-soft",
+              "fill": "$ink",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "先完成一件能展示的小交付。",
+              "content": "【 行動指引 】 先完成一件能展示的小交付。",
               "lineHeight": 1.7,
               "fontFamily": "$font-body",
               "fontSize": 14,
-              "fontWeight": "normal"
+              "fontWeight": "500"
             },
             {
               "id": "TiZT8",
@@ -2680,7 +2882,7 @@
               "fill": "$ink-soft",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "解鎖進階報告後可見 7 天行動方針與兩條路徑比較",
+              "content": "解鎖進階命書後，即啟七日行事方針與吉凶路徑析理",
               "lineHeight": 1.45,
               "fontFamily": "$font-body",
               "fontSize": 13,
@@ -2694,7 +2896,7 @@
               "width": "fill_container",
               "descendants": {
                 "U8Pa5t": {
-                  "content": "行動建議"
+                  "content": "【 七日轉化方略 】・密批封存"
                 }
               }
             },
@@ -2706,7 +2908,7 @@
               "width": "fill_container",
               "descendants": {
                 "U8Pa5t": {
-                  "content": "依據"
+                  "content": "【 星曜格局析理 】・密批封存"
                 }
               }
             },
@@ -2718,7 +2920,7 @@
               "width": "fill_container",
               "descendants": {
                 "U8Pa5t": {
-                  "content": "兩條路徑"
+                  "content": "【 順逆兩局抉擇 】・密批封存"
                 }
               }
             },
@@ -2980,6 +3182,36 @@
           "fontFamily": "$font-body",
           "fontSize": 13,
           "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "uLReX",
+      "x": 380,
+      "y": 0,
+      "name": "SealStamp",
+      "reusable": true,
+      "width": 36,
+      "height": 36,
+      "fill": "$seal",
+      "cornerRadius": 2,
+      "stroke": "$seal-deep",
+      "strokeWidth": 1,
+      "padding": 4,
+      "justifyContent": "center",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "text",
+          "id": "PVSYm",
+          "name": "StampText",
+          "fill": "$sheet",
+          "content": "起盤",
+          "lineHeight": 1.1,
+          "fontFamily": "$font-heading",
+          "fontSize": 13,
+          "fontWeight": "700"
         }
       ]
     }
