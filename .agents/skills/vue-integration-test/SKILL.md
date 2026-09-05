@@ -1,0 +1,99 @@
+---
+name: vue-integration-test
+description: Guides writing Vue 2 component integration tests with @vue/test-utils + Jest + Vuex. Use when the user wants to add a `.integration.test.ts`/`.js` for a Vue component, test rendered output against fixtures, or verify store-driven render paths.
+---
+
+# Vue 2 Integration Test Workflow
+
+本專案 Vue 2 + Vuex 元件整合測試的撰寫指南，沿用本專案既有參考（`tests/unit/components/MoreGame/SPRD-844-baseball-sorting.integration.test.js`、`feature/SPRD-660` 分支之 `SPRD-660-high-precision.integration.test.js`）與 [@vue/test-utils v1 best practices](https://v1.test-utils.vuejs.org/)。
+
+## 何時使用
+
+- 使用者要求為某個 Vue 元件寫「整合測試」、「渲染測試」、「component integration test」。
+- 想驗證 store → computed → DOM 的完整資料流。
+- 要把單元測試（pure function）升級成對元件實際渲染行為的斷言。
+- **不適用**：純函式／utils／composable 測試（用 `unit-test`）、E2E／瀏覽器行為測試（用 `e2e-test`）、React/Next 元件（用 `react-integration-test`）。
+
+## 流程
+
+### 1. 釐清測試目標
+
+- 要測哪個元件（路徑＋計算屬性／分支）？
+- 要覆蓋哪些情境？（對應 fixture 或 user story 的 Scenario）
+- 斷言哪幾層？
+  - **Computed 層**：直接讀 `wrapper.vm.xxx` — 穩定、易斷言，但偏實作細節。
+  - **DOM 層**：`wrapper.findAll('.some-class').length` 或 `wrapper.text()` — 最接近使用者實際看到的結果。
+  - **建議**：重要情境兩層都斷言，互為交叉驗證。
+
+### 2. 命名與檔案位置
+
+- **副檔名優先序**：專案已導入 TypeScript 時，新測試預設用 `.ts`（`.integration.test.ts`）；只有專案本身尚未支援 TypeScript（無 `tsconfig.json`、jest 未設定 ts transform）時才退回 `.js`。判斷方式：檢查專案 `tsconfig.json` 是否存在、`jest.config.*` 的 `transform` 是否已涵蓋 `.ts`；同目錄若已有 `.ts` 測試檔，直接視為該目錄的既有慣例，優先沿用。
+- 路徑：`tests/unit/components/<元件名稱>/<JIRA-單號>-<簡述>.integration.test.ts`
+- 範例：`tests/unit/components/BetViewList/SOPS-3401-duplicate-match-bold.integration.test.ts`（型別標註範例）
+- Fixture 獨立放 `tests/unit/__fixtures__/<feature>/*.json`，以 JSON 定義 `input` 與 `expected`，方便機讀比對。
+
+### 3. 檔案骨架（照以下順序撰寫）
+
+順序：preemptive mock 重量級子元件 → imports → localVue 設定（Vuex + directive）→ fixture builder → mock store factory → mount helper → post-mount helper（`nextTick`）→ assertion helpers → describe 結構對齊 fixture／Scenario。
+
+> **完整程式碼範例與 TypeScript 型別標註慣例見 [reference.md](reference.md) 第一節**——動筆寫骨架前先讀該節，照其順序與結構撰寫。
+
+### 4. Mock store 要點
+
+- **只塞元件實際讀到的欄位**。方法：`grep -n 'this\.\$store\.state\.'` 與 `mapState\|mapGetters` 找出依賴。
+- 每個 module 設定 `namespaced: true`（若專案慣例是 namespaced store）。
+- 若元件會 `commit` mutation：填入空函式 `mutations: { xxx() {} }`；若 `dispatch` action：填 `actions: { xxx: () => Promise.resolve() }`。
+- 根 getter 用 `getters: { userOddsAdjustment: () => 0 }`。
+- 若 store 邏輯本身是待測對象（例如測 `setGameList` mutation + 元件渲染貫通），改為 `import` 真實 module 並 `new Vuex.Store({ modules: { RealModule } })`。
+
+### 5. Mocks / Stubs 策略
+
+- `mocks`：覆寫 Vue prototype 上的全域（`$SportLib`、`$t`、`$lib`、`$conf`、`$router`、`$route`）。`$t` 通常已在 `tests/unit/setup.js` 全域處理。
+- `stubs`：
+  - `{ ChildName: true }` — 渲染為空 tag，最輕量。
+  - `{ ChildName: { template: '<div />' } }` — 需要 slot 或 prop 互動時。
+  - `jest.mock` — 模組層級 mock，用在 **transitive 匯入會炸** 的情況（例如 LiveBoardIndex 匯入一串 SVG/子元件）。
+- 優先順序：能 `stubs: true` 就不要 `jest.mock`；必要時才升級到 module mock。
+
+### 6. 斷言撰寫建議（@vue/test-utils best practices）
+
+- 以「使用者可觀察的行為」為主：`wrapper.text()`、`findAll('.selector').length`、`.attributes()`、`.classes()`、`.emitted()`。
+- 避免斷言 implementation detail（如 `vm` 內部方法名），除非測試就是為了鎖定該 computed 的行為。
+- **Selector 選擇**：
+  - 穩定：`data-testid`（推薦新增）、角色語意 class、元件 stub 名 `findComponent({ name: 'X' })`。
+  - 易碎：動態 class、CSS 模組化 hash、index-based 存取。
+- **非同步更新**：`setData`／`setProps`／`trigger` 後一律 `await Vue.nextTick()`（或 `await wrapper.vm.$nextTick()`）；若涉及多層響應，再加一次 tick 或改用 `flush-promises`。
+- **快照測試**：整合測試**不建議**用 `toMatchSnapshot`（快照 diff 太大難審視）。優先用顯式斷言。
+
+### 7. 常見陷阱
+
+常見的 8 種陷阱（含上游 `v-if` 阻擋 DOM、namespaced store 不一致、`mount` vs `shallowMount`，以及兩種容易誤判為通過的假陽性：debounce 未被觸發、expected 與 mutation 參數共用參考）**完整清單見 [reference.md](reference.md) 第二節**——寫斷言、排查測試「綠燈但沒測到東西」前務必讀過。
+
+### 8. Mutation Test（自我驗證）
+
+完成綠燈後，**把被測的核心邏輯反向破壞一次**（例如把排序改成升序），確認測試會紅。這步證明測試是在綁定邏輯而非 fixture 本身。改完記得還原並再跑一次確認回綠。
+
+### 9. 執行與整合
+
+**若這是 TDD 測試準備任務**（測試策略為 Test-First，且被明確告知「這是測試準備任務，預期紅燈」）：只需跑一次，確認是因對應功能/元件尚未實作而失敗（而非測試本身寫錯），即完成任務，**不要**呼叫 `/fix`、**不要**動手把對應功能實作出來。
+
+**一般情境**：
+
+- 單跑：`npx jest <測試檔路徑> --no-coverage`
+- 全 suite：`npx jest --no-coverage`
+- Watch：`npx jest --watch`
+- 若要 lint：`npx eslint <測試檔路徑>`
+- 若失敗且原因不是測試本身寫錯，依 `/fix` 的流程診斷，不要為了通過而放寬斷言。
+- 若專案的 `jest.config.*` 是用 `babel-jest`（純去型別）處理 `.ts`，型別標註不影響測試實際執行結果，但仍要維持與專案既有 `.ts` 測試檔一致的型別風格。
+
+## 產出時的溝通
+
+1. 先說明：要覆蓋的元件路徑、情境、斷言層。
+2. 快速探 template（上游 `v-if`）與元件依賴（`$store.state.*`、`mapState`、`$SportLib` 等），決定 mock 範圍。
+3. 寫 test → 跑 → 依失敗訊息補 fixture 欄位（常見：`EvtStatus`、`Noshow`、`Status`）。
+4. 綠燈後做一次 mutation test 驗證，再還原。
+5. 最後回報：測試檔位置、通過數、mutation test 結果、發現的關鍵門檻（供其他測試撰寫者參考）。
+
+## 參考實例
+
+本專案既有整合測試檔案清單與 [@vue/test-utils v1 文件](https://v1.test-utils.vuejs.org/) 連結見 [reference.md](reference.md) 第三節。

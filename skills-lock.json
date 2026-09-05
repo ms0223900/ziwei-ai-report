@@ -1,11 +1,203 @@
 {
   "version": 1,
   "skills": {
+    "adjust": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/adjust/SKILL.md",
+      "computedHash": "557ff1db89f7b1c5a7ccb0033a6d1034d7851f33d741dddbf489fd3dae2b0eff"
+    },
+    "change-report": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/change-report/SKILL.md",
+      "computedHash": "15230f23ff6f08e5eca3b8691b314e797ee8ccc1fc5241adecc36d2e3c98f429"
+    },
+    "comment-trim": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/comment-trim/SKILL.md",
+      "computedHash": "986d3bc095782d9495546bb72e946d6f57a3fac5cd9c440188f0f57ca30e3dfe"
+    },
+    "distill-playbook": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/distill-playbook/SKILL.md",
+      "computedHash": "eb476f21fbc9ebb980cea17f6cf66d11984ae355e4f928ce89f07b9ef445316e"
+    },
+    "doc-trim": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/doc-trim/SKILL.md",
+      "computedHash": "ff1d130d944ca615adf07cd5599523aeae4a93272cdd4a4f032cbe5250e11e81"
+    },
+    "e2e-test": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/e2e-test/SKILL.md",
+      "computedHash": "6647cb5c0a9a6966cb4b4c26caef049ec2c68176ad961fb489ca6a6f90959f76"
+    },
+    "feature": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/feature/SKILL.md",
+      "computedHash": "73f6cecad751af9856cdc287249f9674eb4220f9494ac9fffaf4906d6f046128"
+    },
+    "find-component-render-path": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/find-component-render-path/SKILL.md",
+      "computedHash": "cded5faef5c52c378187d1a6349d66b731014f1b396e7476738d3a2ef339c0d2"
+    },
+    "fix": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/fix/SKILL.md",
+      "computedHash": "02d885b3cbe86bbe8c32411bc4eb45afe63889585fab7a82bf982fe6fd6bc39b"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
       "skillPath": "skills/frontend-design/SKILL.md",
       "computedHash": "89496d5dd00f4810205f351759594fc2742bf8eea85a2f2b2d1de59f4bd91576"
+    },
+    "grill-me": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/grill-me/SKILL.md",
+      "computedHash": "f361db4e15e6bfd562a9282b1dccda513910a50061f9e838ce017be9c69dde3f"
+    },
+    "grilling": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/grilling/SKILL.md",
+      "computedHash": "368d3dd7251247c69f3656d93dc83c8f1577792eacac2111f1e7981db2ece49b"
+    },
+    "independent-review": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/independent-review/SKILL.md",
+      "computedHash": "001f304a58eb1e5709b06f28d67db315407915c21b03f50c86e60baaf64108eb"
+    },
+    "merge-conflict-check": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/merge-conflict-check/SKILL.md",
+      "computedHash": "97d782bf78087c40d2fafe37f14aafaf8cbbe43836301703ee2c7baa35365040"
+    },
+    "new-branch-cloud-agent": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/new-branch-cloud-agent/SKILL.md",
+      "computedHash": "93add74d8b2f0f2ad441647bc48c85f63fd4b03a0356be385468252dbea94ce6"
+    },
+    "new-branch-feature": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/new-branch-feature/SKILL.md",
+      "computedHash": "8a8e122896cc8f8dd4b0e644b561cec1cbcd7cc6e08028e47153d233bef85505"
+    },
+    "next-task": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/next-task/SKILL.md",
+      "computedHash": "7c4b8f6338032303cdba284a9557a0b118ca51ac5703eeffd0432c7467b40e5b"
+    },
+    "pr-acceptance-checklist": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/pr-acceptance-checklist/SKILL.md",
+      "computedHash": "1cc2d6baa8dee97a8dd64d26c8c2a1958b33f9876074946e99122a11d4133d21"
+    },
+    "pr-delivery": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/pr-delivery/SKILL.md",
+      "computedHash": "4e26c43d41a4f8004f9e272e6f3644f6c21bb65d08cdeeddd10dc61afd6ba58f"
+    },
+    "quick-debug": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/quick-debug/SKILL.md",
+      "computedHash": "dc436d885ffee7550953489ab500e9cc6c76e9a1ca6ba5bcdc1bc14e64110264"
+    },
+    "react-integration-test": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/react-integration-test/SKILL.md",
+      "computedHash": "64797fe6df4f5985b1b5c7dda39848f71db6b1314b281e2c0086f7bf3be9cdeb"
+    },
+    "refactor": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/refactor/SKILL.md",
+      "computedHash": "1ae2cd96d955e7bc7dda796966afac246326745be63f9ce9c4741eccf68ce5e9"
+    },
+    "refactor-scan": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/refactor-scan/SKILL.md",
+      "computedHash": "596d69fdcde6e8bed30411b6b012e10a558214d8848cfa540d083e61f2e9df28"
+    },
+    "resolve-tracking-dir": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/resolve-tracking-dir/SKILL.md",
+      "computedHash": "3cc10d8b5e777dd878ac575226113c282c2b78a65c91be111a0b64543704eaa9"
+    },
+    "security-audit": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/security-audit/SKILL.md",
+      "computedHash": "cef1d54f41443983aa37f872c3addeb3406f6e39e697018391b9e49fc1a100e5"
+    },
+    "static-html-host": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/static-html-host/SKILL.md",
+      "computedHash": "284f60492a2d2dd9b2e59f07c90927bf782f6f77e0c94619ec4a5e86639f6353"
+    },
+    "ticket-to-ai-spec": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ticket-to-ai-spec/SKILL.md",
+      "computedHash": "6dca421688061411d366c04e8f4e82bed1c0e9ab7cdf78d834b9f4c40a192c64"
+    },
+    "unit-test": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/unit-test/SKILL.md",
+      "computedHash": "e606c9522128eae5c75c6fa17f9ef819b605101bf4492866b4f149dbdd44e083"
+    },
+    "us-acceptance-check": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/us-acceptance-check/SKILL.md",
+      "computedHash": "aa8b8d4d22a1f87d6620d52969d9f0704959872555627bfb04b3a1596e35bd82"
+    },
+    "user-stories": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/user-stories/SKILL.md",
+      "computedHash": "64de32b0bca559f6789349797aa2bade1d566f758d9680de164f46365eccfb48"
+    },
+    "vue-integration-test": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/vue-integration-test/SKILL.md",
+      "computedHash": "57e66d6dab37b7af3cb83e7bb8568bf762a46e9191cdade13aa1a0e6eb5d97fe"
+    },
+    "weekly-branch-report": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/weekly-branch-report/SKILL.md",
+      "computedHash": "c46899fdea92a878fdd371b313bf46eb897f7bbe9c19bb89fe51b068211d920d"
+    },
+    "wrap-up": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/wrap-up/SKILL.md",
+      "computedHash": "5971dc96e7b32425671675c44f9115b8602780ef5be05d4fd4d1257842b58f0d"
     }
   }
 }
