@@ -16,8 +16,10 @@
 **驗收條件**：
 - [ ] 聚焦測試因功能尚未實作而預期紅燈
 - [ ] 涵蓋：合法 Mock valid → 200 無 `error_code` 且無進階三欄；驗證失敗 400 不呼叫生成／不 insert；高風險 200 不 insert；invalid-json／缺欄 422 不 insert；insert 失敗 503
+- [ ] 省略 `focus`（或空字串）的合法 POST：正規化後／成功 body 的 `focus` 為 `整體`
 - [ ] 高風險與成功報告都可能是 HTTP 200，測試必須用 `error_code` 分流，不能只看 `ok`
 - [ ] 502 案例可先用 stub「provider 傳輸失敗」（Live 實作在 US-024）
+- [ ] 本檔 mock store 只鎖 HTTP 分支；**真 insert 成功列由 US-018 驗收，不得在此用 mock 代替**
 
 **測試策略**：Test-First（測試準備）
 > 理由：狀態轉換與 HTTP 對照明確，適合先紅後綠。

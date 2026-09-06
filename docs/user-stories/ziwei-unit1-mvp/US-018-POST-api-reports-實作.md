@@ -16,6 +16,8 @@
 
 **驗收條件**：
 - [ ] US-017 測試轉綠
+- [ ] `MOCK_AI_MODE=valid` 示範輸入 POST 後，已套用的 `reports` 表有新列：`generation_status=success`，同時有 `basic_json` 與 `advanced_json`（缺表／缺 key 則本任務未完成）
+- [ ] 省略 `focus` 的合法請求成功時，寫入列與 HTTP body 的 `focus` 皆為 `整體`
 - [ ] `MOCK_AI_MODE=invalid-json` 時 DB 無新成功列
 - [ ] 輸入錯誤 400；schema 失敗 422；寫入失敗 503
 - [ ] 同一次 POST 遮罩不再打模型

@@ -19,6 +19,7 @@
 - [ ] 無 `user_id`；無單元 2／4 預留遷移檔
 - [ ] `status` 預設或註解為本版固定 `basic`
 - [ ] `generation_status` 允許 `success`／`failed`／`pending`
+- [ ] 本任務只交付可套用的 SQL；**未對目標專案實際套用成功之前，不得把 US-016／US-018 勾成完成**
 
 **測試策略**：Test-After
 > 理由：驗收靠套用遷移與表結構檢查，不適合先寫單元測試。

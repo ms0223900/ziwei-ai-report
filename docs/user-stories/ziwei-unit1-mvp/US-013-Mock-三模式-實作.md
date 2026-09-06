@@ -10,7 +10,7 @@
 
 **輸出格式**：
 - `lib/generation/mock.ts`
-- canned JSON（basic／advanced 兩份）
+- 讀取 US-012 指定的 `lib/generation/fixtures/*.valid.json`（同一份，不另造第二套 canned）
 - provider 可先只接 mock（Live 留給 US-024）
 
 **驗收條件**：
@@ -18,6 +18,7 @@
 - [ ] `valid` 的 basic／advanced 分別通過對應 schema
 - [ ] `invalid-json` 與 `schema-missing-field` 可供後續 Route 回 422
 - [ ] 不把進階長文案當畫面 A 的 `overall`
+- [ ] HTTP／畫面 A 使用 basic fixture，不從 advanced 剝欄位當短 overall
 
 **測試策略**：Test-First
 > 理由：對 US-012 紅燈實作至綠。

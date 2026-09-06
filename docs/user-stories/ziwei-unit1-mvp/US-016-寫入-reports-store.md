@@ -21,9 +21,10 @@
 - [ ] Mock 的 JSON `report_id` 可為 `rpt_demo_001`，DB `id` 仍是 uuid
 - [ ] insert 失敗不把該次標成已解鎖
 - [ ] 本版不實作 `GET /api/reports/:id`
+- [ ] 必須對**已套用** `reports` 表做一次 service-role insert 成功；缺 Supabase／未跑遷移則本任務保持未完成，**禁止**只 stub client 就勾完
 
 **測試策略**：Test-After
-> 理由：依賴真實 Supabase／遷移；用 stub 驗證 insert 參數即可，完整寫入在 Route／本機 env 驗。
+> 理由：依賴真實 Supabase 與已套用的遷移；stub 只能當開發輔助，不能當驗收。
 
 **優先級**：P0  
 **相關功能**：Story 2b  
