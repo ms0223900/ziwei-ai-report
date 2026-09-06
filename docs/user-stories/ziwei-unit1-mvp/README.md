@@ -106,5 +106,6 @@ Phase 4 完成條件：無痕可走完表單 → 畫面 A；高風險／失敗�
 | US-019 | `Desktop / 01 生辰表單`、`Desktop / 02 表單驗證錯誤`；`Mobile / 01`、`02` | `desktop-01-birth-form.png`、`desktop-02-form-error.png`；`mobile-01-*`、`mobile-02-*` |
 | US-020 | `Desktop / 04 基本分析 畫面 A`、`Desktop / 05 CTA 點擊`；`Mobile / 04`、`05` | `desktop-04-report-a.png`、`desktop-05-cta-clicked.png`；對應 mobile |
 | US-021 | `Desktop / 03 生成中`、`06 生成失敗`、`07 高風險`；`Note / 其餘高風險固定句`；對應 Mobile `03`／`06`／`07` | `desktop-03-generating.png`、`desktop-06-fail.png`、`desktop-07-high-risk.png`；對應 mobile |
-| US-022 | 上列全部狀態串在同一頁 | 同上，desktop＋mobile 各走一輪 |  
+| US-022 | 上列全部狀態串在同一頁 | 同上，desktop＋mobile 各走一輪 |
+
 Phase 5 完成條件：Live 主失敗才切備援；bundle 無 key；Route 有 `maxDuration`。
