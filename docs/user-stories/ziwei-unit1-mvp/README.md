@@ -89,23 +89,28 @@ Phase 0 完成條件：`docs/spec.md` 的 `focus` 與 AI spec 同為中文枚舉
 Phase 1 完成條件：`npm test` 可跑（Vitest 由 US-004 導入）；驗證與高風險測試綠；遷移檔已提交（表是否已套用由 US-016 把關）。  
 Phase 2 完成條件：三套 schema + repo 內 canned fixture + Mock 三模式可跑。  
 Phase 3 完成條件：`POST /api/reports` 依 error_code 回 400／422／502／503／200；Mock `valid` 成功路徑在已套用的 `reports` 表寫入一列。  
-Phase 4 完成條件：無痕可走完表單 → 畫面 A；高風險／失敗可重試；desktop＋mobile 對齊 `designs/ziwei-unit1.pen` 對應 frame（對稿可用 `designs/ziwei-unit1-previews/` 同名 PNG）。
+Phase 4 完成條件：無痕可走完表單 → 畫面 A；高風險／失敗可重試；desktop（畫布 1440、箋寬 576）與 mobile（畫布 390）對齊 `designs/ziwei-unit1.pen` 對應 frame；對稿用 `designs/ziwei-unit1-previews/` 語意檔名 PNG（略過同內容的 frame-id 雜湊檔）。
 
 ### 畫面視覺來源（Phase 4）
 
 | 優先 | 來源 | 管什麼 |
 | --- | --- | --- |
-| 1 | AI spec | 產品行為、schema、HTTP、`error_code`、高風險固定句、不得假裝解鎖 |
-| 2 | `designs/ziwei-unit1.pen` | 畫面結構、元件（按鈕／欄位／聚焦段／封條／鎖定佔位／ChartMatrix）、desktop／mobile 各狀態 |
-| 3 | design-brief／brand／`assets/design-tokens.json` | 色票、字級原則、禁用清單；token 名稱須與 `.pen` 的 `$paper`／`$sheet`／`$ink`／`$seal` 等一致 |
+| 1 | AI spec | 產品行為、schema、HTTP、`error_code`、高風險**正文**固定句、不得假裝解鎖／不得帶出 `advanced_json`、不收集性別 |
+| 2 | `designs/ziwei-unit1.pen` | 畫面結構、可見標籤／Lead／H1、元件、ChartMatrix 裝飾盤、desktop／mobile 各狀態 |
+| 3 | design-brief／brand／`assets/design-tokens.json` | CSS 色票與字族（`paper` 對 `$paper`；`heading` 對 `$font-heading` = Noto Serif TC）；禁用清單 |
 
-`.pen` 與 spec 衝突時（例如露出進階真文、假裝付款）：跟 spec。文案以 spec／US-008 常數為準；版面以 `.pen` 為準。
+衝突規則（實作與驗收都跟這張表，不要再各寫一套）：
 
-| US | `.pen` frame | Preview PNG |
+- **安全／行為**：露出進階真文、假裝付款、只靠 `res.ok` 渲染報告卡、高風險走畫面 A → 跟 spec。
+- **畫面上看得到的字與版面**：欄位標籤、Lead、生成中、失敗／高風險 **H1**、鎖定說明、區塊標題、ChartMatrix 裝飾字 → 跟 `.pen`。
+- **API `message`**：失敗畫面放在 Hint（不要拿短句覆蓋 H1）；高風險畫面放在正文（H1 仍用 `.pen`「這題我不能用命盤作答」）。
+- **Token**：樣式用 `assets/design-tokens.json` 的 key（沒有 `$` 前綴）。`.pen` 變數 `$paper`／`$sheet`／`$ink`／`$seal`／`$font-heading`／`$font-body` 對到同名 token。hex 以 tokens.json 為準（與 `.pen` 變數可能差幾個色階，不另造第三套色票）。
+
+| US | `.pen` frame（全名） | Preview（只用語意檔名） |
 | --- | --- | --- |
-| US-019 | `Desktop / 01 生辰表單`、`Desktop / 02 表單驗證錯誤`；`Mobile / 01`、`02` | `desktop-01-birth-form.png`、`desktop-02-form-error.png`；`mobile-01-*`、`mobile-02-*` |
-| US-020 | `Desktop / 04 基本分析 畫面 A`、`Desktop / 05 CTA 點擊`；`Mobile / 04`、`05` | `desktop-04-report-a.png`、`desktop-05-cta-clicked.png`；對應 mobile |
-| US-021 | `Desktop / 03 生成中`、`06 生成失敗`、`07 高風險`；`Note / 其餘高風險固定句`；對應 Mobile `03`／`06`／`07` | `desktop-03-generating.png`、`desktop-06-fail.png`、`desktop-07-high-risk.png`；對應 mobile |
-| US-022 | 上列全部狀態串在同一頁 | 同上，desktop＋mobile 各走一輪 |
+| US-019 | `Desktop / 01 生辰表單`、`Desktop / 02 表單驗證錯誤`；`Mobile / 01 生辰表單`、`Mobile / 02 表單驗證錯誤` | `desktop-01-birth-form.png`、`desktop-02-form-error.png`、`mobile-01-birth-form.png`、`mobile-02-form-error.png` |
+| US-020 | `Desktop / 04 基本分析 畫面 A`、`Desktop / 05 CTA 點擊`；`Mobile / 04 基本分析 畫面 A`、`Mobile / 05 CTA 點擊` | `desktop-04-report-a.png`、`desktop-05-cta-clicked.png`、`mobile-04-report-a.png`、`mobile-05-cta-clicked.png` |
+| US-021 | `Desktop / 03 生成中`、`Desktop / 06 生成失敗`、`Desktop / 07 高風險`；`Note / 其餘高風險固定句`；`Mobile / 03 生成中`、`Mobile / 06 生成失敗`、`Mobile / 07 高風險` | `desktop-03-generating.png`、`desktop-06-fail.png`、`desktop-07-high-risk.png` 與對應 `mobile-03-*`／`06-*`／`07-*` |
+| US-022 | 上列 Must 狀態串在同一頁 | 上列 14 張語意 PNG 各對一次；不要用 `desktop-0{1-7}-*.png` 這種 glob |
 
 Phase 5 完成條件：Live 主失敗才切備援；bundle 無 key；Route 有 `maxDuration`。
