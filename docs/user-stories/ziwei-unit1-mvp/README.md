@@ -14,7 +14,7 @@
 ### Phase 1 — A2 資料與政策
 
 - [x] US-002 建立 reports 遷移
-- [ ] US-003 建立 Supabase service-role client
+- [x] US-003 建立 Supabase service-role client
 - [ ] US-004 生辰驗證規則測試
 - [ ] US-005 生辰驗證規則實作
 - [ ] US-006 高風險短路測試
@@ -52,9 +52,9 @@
 
 ## 重構掃描記錄
 
-- 已掃描至：US-002（2026-09-06）
+- 已掃描至：US-003（2026-09-06）
 - 已知待觀察熱點：無
-- 備註：US-001 為文件、US-002 為單一 SQL；無 churn hotspot，低風險，暫不重構
+- 備註：US-002 SQL 與 US-003 `lib/supabase/` 無共用檔；無 churn hotspot，低風險，暫不重構
 
 ## 依賴鏈摘要
 
