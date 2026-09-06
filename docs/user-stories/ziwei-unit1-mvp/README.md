@@ -1,6 +1,6 @@
 # 單元 1 MVP — User Stories
 
-> 來源：[`docs/specs/2026-09-05-ziwei-unit1-mvp.md`](../../specs/2026-09-05-ziwei-unit1-mvp.md)、[`docs/design-brief.md`](../../design-brief.md)、[`docs/architecture.md`](../../architecture.md)  
+> 來源：[`docs/specs/2026-09-05-ziwei-unit1-mvp.md`](../../specs/2026-09-05-ziwei-unit1-mvp.md)、[`docs/design-brief.md`](../../design-brief.md)、[`docs/architecture.md`](../../architecture.md)、[`designs/ziwei-unit1.pen`](../../../designs/ziwei-unit1.pen)  
 > 非阻塞項：[`docs/specs/2026-09-05-ziwei-unit1-mvp-issues.md`](../../specs/2026-09-05-ziwei-unit1-mvp-issues.md)  
 > 現況：Checkpoint A1 已完成；本目錄覆蓋 A2–A7。  
 > **不做**：會員／登入、RLS owner policy、訂單／ECPay、真正解鎖或扣點、追問主流程、畫面 B/C/D。
@@ -89,5 +89,29 @@ Phase 0 完成條件：`docs/spec.md` 的 `focus` 與 AI spec 同為中文枚舉
 Phase 1 完成條件：`npm test` 可跑（Vitest 由 US-004 導入）；驗證與高風險測試綠；遷移檔已提交（表是否已套用由 US-016 把關）。  
 Phase 2 完成條件：三套 schema + repo 內 canned fixture + Mock 三模式可跑。  
 Phase 3 完成條件：`POST /api/reports` 依 error_code 回 400／422／502／503／200；Mock `valid` 成功路徑在已套用的 `reports` 表寫入一列。  
-Phase 4 完成條件：無痕可走完表單 → 畫面 A；高風險／失敗可重試。  
+Phase 4 完成條件：無痕可走完表單 → 畫面 A；高風險／失敗可重試；desktop（畫布 1440、箋寬 576）與 mobile（畫布 390、箋寬 350）對齊 `designs/ziwei-unit1.pen` 對應 frame；對稿用 `designs/ziwei-unit1-previews/` 語意檔名 PNG（略過同內容的 frame-id 雜湊檔）。
+
+### 畫面視覺來源（Phase 4）
+
+| 優先 | 來源 | 管什麼 |
+| --- | --- | --- |
+| 1 | AI spec | 產品行為、schema、HTTP、`error_code`、高風險**正文**固定句、不得假裝解鎖／不得帶出 `advanced_json`、不收集性別 |
+| 2 | `designs/ziwei-unit1.pen` | 畫面結構、可見標籤／Lead／H1、元件、ChartMatrix 裝飾盤、desktop／mobile 各狀態 |
+| 3 | design-brief／brand／`assets/design-tokens.json` | CSS 色票與字族（`paper` 對 `$paper`；`heading` 對 `$font-heading` = Noto Serif TC）；禁用清單 |
+
+衝突規則（spec／brief／本目錄已與 `.pen` 可見字對齊；不要再用舊 Notion 短標）：
+
+- **安全／行為**：露出進階真文、假裝付款、只靠 `res.ok` 渲染報告卡、高風險走畫面 A、收集性別 → 跟 spec。
+- **畫面上看得到的字與版面**：跟 `.pen`（與更新後 spec／brief 同句）。
+- **API `message`**：失敗畫面放在 Hint；高風險畫面放在正文。
+- **Token**：CSS 用 `assets/design-tokens.json`。`$paper` → `color.paper`；`$font-heading` → `fontFamily.heading`（不是 key 名 `font-heading`）；`$font-body` → `fontFamily.body`。hex 以 tokens.json 為準。`$line-subtle` 若無對應 key，用 `line`。
+- **箋寬**：desktop Sheet **576**；mobile Sheet **350**。不要把 576 套到 390 畫布。
+
+| US | `.pen` frame（全名） | Preview（只用語意檔名） |
+| --- | --- | --- |
+| US-019 | `Desktop / 01 生辰表單`、`Desktop / 02 表單驗證錯誤`；`Mobile / 01 生辰表單`、`Mobile / 02 表單驗證錯誤` | `desktop-01-birth-form.png`、`desktop-02-form-error.png`、`mobile-01-birth-form.png`、`mobile-02-form-error.png` |
+| US-020 | `Desktop / 04 基本分析 畫面 A`、`Desktop / 05 CTA 點擊`；`Mobile / 04 基本分析 畫面 A`、`Mobile / 05 CTA 點擊` | `desktop-04-report-a.png`、`desktop-05-cta-clicked.png`、`mobile-04-report-a.png`、`mobile-05-cta-clicked.png` |
+| US-021 | `Desktop / 03 生成中`、`Desktop / 06 生成失敗`、`Desktop / 07 高風險`；`Note / 其餘高風險固定句`；`Mobile / 03 生成中`、`Mobile / 06 生成失敗`、`Mobile / 07 高風險` | `desktop-03-generating.png`、`desktop-06-fail.png`、`desktop-07-high-risk.png`、`mobile-03-generating.png`、`mobile-06-fail.png`、`mobile-07-high-risk.png` |
+| US-022 | 上列 Must 狀態串在同一頁 | 上列 14 張語意 PNG 各對一次（`desktop-01-birth-form.png` … `mobile-07-high-risk.png`） |
+
 Phase 5 完成條件：Live 主失敗才切備援；bundle 無 key；Route 有 `maxDuration`。

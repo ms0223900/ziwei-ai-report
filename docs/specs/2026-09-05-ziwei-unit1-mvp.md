@@ -2,6 +2,7 @@
 
 > 來源 Ticket：[🧾 【Spec】紫微基本／進階解讀 MVP](https://app.notion.com/p/b8ad5428d1394685a90d0d59d761b4c8)（Notion，2026-09-05 擷取）  
 > 子筆記事實來源：[第一版 Prompt、Mock JSON 與四種權限走查](https://app.notion.com/p/befe709738cc4da8b9318b61b950827e)、[OpenRouter 串接評估與 MVP 實作建議](https://app.notion.com/p/d29f36a539824a3985db258bba619825)  
+> **畫面主稿**：[designs/ziwei-unit1.pen](../../designs/ziwei-unit1.pen)（可見標籤／Lead／H1／LockCaption／ChartMatrix）；文字規範：[docs/design-brief.md](../design-brief.md)。本檔管行為、schema、HTTP、高風險**正文**；舊 Notion brief 短標（「暱稱」「整體提醒」「正在整理你的基本分析…」「解鎖進階報告後可見 7 天…」）已作廢。  
 > 本檔為開發類規格（第 0～6 節 + 獨立審查後第 7 節）。現況：Checkpoint A1 已完成（scaffold）；A2–A7 尚未實作。
 
 ---
@@ -12,7 +13,7 @@
 - **Goal**: 無痕訪客填生辰後看到紫微基本分析；進階欄位鎖定並顯示解鎖入口；後端以 Mock 或 OpenRouter 產出同一 schema 的 JSON，驗證通過後寫入 `reports`，伺服器依未付款狀態遮罩後回傳。
 - **Impacted Areas**:
   - 新建：`app/page.tsx`（目前僅 A1 佔位）、`app/api/reports/route.ts`、`components/birth-form/`、`components/report/`、`lib/`（validation、high-risk、schema、prompt、generation、store、masking）、`supabase/migrations/`（`reports`）
-  - 既有參照：`docs/spec.md`（`focus` 英文枚舉須對齊本檔，見第 7 節問題 1）、`docs/architecture.md`、`.env.example`、`app/layout.tsx`
+  - 既有參照：`docs/spec.md`（`focus` 英文枚舉須對齊本檔，見第 7 節問題 1）、`docs/architecture.md`、`docs/design-brief.md`、`designs/ziwei-unit1.pen`、`.env.example`、`app/layout.tsx`
   - 明確不做：`users`／`orders`／`credits`／`subscriptions`、Auth、ECPay、追問 API
 - **Stakeholders**: 訪客／求測者（無登入）；課程學員（Mock 零 key 可跑）；後續單元的會員／金流接棒（本版只留畫面接點）
 
@@ -46,7 +47,8 @@
 
 - 單頁：表單與結果同頁切換（`app/page.tsx`）；結果放元件 state，不依賴 `localStorage`（無痕可跑）。
 - 前端先檢查、後端再檢查同一組規則；無效請求不得呼叫 LLM、不得 insert `reports`。
-- 不追問性別、出生地。
+- 不追問性別、出生地。畫面可見標籤跟 `.pen`（命主暱稱、生辰公曆…）；JSON 欄名仍為本表。
+- 時辰下拉顯示可含時段（如「卯時 05-07」）；**請求 JSON 只送單字** `子`…`亥`，或 `null`。禁止把「不確定時辰（走未知時辰盤）」或「卯時 05-07」整段當 `birth_time`。
 
 **輸入欄位**
 
@@ -58,7 +60,7 @@
 | `focus` | 否 | 僅 `整體`／`工作`／`關係`；空值視為 `整體` | 其他字串 → HTTP 400 |
 
 > `focus` 允許值以 Prompt／Mock 子筆記為準（中文），與 `docs/spec.md` 目前寫的 `overall`／`work`／`relationship` 不同；實作以本檔與子筆記為準。  
-> 時辰填寫格式 Notion 未寫死；本 repo `docs/architecture.md` 已定 12 支下拉（含「不確定」）。
+> 時辰填寫格式 Notion 未寫死；本 repo 以 `.pen` `Field/Select` + 12 支下拉為準（含「不確定時辰（走未知時辰盤）」→ `null`）。
 
 **示範輸入（Mock `valid` 必須可重現）**: 暱稱「小圓」／`1993-07-12`／時辰未填／聚焦「工作」。
 
@@ -164,7 +166,9 @@
 
 - 標題：`{暱稱}的基本分析`；`time_unknown=true` 時標題或 overall 須可見「未知時辰，準確度較低」。
 - 顯示 `overall`／`work`／`relationship`（可另顯示 basic `action` 一句；進階 7 天與路徑必須鎖定）。
-- 行動建議區鎖定文案：**「解鎖進階報告後可見 7 天行動方針與兩條路徑比較」**。
+- 行動建議區鎖定文案（舊 brief「解鎖進階報告後可見 7 天…」作廢）：**「解鎖進階命書後，即啟七日行事方針與吉凶路徑析理」**。
+- 區塊小標跟 `.pen`（含「局象／象意」裝飾字）；正文仍是 basic `overall`／`work`／`relationship`／`action`，不是 schema 新欄。
+- ChartMatrix 是裝飾暫定盤，不是真排盤、不是 API 欄；禁止為此加性別輸入。
 - 底部 disclaimer + CTA **「解鎖完整報告」**。
 - 點擊 CTA：不呼叫付款、不改 `status`、不把畫面切成進階。可 disabled 或提示「即將開放」；**禁止**假裝付款成功。
 - 追問輸入框：本版不出現（Could Have 才以鎖定態出現）。
@@ -186,7 +190,7 @@
 - 掃描對象：請求內所有字串（至少 `nickname`；`focus` 為枚舉，仍一併掃）。
 - 五類：健康、法律、財務投資、孕產、自傷／傷害他人。
 - 命中：不呼叫 LLM、不 insert `reports`、不顯示解鎖 CTA、不展示命盤結論。
-- 前端分流：HTTP 200 **且** `error_code === "HIGH_RISK"` → 安全文案畫面（只有 `message` + `disclaimer`）。HTTP 200 **且無** `error_code` → 畫面 A。禁止只靠 `res.ok` 渲染報告卡。
+- 前端分流：HTTP 200 **且** `error_code === "HIGH_RISK"` → 安全畫面（對齊 `.pen` 07）：H1「這題我不能用命盤作答」+ 該類固定**正文** + disclaimer +「回表單」。HTTP 200 **且無** `error_code` → 畫面 A。禁止只靠 `res.ok` 渲染報告卡。禁止解鎖 CTA、禁止 ChartMatrix／命盤結論。五類共用同一版面，只換正文（不另開畫面、不做類別切換器）。
 - 畫面直接使用子筆記固定文案（擇一對應類別；多類命中用更嚴重者或第一個命中類即可，本票未規定合併規則時採「第一個命中類」）：
   - 健康：這題涉及健康與醫療判斷，我不能用命盤作答。請尋求合格醫療專業人員協助。
   - 法律：這題涉及法律諮詢，我不能用運勢作答。請尋求合格律師或法律援助。
@@ -197,7 +201,9 @@
 
 ### For Story 5 — 失敗可重試
 
-- 前端依 `error_code` 顯示繁中 `message`，表單保留已填值，可再次送出。
+- 前端 422／502／503：對齊 `.pen` 06；H1「這次沒有寫成報告，你可以再試一次。」Hint 顯示 API 繁中 `message`（不要用短句覆蓋 H1）。主鈕「再試一次」、次鈕「回表單」。表單保留已填值。
+- 前端欄位驗證錯誤對齊 `.pen` 02（欄位下錯誤），不走 06。HTTP 400 `VALIDATION_ERROR` 若仍發生，也應當欄位／驗證錯誤處理，不得套用生成失敗 H1。
+- 生成中 Lead：「正在依生辰起紫微命盤，定局排星中…」（舊 brief「正在整理你的基本分析…」作廢）。
 - 失敗列若曾寫入，僅允許 `generation_status=failed`；**不得**寫成功 basic、**不得**把 `status` 當已解鎖。預設路徑是驗證失敗則完全不 insert（對齊既有 `docs/spec.md` 與 architecture A4：`MOCK_AI_MODE=invalid-json` 時 DB 無新列）。
 - 避免 uncaught 導致整頁白屏。
 
@@ -207,8 +213,9 @@
 
 ### For Story 1
 
-- **Happy Path**: Given 無痕視窗打開公開頁 When 填暱稱「小圓」、生日 `1993-07-12`、時辰選「不確定」或留空、聚焦「工作」並送出 Then `POST /api/reports` 的 JSON body 含 `nickname`／`birth_date`／`focus`，`birth_time` 為 `null`（**不含** `time_unknown`）；後端將 `time_unknown` 標為 `true`。（此 AC 需先處理第 7 節阻塞問題 1，否則 `focus` 枚舉會跟錯檔。）
-- **驗證錯誤**: Given 生日空白或非 `YYYY-MM-DD` 或為未來日 When 送出 Then 畫面提示修正、不呼叫 LLM、不 insert；HTTP 400 `VALIDATION_ERROR`。
+- **Happy Path**: Given 無痕視窗打開公開頁 When 填暱稱「小圓」、生日 `1993-07-12`、時辰選「不確定時辰（走未知時辰盤）」或留空、聚焦選「工作・官祿」並送出 Then `POST /api/reports` 的 JSON body 含 `nickname`／`birth_date`／`focus` 為 `工作`，`birth_time` 為 `null`（**不含** `time_unknown`）；後端將 `time_unknown` 標為 `true`。（此 AC 需先處理第 7 節阻塞問題 1，否則 `focus` 枚舉會跟錯檔。）
+- **邊界 — 十二支顯示值**：Given 時辰選「卯時 05-07」或同等顯示 When 送出合法請求 Then `birth_time` 為 `"卯"`，不是整段顯示字串。
+- **驗證錯誤**: Given 生日空白或非 `YYYY-MM-DD` 或為未來日 When 送出 Then 畫面為 `.pen` 02 欄位下提示、不呼叫 LLM、不 insert；不得套用 06 生成失敗 H1。後端若收到該請求則 HTTP 400 `VALIDATION_ERROR`。
 - **邊界 — 空白暱稱**: Given `nickname` 為空白或僅空白字元 When 送出 Then 提示重填；不呼叫模型。
 - **邊界 — 非法 focus**: Given `focus` 為「感情」或其他非允許值 When 送出 Then HTTP 400；不寫 DB。
 - **邊界 — 非法時辰**: Given `birth_time` 為 `14:00` 或非 12 支 When 送出 Then HTTP 400。
@@ -230,7 +237,7 @@
 
 ### For Story 3
 
-- **Happy Path**: Given HTTP 200 且 **沒有** `error_code` When 畫面渲染 Then 標題為「小圓的基本分析」（示範資料）、overall／work／relationship 對齊子筆記**基本** canned（非進階長文案）、行動區為鎖定文案、可見「解鎖完整報告」。
+- **Happy Path**: Given HTTP 200 且 **沒有** `error_code` When 畫面渲染 Then 標題為「小圓的基本分析」（示範資料）、overall／work／relationship 對齊子筆記**基本** canned（非進階長文案）、鎖定說明為「解鎖進階命書後，即啟七日行事方針與吉凶路徑析理」、可見「解鎖完整報告」。
 - **CTA 不假裝成功**: Given 點擊「解鎖完整報告」 When 互動結束 Then `status` 仍為未解鎖；無金流導轉；畫面仍為基本分析。
 - **未知時辰標示**: Given `time_unknown=true` When 顯示結果 Then 可見準確度較低／未知時辰。
 - **Disclaimer**: Given 表單頁與結果頁 When 檢視 Then 介面與報告皆有娛樂用途聲明（文案對齊子筆記 disclaimer）。
@@ -239,13 +246,13 @@
 
 ### For Story 4
 
-- **Happy Path**: Given `nickname` 含財務投資語意（單元 1 無追問欄，例句只能放暱稱，例如「這筆投資會不會賺」） When 送出 Then HTTP 200、`error_code=HIGH_RISK`、`category=financial_risk`、畫面只顯示財務固定文案 + disclaimer；不呼叫 LLM；DB 無新列；無解鎖 CTA；不渲染畫面 A。
+- **Happy Path**: Given `nickname` 含財務投資語意（單元 1 無追問欄，例句只能放暱稱，例如「這筆投資會不會賺」） When 送出 Then HTTP 200、`error_code=HIGH_RISK`、`category=financial_risk`、畫面為 07 安全殼（H1「這題我不能用命盤作答」+ 財務固定正文 + disclaimer + 回表單）；不呼叫 LLM；DB 無新列；無解鎖 CTA；不渲染畫面 A。
 - **錯誤／誤判邊界**: Given 一般暱稱「小圓」無高風險字 When 送出 Then 不走安全短路，走正常生成。
 - **邊界 — 自傷**: Given 輸入含自傷／傷害他人 When 送出 Then 顯示子筆記自傷文案；不寫 DB。
 
 ### For Story 5
 
-- **生成失敗**: Given OpenRouter timeout 或非 2xx When 流程結束 Then HTTP 502；畫面繁中「生成失敗，請再試一次」；可再送出；不標記已解鎖。
+- **生成失敗**: Given OpenRouter timeout 或非 2xx When 流程結束 Then HTTP 502；畫面 H1「這次沒有寫成報告，你可以再試一次。」且 Hint 為「生成失敗，請再試一次。」；可再送出；不標記已解鎖。
 - **Schema 失敗可重試**: Given 422 When 本機將 `MOCK_AI_MODE` 改回 `valid` 後再次送出 Then 可得到 200 基本摘要（無 `error_code`）。
 - **邊界 — 不崩潰**: Given API 回 4xx／5xx 或 200 `HIGH_RISK` When UI 處理 Then 無 uncaught crash／白屏。
 

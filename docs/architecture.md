@@ -5,7 +5,7 @@
 ## 1. 技術選型(定案)
 
 - **框架**:Next.js App Router(Next 16、React 19、TypeScript),build/dev 一律 `--webpack`(與藍本一致,避免 dev/CI 行為分歧)
-- **樣式**:Tailwind CSS 4；視覺以 [`docs/design-brief.md`](design-brief.md) 與 [`docs/brand-guidelines.md`](brand-guidelines.md) 為準（墨箋夜讀）。Token：[`assets/design-tokens.json`](../assets/design-tokens.json)。本版不做暗色模式。scaffold 時期的紫 M3（`#6a3fb5`）已廢棄。
+- **樣式**:Tailwind CSS 4；畫面主稿 [`designs/ziwei-unit1.pen`](../designs/ziwei-unit1.pen)，文字／禁用清單以 [`docs/design-brief.md`](design-brief.md) 與 [`docs/brand-guidelines.md`](brand-guidelines.md) 為準（墨箋夜讀）。Token：[`assets/design-tokens.json`](../assets/design-tokens.json)。本版不做暗色模式。scaffold 時期的紫 M3（`#6a3fb5`）已廢棄。
 - **資料庫 / Auth**:Supabase(Postgres + RLS);本版只用 service_role 後端寫入;單元 2 起接 Auth
 - **AI**:自串 OpenRouter REST(`openrouter.ai/api/v1/chat/completions`),主模型 + 備援模型;`AI_PROVIDER=mock|openrouter` 讓課程可離線示範
 - **部署**:Vercel(production);route handler 設 `maxDuration`
@@ -84,7 +84,7 @@ ziwei-ai-report/
 │
 └── components/
     ├── birth-form/
-    │   └── BirthForm.tsx           # client;暱稱/日期(上限今天)/時辰下拉(含「不確定」)
+    │   └── BirthForm.tsx           # client;命主暱稱/公曆日期(上限今天)/時辰下拉(不確定→null；十二支 JSON 單字)
     │                               # /聚焦三選一;結果放 state 不依賴 localStorage(無痕可跑);
     │                               # POST /api/reports;依 {error_code} 顯示繁中文案
     ├── report/
