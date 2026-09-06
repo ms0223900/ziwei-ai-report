@@ -19,9 +19,9 @@
 | `nickname` | 是 | 文字 | 空白提示重填 |
 | `birth_date` | 是 | `YYYY-MM-DD` | 格式錯誤或未來日期提示重填 |
 | `birth_time` | 否 | 12 支時辰 | 未填 → `time_unknown=true`,標示準確度較低 |
-| `focus` | 否 | `overall`/`work`/`relationship` | 空值視為 overall |
+| `focus` | 否 | `整體`／`工作`／`關係` | 空值視為 `整體` |
 
-示範輸入:暱稱「小圓」/ `1993-07-12` / 時辰未填 / 聚焦 work。
+示範輸入:暱稱「小圓」/ `1993-07-12` / 時辰未填 / 聚焦「工作」。
 
 ### 共用輸出 JSON
 
@@ -47,7 +47,7 @@
 | birth_date | date | YYYY-MM-DD |
 | birth_time | text / null | 12 支;null = 未提供 |
 | time_unknown | boolean | 未填時辰為 true |
-| focus | text | overall / work / relationship |
+| focus | text | `整體`／`工作`／`關係` |
 | basic_json | jsonb | 驗證過的基本結果 |
 | advanced_json | jsonb / null | 可同次生成存檔,畫面仍遮罩 |
 | status | text | `basic`(本版固定)/ 日後 `unlocked` |
