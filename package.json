@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "ai:prototype": "node scripts/switch-ai-mode.mjs prototype",
     "ai:production": "node scripts/switch-ai-mode.mjs production",
     "ai:mode": "node scripts/switch-ai-mode.mjs"
@@ -29,6 +30,7 @@
     "eslint-config-next": "^16.2.4",
     "postcss": "^8.5.12",
     "tailwindcss": "^4.2.4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.0"
   }
 }
