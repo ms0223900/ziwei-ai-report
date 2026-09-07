@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DISCLAIMER } from "../constants";
+import { validateAdvanced, validateBasic } from "../schemas/loader";
 import advancedValid from "./fixtures/advanced.valid.json";
 import basicValid from "./fixtures/basic.valid.json";
 import { generateMockReport } from "./mock";
@@ -20,11 +21,11 @@ describe("generateMockReport", () => {
     const result = generateMockReport("valid");
 
     expect(result.mode).toBe("valid");
-    expect(result).toMatchObject({
-      mode: "valid",
-      basic: basicValid,
-      advanced: advancedValid,
-    });
+    if (result.mode !== "valid") {
+      throw new Error("expected valid");
+    }
+    expect(result.basic).toEqual(basicValid);
+    expect(result.advanced).toEqual(advancedValid);
     for (const key of ADVANCED_DISPLAY_KEYS) {
       expect(result.basic).not.toHaveProperty(key);
     }
@@ -33,14 +34,20 @@ describe("generateMockReport", () => {
     expect(result.basic.focus).toBe("工作");
     expect(result.basic.birth_time).toBeNull();
     expect(result.basic.time_unknown).toBe(true);
+    expect(result.basic.overall).not.toBe(result.advanced.overall);
     expect(JSON.stringify(result.basic)).not.toContain("原局總覽");
     expect(JSON.stringify(result.basic)).not.toContain("局象");
+    expect(validateBasic(result.basic).ok).toBe(true);
+    expect(validateAdvanced(result.advanced).ok).toBe(true);
   });
 
   it("invalid-json mode returns raw text that is not JSON", () => {
     const result = generateMockReport("invalid-json");
 
     expect(result.mode).toBe("invalid-json");
+    if (result.mode !== "invalid-json") {
+      throw new Error("expected invalid-json");
+    }
     expect(typeof result.raw).toBe("string");
     expect(() => JSON.parse(result.raw)).toThrow();
   });
@@ -49,9 +56,13 @@ describe("generateMockReport", () => {
     const result = generateMockReport("schema-missing-field");
 
     expect(result.mode).toBe("schema-missing-field");
+    if (result.mode !== "schema-missing-field") {
+      throw new Error("expected schema-missing-field");
+    }
     expect(result.basic).not.toHaveProperty("overall");
     expect(result.basic.work).toBe(basicValid.work);
     expect(result.basic.action).toBe(basicValid.action);
+    expect(validateBasic(result.basic).ok).toBe(false);
   });
 });
 
