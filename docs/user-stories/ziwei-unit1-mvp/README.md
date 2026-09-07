@@ -23,7 +23,7 @@
 
 ### Phase 2 — A3 Schema／Mock
 
-- [ ] US-009 報告 schema 與 ajv 測試
+- [x] US-009 報告 schema 與 ajv 測試 — 預期紅燈；待實作轉綠
 - [ ] US-010 報告 schema 與 ajv 實作
 - [ ] US-011 Prompt v1
 - [ ] US-012 Mock 三模式測試
