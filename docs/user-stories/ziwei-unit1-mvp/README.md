@@ -23,11 +23,11 @@
 
 ### Phase 2 — A3 Schema／Mock
 
-- [x] US-009 報告 schema 與 ajv 測試 — 預期紅燈；待實作轉綠
-- [ ] US-010 報告 schema 與 ajv 實作
-- [ ] US-011 Prompt v1
-- [ ] US-012 Mock 三模式測試
-- [ ] US-013 Mock 三模式實作
+- [x] US-009 報告 schema 與 ajv 測試
+- [x] US-010 報告 schema 與 ajv 實作
+- [x] US-011 Prompt v1
+- [x] US-012 Mock 三模式測試
+- [x] US-013 Mock 三模式實作
 
 ### Phase 3 — A4 API
 
@@ -52,10 +52,10 @@
 
 ## 重構掃描記錄
 
-- 已掃描至：US-008（2026-09-06）
+- 已掃描至：US-013（2026-09-07）
 - 已知待觀察熱點：
   - `lib/policy/high-risk.ts`（US-007 新增、US-008 改為引用常數；中風險觀察，未達重構門檻）
-- 備註：Phase 1 已收尾；暫不重構
+- 備註：US-012／US-013 成對改 `lib/generation/mock.test.ts`；產品邏輯只在 `mock.ts` 新增一次。低風險，暫不重構
 
 ## 依賴鏈摘要
 
