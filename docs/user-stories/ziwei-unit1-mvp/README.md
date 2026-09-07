@@ -26,7 +26,7 @@
 - [x] US-009 報告 schema 與 ajv 測試
 - [x] US-010 報告 schema 與 ajv 實作
 - [x] US-011 Prompt v1
-- [ ] US-012 Mock 三模式測試
+- [x] US-012 Mock 三模式測試（預期紅燈；待實作轉綠）
 - [ ] US-013 Mock 三模式實作
 
 ### Phase 3 — A4 API
