@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ziwei.local/schemas/report.advanced.v1.json",
+  "title": "report.advanced.v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "report_id",
+    "rationale",
+    "path_compare",
+    "action_plan"
+  ],
+  "properties": {
+    "report_id": { "type": "string", "minLength": 1 },
+    "tier": { "type": "string", "minLength": 1 },
+    "nickname": { "type": "string", "minLength": 1 },
+    "birth_date": { "type": "string", "minLength": 1 },
+    "birth_time": { "type": ["string", "null"] },
+    "time_unknown": { "type": "boolean" },
+    "focus": { "type": "string", "enum": ["整體", "工作", "關係"] },
+    "disclaimer": { "type": "string", "minLength": 1 },
+    "overall": { "type": "string", "minLength": 1 },
+    "work": { "type": "string", "minLength": 1 },
+    "relationship": { "type": "string", "minLength": 1 },
+    "rationale": { "type": "string", "minLength": 1 },
+    "path_compare": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path_a", "path_b", "note"],
+      "properties": {
+        "path_a": { "type": "string", "minLength": 1 },
+        "path_b": { "type": "string", "minLength": 1 },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    },
+    "action_plan": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

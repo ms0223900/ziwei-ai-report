@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ziwei.local/schemas/report.basic.v1.json",
+  "title": "report.basic.v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "report_id",
+    "tier",
+    "nickname",
+    "birth_date",
+    "birth_time",
+    "time_unknown",
+    "focus",
+    "disclaimer",
+    "overall",
+    "work",
+    "relationship",
+    "action",
+    "locked_fields"
+  ],
+  "properties": {
+    "report_id": { "type": "string", "minLength": 1 },
+    "tier": { "type": "string", "minLength": 1 },
+    "nickname": { "type": "string", "minLength": 1 },
+    "birth_date": { "type": "string", "minLength": 1 },
+    "birth_time": { "type": ["string", "null"] },
+    "time_unknown": { "type": "boolean" },
+    "focus": { "type": "string", "enum": ["整體", "工作", "關係"] },
+    "disclaimer": { "type": "string", "minLength": 1 },
+    "overall": { "type": "string", "minLength": 1 },
+    "work": { "type": "string", "minLength": 1 },
+    "relationship": { "type": "string", "minLength": 1 },
+    "action": { "type": "string", "minLength": 1 },
+    "locked_fields": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "string",
+        "enum": ["action_plan", "path_compare", "rationale"]
+      }
+    }
+  }
+}
