@@ -31,8 +31,8 @@
 
 ### Phase 3 — A4 API
 
-- [x] US-014 遮罩組裝測試（預期紅燈；待實作轉綠）
-- [ ] US-015 遮罩組裝實作
+- [x] US-014 遮罩組裝測試
+- [x] US-015 遮罩組裝實作
 - [ ] US-016 寫入 reports store
 - [ ] US-017 POST /api/reports 流程測試
 - [ ] US-018 POST /api/reports 實作
@@ -52,10 +52,10 @@
 
 ## 重構掃描記錄
 
-- 已掃描至：US-013（2026-09-07）
+- 已掃描至：US-015（2026-09-07）
 - 已知待觀察熱點：
   - `lib/policy/high-risk.ts`（US-007 新增、US-008 改為引用常數；中風險觀察，未達重構門檻）
-- 備註：US-012／US-013 成對改 `lib/generation/mock.test.ts`；產品邏輯只在 `mock.ts` 新增一次。低風險，暫不重構
+- 備註：US-014／US-015 成對改 `lib/masking/buildReportResponse.test.ts`；產品邏輯只在 `buildReportResponse.ts` 新增一次。低風險，暫不重構
 
 ## 依賴鏈摘要
 

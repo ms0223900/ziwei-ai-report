@@ -13,9 +13,9 @@ const FORBIDDEN_BODY_KEYS = [
 
 const completeReport = {
   ...basicValid,
-  ...advancedValid,
-  action: basicValid.action,
-  locked_fields: [...LOCKED_FIELDS],
+  rationale: advancedValid.rationale,
+  path_compare: advancedValid.path_compare,
+  action_plan: advancedValid.action_plan,
   tier: "advanced",
 };
 
