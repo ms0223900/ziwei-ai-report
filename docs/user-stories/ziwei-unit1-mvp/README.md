@@ -25,7 +25,7 @@
 
 - [x] US-009 報告 schema 與 ajv 測試
 - [x] US-010 報告 schema 與 ajv 實作
-- [ ] US-011 Prompt v1
+- [x] US-011 Prompt v1
 - [ ] US-012 Mock 三模式測試
 - [ ] US-013 Mock 三模式實作
 
@@ -52,10 +52,10 @@
 
 ## 重構掃描記錄
 
-- 已掃描至：US-010（2026-09-07）
+- 已掃描至：US-011（2026-09-07）
 - 已知待觀察熱點：
   - `lib/policy/high-risk.ts`（US-007 新增、US-008 改為引用常數；中風險觀察，未達重構門檻）
-- 備註：US-009 測試與 US-010 schema／loader 分檔；低風險，暫不重構
+- 備註：US-011 新增獨立 `lib/prompts/zwds-v1.ts`；低風險，暫不重構
 
 ## 依賴鏈摘要
 
