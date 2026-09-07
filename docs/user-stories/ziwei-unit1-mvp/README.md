@@ -31,7 +31,7 @@
 
 ### Phase 3 — A4 API
 
-- [ ] US-014 遮罩組裝測試
+- [x] US-014 遮罩組裝測試（預期紅燈；待實作轉綠）
 - [ ] US-015 遮罩組裝實作
 - [ ] US-016 寫入 reports store
 - [ ] US-017 POST /api/reports 流程測試
