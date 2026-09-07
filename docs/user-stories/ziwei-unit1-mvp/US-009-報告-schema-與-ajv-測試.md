@@ -17,11 +17,22 @@
 - 使用最小合法 fixture，不要求 Live 真呼叫
 
 **驗收條件**：
-- [ ] 聚焦測試因功能尚未實作而預期紅燈（以 US-004 的 `npm test` 跑；紅燈不得是沒有測試指令）
-- [ ] 合法 basic／advanced／complete fixture 各至少一筆預期通過（實作後）
-- [ ] 缺 `overall`、非 JSON 物件必須失敗
-- [ ] schema **沒有** `report_id.format: uuid`；`rpt_demo_001` 與一筆 uuid 字串 fixture **都通過**（禁止寫成「長得像 uuid 就拒絕」）
-- [ ] 不拿「已遮罩 HTTP body」當完整 schema 通過條件
+- [x] 聚焦測試因功能尚未實作而預期紅燈（以 US-004 的 `npm test` 跑；紅燈不得是沒有測試指令）
+- [x] 合法 basic／advanced／complete fixture 各至少一筆預期通過（實作後）
+- [x] 缺 `overall`、非 JSON 物件必須失敗
+- [x] schema **沒有** `report_id.format: uuid`；`rpt_demo_001` 與一筆 uuid 字串 fixture **都通過**（禁止寫成「長得像 uuid 就拒絕」）
+- [x] 不拿「已遮罩 HTTP body」當完整 schema 通過條件
+
+#### 驗收說明
+
+**整體結論**：PREPARED
+
+PREPARED：預期紅燈測試已建立
+
+- 路徑：`lib/schemas/loader.test.ts`
+- 原因：`npx vitest run lib/schemas/loader.test.ts` 失敗於 `Cannot find module './report.basic.v1.json'`（三套 schema 與 `loader.ts` 尚未實作）
+- `package.json` 仍有 `test`：`vitest run`；既有 `lib/validation`／`lib/policy`／`lib/constants.test.ts` 仍綠
+- 待 US-010 補 ajv v8、三份 draft-07 與 loader 轉綠
 
 **測試策略**：Test-First（測試準備）
 > 理由：schema 通過／失敗是明確 I/O。
