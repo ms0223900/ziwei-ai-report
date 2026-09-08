@@ -37,10 +37,10 @@ vi.mock("../../../lib/schemas/loader", () => ({
   validateBasic,
   validateAdvanced,
   validateComplete,
+  SCHEMA_VERSION: 1,
 }));
 // mock store 只鎖 HTTP 分支；真 insert 成功列由 US-018 驗收
 vi.mock("../../../lib/reports/store", () => ({ insertReport }));
-}
 vi.mock("../../../lib/masking/buildReportResponse", () => ({
   buildReportResponse,
 }));
