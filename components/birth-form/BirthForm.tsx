@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState, type FormEvent } from "react";
+import { useId, useState, type FormEvent } from "react";
 import { DISCLAIMER } from "../../lib/constants";
 import type { FocusValue } from "../../lib/validation/birth";
 import {
@@ -17,15 +17,6 @@ const DEMO_BIRTH_DATE = "1993-07-12";
 const TIME_HINT =
   "未填時辰走未知時辰盤，準確度較低；知曉生時請選十二時辰（如卯時 05-07）。";
 
-function taipeiTodayYmd(): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Taipei",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-}
-
 export type BirthFormProps = {
   onValidSubmit?: (body: BirthRequestBody) => void;
 };
@@ -37,7 +28,6 @@ export function BirthForm({ onValidSubmit }: BirthFormProps) {
   const nicknameErrorId = useId();
   const dateErrorId = useId();
   const timeHintId = useId();
-  const maxDate = useMemo(() => taipeiTodayYmd(), []);
 
   const [nickname, setNickname] = useState(DEMO_NICKNAME);
   const [birthDate, setBirthDate] = useState(DEMO_BIRTH_DATE);
@@ -134,7 +124,7 @@ export function BirthForm({ onValidSubmit }: BirthFormProps) {
               errors.birth_date ? "border-warn" : "border-line"
             }`}
             id={dateId}
-            max={maxDate}
+            inputMode="numeric"
             name="birth_date"
             onChange={(event) => {
               setBirthDate(event.target.value);
@@ -142,7 +132,7 @@ export function BirthForm({ onValidSubmit }: BirthFormProps) {
                 setErrors((current) => ({ ...current, birth_date: undefined }));
               }
             }}
-            type="date"
+            type="text"
             value={birthDate}
           />
           {errors.birth_date ? (
