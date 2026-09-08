@@ -34,8 +34,8 @@
 - [x] US-014 遮罩組裝測試
 - [x] US-015 遮罩組裝實作
 - [x] US-016 寫入 reports store
-- [x] US-017 POST /api/reports 流程測試（預期紅燈；待實作轉綠）
-- [ ] US-018 POST /api/reports 實作
+- [x] US-017 POST /api/reports 流程測試
+- [⚠️] US-018 POST /api/reports 實作（缺 service-role key，valid POST 尚未寫入成功列）
 
 ### Phase 4 — A5 畫面
 
@@ -52,10 +52,10 @@
 
 ## 重構掃描記錄
 
-- 已掃描至：US-016（2026-09-08）
+- 已掃描至：US-018（2026-09-08）
 - 已知待觀察熱點：
   - `lib/policy/high-risk.ts`（US-007 新增、US-008 改為引用常數；中風險觀察，未達重構門檻）
-- 備註：US-016 只新增 `lib/reports/store.ts`（及測試）；無 churn hotspot。低風險，暫不重構
+- 備註：掃描範圍 US-017～US-018。`app/api/reports/route.test.ts` 被測試準備＋實作各觸一次（Test-First 配對，不計產品 churn）。`route.ts` 僅本任務新增，無反模式。低風險，暫不重構
 
 ## 依賴鏈摘要
 
