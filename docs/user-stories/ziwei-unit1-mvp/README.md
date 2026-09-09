@@ -47,18 +47,19 @@
 ### Phase 5 — A6／A7 Live
 
 - [x] US-023 OpenRouter 主備援測試（預期紅燈；待實作轉綠）
-- [ ] US-024 OpenRouter 主備援實作
+- [x] US-024 OpenRouter 主備援實作
 - [ ] US-025 maxDuration 與機密不外洩
 
 ## 重構掃描記錄
 
-- 已掃描至：US-022（2026-09-09）
+- 已掃描至：US-024（2026-09-09）
 - 已知待觀察熱點：
   - `lib/policy/high-risk.ts`（US-007 新增、US-008 改為引用常數；中風險觀察，未達重構門檻）
   - `app/page.tsx`（US-019／US-020 皆改；目前只轉接 `HomeClient`，未達重構門檻）
   - `components/home/HomeClient.tsx`（US-020 新增、US-021／US-022 改分流；Phase 4 匯聚點，仍短，中風險觀察）
   - `components/birth-form/BirthForm.tsx`（US-019 新增、US-021 加 generating／busy）
-- 備註：US-022 把 persist 503 接到 canned 畫面 A。無反模式達重構門檻。低～中風險，暫不重構。
+  - `app/api/reports/route.ts`（US-018／US-024 疊 Live 分支；本次掃描窗內無 ≥2 任務同檔 churn 達門檻）
+- 備註：US-023～US-024 補 OpenRouter 主備援。無反模式達重構門檻。低風險，暫不重構。
 
 ## 依賴鏈摘要
 

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DISCLAIMER,
   ERROR_MESSAGES,
@@ -14,6 +14,7 @@ const {
   validateBirth,
   scanHighRisk,
   generateMockReport,
+  generateLiveReport,
   validateBasic,
   validateAdvanced,
   validateComplete,
@@ -23,6 +24,7 @@ const {
   validateBirth: vi.fn(),
   scanHighRisk: vi.fn(),
   generateMockReport: vi.fn(),
+  generateLiveReport: vi.fn(),
   validateBasic: vi.fn(),
   validateAdvanced: vi.fn(),
   validateComplete: vi.fn(),
@@ -33,6 +35,7 @@ const {
 vi.mock("../../../lib/validation/birth", () => ({ validateBirth }));
 vi.mock("../../../lib/policy/high-risk", () => ({ scanHighRisk }));
 vi.mock("../../../lib/generation/mock", () => ({ generateMockReport }));
+vi.mock("../../../lib/generation/provider", () => ({ generateLiveReport }));
 vi.mock("../../../lib/schemas/loader", () => ({
   validateBasic,
   validateAdvanced,
@@ -266,5 +269,82 @@ describe("POST /api/reports", () => {
 
     expect(res.status).toBe(200);
     expect(json.focus).toBe("整體");
+  });
+});
+
+describe("POST /api/reports live OpenRouter branch", () => {
+  const completeLive = {
+    ...basicValid,
+    ...advancedValid,
+    tier: "advanced",
+    action: basicValid.action,
+    locked_fields: [...LOCKED_FIELDS],
+    disclaimer: DISCLAIMER,
+  };
+
+  beforeEach(() => {
+    vi.stubEnv("AI_PROVIDER", "openrouter");
+    validateBirth.mockReturnValue({ ok: true, value: validatedBirth });
+    scanHighRisk.mockReturnValue(null);
+    validateBasic.mockReturnValue({ ok: true, data: basicValid });
+    validateAdvanced.mockReturnValue({ ok: true, data: advancedValid });
+    validateComplete.mockReturnValue({ ok: true, data: completeLive });
+    insertReport.mockResolvedValue({
+      id: "11111111-1111-4111-8111-111111111111",
+      status: "basic",
+      generation_status: "success",
+    });
+    buildReportResponse.mockReturnValue(specHttp200);
+    generateLiveReport.mockResolvedValue({
+      ok: true,
+      complete: completeLive,
+      model: "test/primary-model",
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("inserts only after complete schema passes and returns basic subset", async () => {
+    const res = await postReports(validBody);
+    const json = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(json).toEqual(specHttp200);
+    for (const key of FORBIDDEN_BODY_KEYS) {
+      expect(json).not.toHaveProperty(key);
+    }
+    expect(insertReport).toHaveBeenCalledOnce();
+    expect(generateMockReport).not.toHaveBeenCalled();
+    expect(validateComplete).toHaveBeenCalled();
+  });
+
+  it("returns 502 GENERATION_FAILED and skips insert on transport failure", async () => {
+    generateLiveReport.mockResolvedValue({ ok: false, kind: "transport" });
+
+    const res = await postReports(validBody);
+    const json = await res.json();
+
+    expect(res.status).toBe(502);
+    expect(json).toEqual({
+      error_code: "GENERATION_FAILED",
+      message: ERROR_MESSAGES.GENERATION_FAILED,
+    });
+    expect(insertReport).not.toHaveBeenCalled();
+  });
+
+  it("returns 422 SCHEMA_INVALID and skips insert on schema failure", async () => {
+    generateLiveReport.mockResolvedValue({ ok: false, kind: "schema" });
+
+    const res = await postReports(validBody);
+    const json = await res.json();
+
+    expect(res.status).toBe(422);
+    expect(json).toEqual({
+      error_code: "SCHEMA_INVALID",
+      message: ERROR_MESSAGES.SCHEMA_INVALID,
+    });
+    expect(insertReport).not.toHaveBeenCalled();
   });
 });
