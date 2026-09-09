@@ -17,6 +17,17 @@ type HighRiskView = {
   disclaimer: string;
 };
 
+const MIN_GENERATING_MS = 500;
+
+async function holdGenerating(startedAt: number) {
+  const elapsed = Date.now() - startedAt;
+  if (elapsed < MIN_GENERATING_MS) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, MIN_GENERATING_MS - elapsed);
+    });
+  }
+}
+
 export function HomeClient() {
   const [view, setView] = useState<HomeView>("form");
   const [formKey, setFormKey] = useState(0);
@@ -32,6 +43,7 @@ export function HomeClient() {
     setView("generating");
     setReport(null);
     setHighRisk(null);
+    const startedAt = Date.now();
 
     try {
       const response = await fetch("/api/reports", {
@@ -46,6 +58,8 @@ export function HomeClient() {
       } catch {
         json = {};
       }
+
+      await holdGenerating(startedAt);
 
       const decision = interpretReportsResponse(response.status, json);
 
@@ -72,6 +86,7 @@ export function HomeClient() {
       setReport(overlayCannedReport(body));
       setView("report");
     } catch {
+      await holdGenerating(startedAt);
       setFailMessage(ERROR_MESSAGES.GENERATION_FAILED);
       setView("fail");
     }
