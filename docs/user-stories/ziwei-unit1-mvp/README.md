@@ -41,7 +41,7 @@
 
 - [x] US-019 生辰表單畫面
 - [x] US-020 基本分析與鎖定 CTA
-- [ ] US-021 高風險與失敗可重試畫面
+- [x] US-021 高風險與失敗可重試畫面
 - [ ] US-022 單頁表單結果切換
 
 ### Phase 5 — A6／A7 Live
@@ -52,11 +52,13 @@
 
 ## 重構掃描記錄
 
-- 已掃描至：US-020（2026-09-09）
+- 已掃描至：US-021（2026-09-09）
 - 已知待觀察熱點：
   - `lib/policy/high-risk.ts`（US-007 新增、US-008 改為引用常數；中風險觀察，未達重構門檻）
   - `app/page.tsx`（US-019／US-020 皆改；目前只轉接 `HomeClient`，未達重構門檻）
-- 備註：US-020 新增 `components/report/` 與 `components/home/HomeClient.tsx`。無產品 churn hotspot。低風險，暫不重構。
+  - `components/home/HomeClient.tsx`（US-020 新增、US-021 改為 POST 分流；US-022 仍會再改，中風險觀察）
+  - `components/birth-form/BirthForm.tsx`（US-019 新增、US-021 加 generating／busy）
+- 備註：US-021 新增 `FailSheet`／`HighRiskSheet`／`interpretReportsResponse`。無產品 churn hotspot 達重構門檻。低～中風險，暫不重構。
 
 ## 依賴鏈摘要
 
