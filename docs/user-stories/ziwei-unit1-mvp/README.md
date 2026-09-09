@@ -34,8 +34,8 @@
 - [x] US-014 遮罩組裝測試
 - [x] US-015 遮罩組裝實作
 - [x] US-016 寫入 reports store
-- [ ] US-017 POST /api/reports 流程測試
-- [ ] US-018 POST /api/reports 實作
+- [x] US-017 POST /api/reports 流程測試
+- [⚠️] US-018 POST /api/reports 實作（缺 service-role key，valid POST 尚未寫入成功列）
 
 ### Phase 4 — A5 畫面
 
@@ -55,7 +55,7 @@
 - 已掃描至：US-019（2026-09-08）
 - 已知待觀察熱點：
   - `lib/policy/high-risk.ts`（US-007 新增、US-008 改為引用常數；中風險觀察，未達重構門檻）
-- 備註：本分支自 main（水位線 US-016）只新增 `components/birth-form/`。無 churn hotspot。低風險，暫不重構。US-017／US-018 仍在其他 PR。
+- 備註：US-017～US-018 合入 main：`route.test.ts` 為 Test-First 配對、`route.ts` 僅新增、無反模式。US-019 新增 `components/birth-form/`。無 churn hotspot。低風險，暫不重構。
 
 ## 依賴鏈摘要
 
