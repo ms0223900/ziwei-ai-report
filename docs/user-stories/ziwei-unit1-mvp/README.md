@@ -46,7 +46,7 @@
 
 ### Phase 5 — A6／A7 Live
 
-- [ ] US-023 OpenRouter 主備援測試
+- [x] US-023 OpenRouter 主備援測試（預期紅燈；待實作轉綠）
 - [ ] US-024 OpenRouter 主備援實作
 - [ ] US-025 maxDuration 與機密不外洩
 
