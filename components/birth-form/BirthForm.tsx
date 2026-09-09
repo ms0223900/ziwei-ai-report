@@ -14,14 +14,38 @@ import {
 
 const DEMO_NICKNAME = "小圓";
 const DEMO_BIRTH_DATE = "1993-07-12";
+const IDLE_LEAD = "依生辰起紫微原局，先批基本命理。進階詳批封存。";
+const GENERATING_LEAD = "正在依生辰起紫微命盤，定局排星中…";
 const TIME_HINT =
   "未填時辰走未知時辰盤，準確度較低；知曉生時請選十二時辰（如卯時 05-07）。";
 
 export type BirthFormProps = {
+  busy?: boolean;
+  initialValues?: BirthRequestBody;
   onValidSubmit?: (body: BirthRequestBody) => void;
 };
 
-export function BirthForm({ onValidSubmit }: BirthFormProps) {
+function initialNickname(values?: BirthRequestBody) {
+  return values?.nickname ?? DEMO_NICKNAME;
+}
+
+function initialBirthDate(values?: BirthRequestBody) {
+  return values?.birth_date ?? DEMO_BIRTH_DATE;
+}
+
+function initialBirthTime(values?: BirthRequestBody) {
+  return values?.birth_time ?? UNKNOWN_TIME_VALUE;
+}
+
+function initialFocus(values?: BirthRequestBody): FocusValue {
+  return values?.focus ?? "工作";
+}
+
+export function BirthForm({
+  busy = false,
+  initialValues,
+  onValidSubmit,
+}: BirthFormProps) {
   const nicknameId = useId();
   const dateId = useId();
   const timeId = useId();
@@ -29,10 +53,10 @@ export function BirthForm({ onValidSubmit }: BirthFormProps) {
   const dateErrorId = useId();
   const timeHintId = useId();
 
-  const [nickname, setNickname] = useState(DEMO_NICKNAME);
-  const [birthDate, setBirthDate] = useState(DEMO_BIRTH_DATE);
-  const [birthTime, setBirthTime] = useState(UNKNOWN_TIME_VALUE);
-  const [focus, setFocus] = useState<FocusValue>("工作");
+  const [nickname, setNickname] = useState(() => initialNickname(initialValues));
+  const [birthDate, setBirthDate] = useState(() => initialBirthDate(initialValues));
+  const [birthTime, setBirthTime] = useState(() => initialBirthTime(initialValues));
+  const [focus, setFocus] = useState<FocusValue>(() => initialFocus(initialValues));
   const [errors, setErrors] = useState<{
     nickname?: string;
     birth_date?: string;
@@ -40,6 +64,9 @@ export function BirthForm({ onValidSubmit }: BirthFormProps) {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy) {
+      return;
+    }
     const fieldErrors = collectBirthFormFieldErrors({
       nickname,
       birth_date: birthDate,
@@ -61,19 +88,22 @@ export function BirthForm({ onValidSubmit }: BirthFormProps) {
   }
 
   return (
-    <article className="w-full max-w-[350px] rounded-sheet border border-line bg-sheet px-6 py-8 md:max-w-[576px] md:px-8 md:py-10">
+    <article
+      aria-busy={busy}
+      className="w-full max-w-[350px] rounded-sheet border border-line bg-sheet px-6 py-8 md:max-w-[576px] md:px-8 md:py-10"
+    >
       <header className="mb-6 flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="font-serif text-display text-ink">紫微解讀</h1>
-          <p className="mt-3 text-body text-ink">
-            依生辰起紫微原局，先批基本命理。進階詳批封存。
+          <p className={`mt-3 text-body ${busy ? "text-ink-soft" : "text-ink"}`}>
+            {busy ? GENERATING_LEAD : IDLE_LEAD}
           </p>
         </div>
         <span
           aria-hidden="true"
           className="shrink-0 bg-seal px-2 py-1 text-label font-medium text-sheet"
         >
-          起盤
+          {busy ? "排盤" : "起盤"}
         </span>
       </header>
 
@@ -92,6 +122,7 @@ export function BirthForm({ onValidSubmit }: BirthFormProps) {
             className={`min-h-11 rounded-control border bg-sheet px-3 py-2 text-body text-ink ${
               errors.nickname ? "border-warn" : "border-line"
             }`}
+            disabled={busy}
             id={nicknameId}
             name="nickname"
             onChange={(event) => {
@@ -123,6 +154,7 @@ export function BirthForm({ onValidSubmit }: BirthFormProps) {
             className={`min-h-11 rounded-control border bg-sheet px-3 py-2 font-mono text-body text-ink ${
               errors.birth_date ? "border-warn" : "border-line"
             }`}
+            disabled={busy}
             id={dateId}
             inputMode="numeric"
             name="birth_date"
@@ -149,6 +181,7 @@ export function BirthForm({ onValidSubmit }: BirthFormProps) {
           <select
             aria-describedby={timeHintId}
             className="min-h-11 rounded-control border border-line bg-sheet px-3 py-2 text-body text-ink"
+            disabled={busy}
             id={timeId}
             name="birth_time"
             onChange={(event) => setBirthTime(event.target.value)}
@@ -180,6 +213,7 @@ export function BirthForm({ onValidSubmit }: BirthFormProps) {
                       ? "border-seal bg-seal text-sheet"
                       : "border-line bg-sheet text-ink"
                   }`}
+                  disabled={busy}
                   key={option.value}
                   onClick={() => setFocus(option.value)}
                   type="button"
@@ -192,7 +226,8 @@ export function BirthForm({ onValidSubmit }: BirthFormProps) {
         </fieldset>
 
         <button
-          className="min-h-11 w-full rounded-control bg-seal px-5 py-3 text-button text-sheet transition-colors duration-[var(--primitive-duration-hover)] hover:bg-seal-deep"
+          className="min-h-11 w-full rounded-control bg-seal px-5 py-3 text-button text-sheet transition-colors duration-[var(--primitive-duration-hover)] hover:bg-seal-deep disabled:pointer-events-none disabled:opacity-[0.45] disabled:hover:bg-seal"
+          disabled={busy}
           type="submit"
         >
           看基本分析
