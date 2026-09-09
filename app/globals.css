@@ -60,6 +60,19 @@
   --max-width-sheet: 36rem;
 }
 
+@keyframes report-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-report-enter {
+  animation: report-enter var(--primitive-duration-fade) ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --primitive-duration-fade: 0ms;
