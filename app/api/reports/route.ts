@@ -6,6 +6,7 @@ import {
   schemaInvalidError,
 } from "../../../lib/errors";
 import { generateMockReport } from "../../../lib/generation/mock";
+import { generateLiveReport } from "../../../lib/generation/provider";
 import { buildReportResponse } from "../../../lib/masking/buildReportResponse";
 import { scanHighRisk } from "../../../lib/policy/high-risk";
 import { PROMPT_VERSION } from "../../../lib/prompts/zwds-v1";
@@ -19,10 +20,27 @@ import {
 import {
   validateBirth,
   type BirthInput,
+  type ValidatedBirth,
 } from "../../../lib/validation/birth";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
+
+const BASIC_PERSIST_KEYS = [
+  "report_id",
+  "tier",
+  "nickname",
+  "birth_date",
+  "birth_time",
+  "time_unknown",
+  "focus",
+  "disclaimer",
+  "overall",
+  "work",
+  "relationship",
+  "action",
+  "locked_fields",
+] as const;
 
 function jsonError(error: AppError): Response {
   return Response.json(
@@ -56,6 +74,71 @@ function asObject(value: unknown): Record<string, unknown> {
     return { ...(value as Record<string, unknown>) };
   }
   return {};
+}
+
+function splitCompleteForPersist(complete: Record<string, unknown>): {
+  basic: Record<string, unknown>;
+  advanced: Record<string, unknown>;
+} {
+  const basic: Record<string, unknown> = {};
+  for (const key of BASIC_PERSIST_KEYS) {
+    if (key in complete) {
+      basic[key] = complete[key];
+    }
+  }
+  basic.tier = "basic";
+  return { basic, advanced: complete };
+}
+
+async function persistMaskedReport(args: {
+  birth: ValidatedBirth;
+  basic: Record<string, unknown>;
+  advanced: Record<string, unknown>;
+  model: string;
+  provider: string;
+}): Promise<Response> {
+  const basicForPersist = {
+    ...args.basic,
+    nickname: args.birth.nickname,
+    birth_date: args.birth.birth_date,
+    birth_time: args.birth.birth_time,
+    time_unknown: args.birth.time_unknown,
+    focus: args.birth.focus,
+  };
+
+  try {
+    await insertReport({
+      nickname: args.birth.nickname,
+      birth_date: args.birth.birth_date,
+      birth_time: args.birth.birth_time,
+      time_unknown: args.birth.time_unknown,
+      focus: args.birth.focus,
+      basic_json: basicForPersist,
+      advanced_json: args.advanced,
+      model: args.model,
+      provider: args.provider,
+      prompt_version: PROMPT_VERSION,
+      schema_version: String(SCHEMA_VERSION),
+      request_id: crypto.randomUUID(),
+      generated_at: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      return jsonError(error);
+    }
+    return jsonError(persistFailedError());
+  }
+
+  return Response.json(
+    buildReportResponse({
+      report: basicForPersist,
+      advanced_json: args.advanced,
+      meta: {
+        status: "basic",
+        generation_status: "success",
+      },
+    }),
+  );
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -93,6 +176,43 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
+  if (process.env.AI_PROVIDER === "openrouter") {
+    let live: Awaited<ReturnType<typeof generateLiveReport>>;
+    try {
+      live = await generateLiveReport(birth);
+    } catch (error) {
+      if (error instanceof AppError) {
+        return jsonError(error);
+      }
+      return jsonError(generationFailedError());
+    }
+
+    if (!live.ok) {
+      if (live.kind === "transport") {
+        return jsonError(generationFailedError());
+      }
+      return jsonError(schemaInvalidError());
+    }
+
+    const complete = asObject(live.complete);
+    if (!validateComplete(complete).ok) {
+      return jsonError(schemaInvalidError());
+    }
+
+    const { basic, advanced } = splitCompleteForPersist(complete);
+    if (!validateBasic(basic).ok || !validateAdvanced(advanced).ok) {
+      return jsonError(schemaInvalidError());
+    }
+
+    return persistMaskedReport({
+      birth,
+      basic,
+      advanced,
+      model: live.model,
+      provider: "openrouter",
+    });
+  }
+
   let generated: ReturnType<typeof generateMockReport>;
   try {
     generated = generateMockReport();
@@ -124,46 +244,11 @@ export async function POST(request: Request): Promise<Response> {
     return jsonError(schemaInvalidError());
   }
 
-  const basicForPersist = {
-    ...basic,
-    nickname: birth.nickname,
-    birth_date: birth.birth_date,
-    birth_time: birth.birth_time,
-    time_unknown: birth.time_unknown,
-    focus: birth.focus,
-  };
-
-  try {
-    await insertReport({
-      nickname: birth.nickname,
-      birth_date: birth.birth_date,
-      birth_time: birth.birth_time,
-      time_unknown: birth.time_unknown,
-      focus: birth.focus,
-      basic_json: basicForPersist,
-      advanced_json: advanced,
-      model: "mock",
-      provider: "mock",
-      prompt_version: PROMPT_VERSION,
-      schema_version: String(SCHEMA_VERSION),
-      request_id: crypto.randomUUID(),
-      generated_at: new Date().toISOString(),
-    });
-  } catch (error) {
-    if (error instanceof AppError) {
-      return jsonError(error);
-    }
-    return jsonError(persistFailedError());
-  }
-
-  const masked = buildReportResponse({
-    report: basicForPersist,
-    advanced_json: advanced,
-    meta: {
-      status: "basic",
-      generation_status: "success",
-    },
+  return persistMaskedReport({
+    birth,
+    basic,
+    advanced,
+    model: "mock",
+    provider: "mock",
   });
-
-  return Response.json(masked);
 }
