@@ -34,7 +34,7 @@
 - [x] US-014 遮罩組裝測試
 - [x] US-015 遮罩組裝實作
 - [x] US-016 寫入 reports store
-- [ ] US-017 POST /api/reports 流程測試
+- [x] US-017 POST /api/reports 流程測試 — 預期紅燈；待實作轉綠
 - [ ] US-018 POST /api/reports 實作
 
 ### Phase 4 — A5 畫面
