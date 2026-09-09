@@ -34,15 +34,95 @@
 - B／C／D 只預留同一 DOM 位置
 
 **驗收條件**：
-- [ ] 標題區、ChartMatrix、三段完整小標、封條「未開封」、鎖定三塊、CTA 對齊 `.pen` 04／05；desktop 1440／箋 576 與 mobile 390／箋 350
-- [ ] ChartMatrix 是暫定命盤表，不是空白 placeholder、不是三張卡
-- [ ] 無性別欄；「女命」僅示範小圓的 ChartMatrix
-- [ ] 示範標題「小圓的基本分析」；短 overall／work／relationship
-- [ ] `time_unknown=true` 時可見「未知時辰，準確度較低」
-- [ ] 鎖定三塊不是真實 `rationale`／路徑／7 天步驟
-- [ ] LockCaption 與 US-008／spec 同句
-- [ ] 點 CTA 不改 `status`、無金流、不切畫面 B；出現「解鎖即將開放，本版不收費。」
-- [ ] 無追問輸入；底部完整 disclaimer
+- [x] 標題區、ChartMatrix、三段完整小標、封條「未開封」、鎖定三塊、CTA 對齊 `.pen` 04／05；desktop 1440／箋 576 與 mobile 390／箋 350
+- [x] ChartMatrix 是暫定命盤表，不是空白 placeholder、不是三張卡
+- [x] 無性別欄；「女命」僅示範小圓的 ChartMatrix
+- [x] 示範標題「小圓的基本分析」；短 overall／work／relationship
+- [x] `time_unknown=true` 時可見「未知時辰，準確度較低」
+- [x] 鎖定三塊不是真實 `rationale`／路徑／7 天步驟
+- [x] LockCaption 與 US-008／spec 同句
+- [x] 點 CTA 不改 `status`、無金流、不切畫面 B；出現「解鎖即將開放，本版不收費。」
+- [x] 無追問輸入；底部完整 disclaimer
+
+#### 驗收說明
+
+**整體結論**：PASS ✅
+
+> 合法生辰送出後切到畫面 A 箋本（canned overlay，不打 API）。CTA 只出即將開放提示。瀏覽器 1440／390 已走一次；非逐像素對稿。
+
+---
+
+**AC-1：版面對齊 04／05，箋寬 576／350**
+
+狀態：✅ 通過
+
+- `ReportCard` `max-w-[350px] md:max-w-[576px]`，與表單箋同寬
+- 瀏覽器 1440 與 390 已看到標題、封條、鎖定三塊與 CTA；非逐像素
+
+---
+
+**AC-2：ChartMatrix 是暫定命盤表**
+
+狀態：✅ 通過
+
+- `components/report/ChartMatrix.tsx` 畫標題／局名／命主／生辰／歲次／問事焦點，不是空框或三張卡
+
+---
+
+**AC-3：無性別欄；女命僅小圓**
+
+狀態：✅ 通過
+
+- `chartSubjectLine()` 只對暱稱「小圓」加「（女命）」
+- `npx vitest run components/report` 覆蓋非示範暱稱不含女命
+
+---
+
+**AC-4：示範標題與短正文**
+
+狀態：✅ 通過
+
+- 標題 `{暱稱}的基本分析`；正文用 `basic.valid.json` 短 overall／work／relationship
+
+---
+
+**AC-5：未知時辰可見**
+
+狀態：✅ 通過
+
+- canned `overall` 含「未知時辰，準確度較低」
+
+---
+
+**AC-6：鎖定三塊不是進階真文**
+
+狀態：✅ 通過
+
+- `AdvancedLockedPanel` 用 night 灰條；測試斷言不含 `rationale`／`path_a`／「第 1 天」
+
+---
+
+**AC-7：LockCaption 同句**
+
+狀態：✅ 通過
+
+- 引用 `lib/constants.ts` 的 `LOCK_CAPTION`
+
+---
+
+**AC-8：CTA 不假裝解鎖**
+
+狀態：✅ 通過
+
+- 點「解鎖完整報告」只出現「解鎖即將開放，本版不收費。」；仍停在畫面 A
+
+---
+
+**AC-9：無追問；底部 disclaimer**
+
+狀態：✅ 通過
+
+- 報告無 textbox；底部 `Disclaimer` 用 `DISCLAIMER`
 
 **測試策略**：Test-After
 > 理由：畫面 A／CTA 以 Pencil 對稿為準。
