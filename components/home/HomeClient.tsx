@@ -4,7 +4,12 @@ import { useState } from "react";
 import { ERROR_MESSAGES } from "../../lib/constants";
 import { BirthForm } from "../birth-form/BirthForm";
 import type { BirthRequestBody } from "../birth-form/payload";
-import { overlayCannedReport, type MaskedReportView } from "../report/overlay";
+import {
+  isPersistFailedBody,
+  maskedReportFromApi,
+  overlayCannedReport,
+  type MaskedReportView,
+} from "../report/overlay";
 import { ReportCard } from "../report/ReportCard";
 import { FailSheet } from "./FailSheet";
 import { HighRiskSheet } from "./HighRiskSheet";
@@ -73,6 +78,11 @@ export function HomeClient() {
       }
 
       if (decision.kind === "fail") {
+        if (isPersistFailedBody(json)) {
+          setReport(overlayCannedReport(body));
+          setView("report");
+          return;
+        }
         setFailMessage(decision.message);
         setView("fail");
         return;
@@ -83,7 +93,7 @@ export function HomeClient() {
         return;
       }
 
-      setReport(overlayCannedReport(body));
+      setReport(maskedReportFromApi(json, body));
       setView("report");
     } catch {
       await holdGenerating(startedAt);

@@ -142,17 +142,11 @@ describe("HomeClient 高風險與失敗分流", () => {
   it.each([
     [422, ERROR_MESSAGES.SCHEMA_INVALID],
     [502, ERROR_MESSAGES.GENERATION_FAILED],
-    [503, ERROR_MESSAGES.PERSIST_FAILED],
   ] as const)("shows retryable fail for HTTP %s", async (status, message) => {
     const user = userEvent.setup();
     vi.mocked(fetch).mockResolvedValue(
       await jsonResponse(status, {
-        error_code:
-          status === 422
-            ? "SCHEMA_INVALID"
-            : status === 502
-              ? "GENERATION_FAILED"
-              : "PERSIST_FAILED",
+        error_code: status === 422 ? "SCHEMA_INVALID" : "GENERATION_FAILED",
         message,
       }),
     );
@@ -215,5 +209,57 @@ describe("HomeClient 高風險與失敗分流", () => {
       "這筆投資會不會賺",
     );
     expect(screen.getByRole("heading", { name: "紫微解讀" })).toBeTruthy();
+  });
+});
+
+describe("HomeClient 單頁 wizard（US-022）", () => {
+  it("renders 畫面 A from a 200 masked body, not canned-only copy", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockResolvedValue(
+      await jsonResponse(200, {
+        nickname: "小圓",
+        birth_date: "1993-07-12",
+        birth_time: null,
+        time_unknown: true,
+        focus: "工作",
+        overall: "API 原局總覽句",
+        work: "API 官祿句",
+        relationship: "API 夫妻句",
+        action: "API 行動句",
+        disclaimer: DISCLAIMER,
+        status: "basic",
+      }),
+    );
+
+    render(<HomeClient />);
+    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+
+    expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
+    expect(screen.getByText("API 原局總覽句")).toBeTruthy();
+    expect(screen.getByText("API 官祿句")).toBeTruthy();
+    expect(screen.getByText("【 紫微原局・排盤總目 】")).toBeTruthy();
+    expect(screen.getByText("解鎖完整報告")).toBeTruthy();
+    expect(window.localStorage.length).toBe(0);
+  });
+
+  it("shows 畫面 A on persist 503 so mock-valid demo still works without a DB key", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockResolvedValue(
+      await jsonResponse(503, {
+        error_code: "PERSIST_FAILED",
+        message: ERROR_MESSAGES.PERSIST_FAILED,
+      }),
+    );
+
+    render(<HomeClient />);
+    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+
+    expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
+    expect(screen.getByText("【 紫微原局・排盤總目 】")).toBeTruthy();
+    expect(
+      screen.queryByRole("heading", {
+        name: "這次沒有寫成報告，你可以再試一次。",
+      }),
+    ).toBeNull();
   });
 });

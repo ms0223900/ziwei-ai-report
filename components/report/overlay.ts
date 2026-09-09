@@ -31,3 +31,56 @@ export function overlayCannedReport(body: BirthRequestBody): MaskedReportView {
     status: "basic",
   };
 }
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  return null;
+}
+
+function readString(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+export function maskedReportFromApi(
+  body: unknown,
+  request: BirthRequestBody,
+): MaskedReportView {
+  const record = asRecord(body);
+  if (!record || readString(record.error_code)) {
+    return overlayCannedReport(request);
+  }
+
+  const overall = readString(record.overall);
+  const work = readString(record.work);
+  const relationship = readString(record.relationship);
+  const action = readString(record.action);
+  if (!overall || !work || !relationship || !action) {
+    return overlayCannedReport(request);
+  }
+
+  const birthTime =
+    record.birth_time === null
+      ? null
+      : (readString(record.birth_time) ?? request.birth_time);
+
+  return {
+    nickname: readString(record.nickname) ?? request.nickname,
+    birth_date: readString(record.birth_date) ?? request.birth_date,
+    birth_time: birthTime,
+    time_unknown: record.time_unknown === true || birthTime == null,
+    focus: readString(record.focus) ?? request.focus ?? "整體",
+    overall,
+    work,
+    relationship,
+    action,
+    disclaimer: readString(record.disclaimer) ?? DISCLAIMER,
+    status: "basic",
+  };
+}
+
+export function isPersistFailedBody(body: unknown): boolean {
+  const record = asRecord(body);
+  return readString(record?.error_code) === "PERSIST_FAILED";
+}
