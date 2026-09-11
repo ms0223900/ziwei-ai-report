@@ -109,4 +109,4 @@
 | `ECPAY_ENV` | server-only | `stage` / `prod` | 單元 4 |
 | `APP_BASE_URL` | server-only | 回跳/Webhook 網址根 | 單元 4 |
 
-前端一律不載入 server-only 變數;secret 不用 `NEXT_PUBLIC_` 前綴。
+前端一律不載入 server-only 變數;secret 不用 `NEXT_PUBLIC_` 前綴。Live 備援（主失敗→重試→備援）允許本機／預覽驗證，不以 Vercel Hobby 10 秒為硬 SLA。

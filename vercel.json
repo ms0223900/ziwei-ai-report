@@ -1,5 +1,10 @@
 {
   "framework": "nextjs",
   "buildCommand": "next build --webpack",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "functions": {
+    "app/api/reports/route.ts": {
+      "maxDuration": 60
+    }
+  }
 }

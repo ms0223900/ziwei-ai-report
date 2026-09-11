@@ -121,7 +121,7 @@ ziwei-ai-report/
 
 1. **`cookies()` 非同步**:Next 16 一律 `await cookies()`;server client 以 CLC 版為準
 2. **RLS 驗證陷阱**:SQL Editor 以 owner 身分操作會繞過 RLS 造成誤判;驗證要走 anon / 雙帳號
-3. **Vercel Hobby**:無 cron;route handler 設 `maxDuration`;常態 demo 選快速主模型,10 秒內完成
+3. **Vercel Hobby**:無 cron;route handler 設 `maxDuration` ≥ 60。常態 demo 選快速主模型。備援路徑（主失敗→重試→備援）允許本機／預覽驗證，不以 Hobby 10 秒為硬 SLA。
 4. **ECPay 預警(單元 4)**:`MerchantTradeNo` ≤20 字元英數不可重用;webhook body 是 `x-www-form-urlencoded` 非 JSON,回應純文字 `1|OK`;middleware matcher 排除 webhook;瀏覽器回跳不得當成功依據;簽章/驗章共用同一函式
 5. **訪客報告無法事後認領**:本版報告無 user_id,一次性示範;會員單元起「先登入再生成」
 
