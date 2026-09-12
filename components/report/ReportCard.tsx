@@ -1,7 +1,17 @@
-import type { MaskedReportView } from "./overlay";
+"use client";
+
+import { useState } from "react";
+import {
+  isCommercialPreviewEnabled,
+  resolveEffectivePreviewState,
+  resolvePreviewView,
+  type PreviewState,
+} from "../../lib/commercial/preview";
 import { AdvancedLockedPanel } from "./AdvancedLockedPanel";
 import { ChartMatrix } from "./ChartMatrix";
+import { CommercialPreviewBar } from "./CommercialPreviewBar";
 import { Disclaimer } from "./Disclaimer";
+import type { MaskedReportView } from "./overlay";
 
 const SECTION_LABELS = {
   overall: "【 原局總覽 】  〔 局象：守成蓄勢 〕",
@@ -9,11 +19,35 @@ const SECTION_LABELS = {
   relationship: "【 夫妻交友 】  〔 象意：界線明晰 〕",
 } as const;
 
-export function ReportCard({ report }: { report: MaskedReportView }) {
+export function ReportCard({
+  report,
+  commercialPreviewEnabled,
+}: {
+  report: MaskedReportView;
+  commercialPreviewEnabled?: boolean;
+}) {
+  const enabled =
+    commercialPreviewEnabled ??
+    isCommercialPreviewEnabled(process.env.NEXT_PUBLIC_COMMERCIAL_PREVIEW);
+  const [localState, setLocalState] = useState<PreviewState>("A");
+  const effectiveState = resolveEffectivePreviewState({
+    enabled,
+    localState,
+    searchParams: null,
+  });
+  const view = resolvePreviewView({
+    state: effectiveState,
+    nickname: report.nickname,
+  });
+
   return (
     <article className="animate-report-enter w-full max-w-[350px] rounded-sheet border border-line bg-sheet px-6 py-6 md:max-w-[576px] md:p-6">
+      {enabled ? (
+        <CommercialPreviewBar onChange={setLocalState} state={localState} />
+      ) : null}
+
       <header className="mb-5 flex items-start justify-between gap-4">
-        <h1 className="font-serif text-display text-ink">{report.nickname}的基本分析</h1>
+        <h1 className="font-serif text-display text-ink">{view.title}</h1>
         <span
           aria-hidden="true"
           className="flex size-[38px] shrink-0 items-center justify-center rounded-[1px] border-2 border-seal-deeper bg-seal font-serif text-[13px] font-bold leading-none text-sheet"
@@ -60,7 +94,7 @@ export function ReportCard({ report }: { report: MaskedReportView }) {
           {`【 行動指引・破局之著 】  ${report.action}`}
         </p>
 
-        <AdvancedLockedPanel />
+        <AdvancedLockedPanel view={view} />
 
         <Disclaimer text={report.disclaimer} />
       </div>
