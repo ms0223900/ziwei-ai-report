@@ -5,6 +5,7 @@ import {
   HIGH_RISK_MESSAGES,
   LOCKED_FIELDS,
   LOCK_CAPTION,
+  REPORT_SLOTS,
 } from "./constants";
 import {
   generationFailedError,
@@ -32,6 +33,18 @@ describe("shared copy and error codes", () => {
       "path_compare",
       "rationale",
     ]);
+  });
+
+  it("exposes named commercial report slots", () => {
+    expect(REPORT_SLOTS).toEqual({
+      lockActionPlan: "slot-lock-action-plan",
+      lockRationale: "slot-lock-rationale",
+      lockPathCompare: "slot-lock-path-compare",
+      delivery: "slot-delivery",
+      unlockCta: "slot-unlock-cta",
+      followup: "slot-followup",
+      subscribe: "slot-subscribe",
+    });
   });
 
   it("keeps the five high-risk sentences from the spec", () => {
