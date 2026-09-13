@@ -9,9 +9,13 @@ import {
   REPORT_SLOTS,
 } from "./constants";
 import {
+  forbiddenLockedError,
   generationFailedError,
+  loginRequiredError,
   persistFailedError,
   schemaInvalidError,
+  unauthorizedError,
+  updateFailedError,
 } from "./errors";
 
 describe("shared copy and error codes", () => {
@@ -87,5 +91,33 @@ describe("shared copy and error codes", () => {
       status: 503,
       message: "儲存失敗，請再試一次。",
     });
+  });
+
+  it("maps membership grant and GET errors to spec copy", () => {
+    expect(unauthorizedError()).toMatchObject({
+      error_code: "UNAUTHENTICATED",
+      status: 401,
+      message: ERROR_MESSAGES.UNAUTHORIZED,
+    });
+    expect(loginRequiredError()).toMatchObject({
+      error_code: "UNAUTHENTICATED",
+      status: 401,
+      message: ERROR_MESSAGES.LOGIN_REQUIRED,
+    });
+    expect(forbiddenLockedError()).toMatchObject({
+      error_code: "FORBIDDEN",
+      status: 403,
+      message: ERROR_MESSAGES.ADVANCED_LOCKED,
+    });
+    expect(updateFailedError()).toMatchObject({
+      error_code: "PERSIST_FAILED",
+      status: 503,
+      message: ERROR_MESSAGES.UPDATE_FAILED,
+    });
+    expect(ERROR_MESSAGES.GRANT_IDENTITY_REQUIRED).toBe(
+      "請提供 email 或 user_id。",
+    );
+    expect(ERROR_MESSAGES.MEMBER_NOT_FOUND).toBe("找不到這位會員。");
+    expect(ERROR_MESSAGES.REPORT_NOT_FOUND).toBe("找不到這份報告。");
   });
 });

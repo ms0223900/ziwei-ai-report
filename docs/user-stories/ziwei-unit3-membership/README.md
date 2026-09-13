@@ -43,10 +43,11 @@
 
 ### Phase 3 — 受控開通與進階讀取
 
-- [ ] US-011 grant-access 測試
-- [ ] US-012 grant-access 實作
-- [ ] US-013 GET 進階報告 測試
-- [ ] US-014 GET 進階報告 實作
+- [x] US-018 記憶體 fake Supabase client
+- [x] US-011 grant-access 測試
+- [x] US-012 grant-access 實作
+- [x] US-013 GET 進階報告 測試
+- [x] US-014 GET 進階報告 實作
 
 ### Phase 4 — 三態畫面
 
@@ -69,8 +70,8 @@ US-005 ─────► US-006
 US-007 ─┬─► US-008
         ├─► US-009
         └─► US-014
-US-011 ─────► US-012
-US-013 ─────► US-014
+US-018 ─┬─► US-011 ─────► US-012
+        └─► US-013 ─────► US-014
 US-015 ─────► US-016 ─────► US-017
 ```
 
@@ -94,10 +95,12 @@ Phase 4 完成條件：先處於該身分再生成，三態畫面正確；登出
 
 ## 重構掃描記錄
 
-- 已掃描至：US-010（2026-09-13）
+- 已掃描至：US-014（2026-09-13）
 - 已知待觀察熱點：
   - `lib/membership/ensureProfile.ts`（新建；只補列）
   - `supabase/migrations/20260913000000_create_profiles.sql`
   - `components/auth/AuthSessionBar.tsx`（US-009／US-010 同檔；仍短）
   - `lib/supabase/session.ts`／`update-session.ts`（cookie adapter 重複 getAll／setAll，未達重構門檻）
-- 備註：無反模式達重構門檻。低／中風險，暫不重構。
+  - `lib/errors.ts`（本包新增 membership helpers／`jsonError`；POST route 仍有一份本地 `jsonError`，未達第三次抽取）
+  - `test/fakes/supabase.ts`（測試替身；不模擬 RLS）
+- 備註：US-018～US-014 無 churn hotspot。低風險，暫不重構。
