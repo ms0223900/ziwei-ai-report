@@ -323,7 +323,7 @@
 | `SUPABASE_SERVICE_ROLE_KEY` | server | 沿用；ensure／GET／grant |
 | `MEMBERSHIP_GRANT_SECRET` | server | 新增 |
 | `MEMBERSHIP_GRANT_ENABLED` | server | 新增；`1` 才開 grant route |
-| `NEXT_PUBLIC_COMMERCIAL_PREVIEW` | public | 沿用；正式驗收本單時為 `0` |
+| `NEXT_PUBLIC_COMMERCIAL_PREVIEW` | public | 沿用；本單驗收建議 `0`。現有 `.env.production` 為 `1`（unit2 對稿），已開通必須覆蓋預覽態 |
 
 ---
 
