@@ -4,7 +4,7 @@
 > 課程大綱原文稱「單元 2｜會員」；**本 repo 已占用單元 2 = 解鎖預留入口**，本檔依使用者指定與既有檔名慣例編號為 **單元 3**。  
 > 前兩版規格：[`2026-09-05-ziwei-unit1-mvp.md`](2026-09-05-ziwei-unit1-mvp.md)（生成／遮罩／`reports`）、[`2026-09-11-ziwei-unit2-commercial-entry.md`](2026-09-11-ziwei-unit2-commercial-entry.md)（具名槽位／即將開放／預覽假文）  
 > 濃縮對照：[`docs/spec.md`](../spec.md) §4（仍寫「單元 2 會員」，內容對齊本單）。  
-> 本檔為開發類規格（第 0～6 節；第 7 節待獨立審查後決定是否附加）。
+> 本檔為開發類規格（第 0～6 節 + 獨立審查後第 7 節）。第 2～5 節已依第 7 節收斂（ensure 只補列、欄位 REVOKE、ssr cookie adapter、先登入再生成、GET 合併 basic、登出清真文）。
 
 ---
 
@@ -77,8 +77,8 @@
 
 - 頁面：`/login`。`signInWithPassword`。成功導向 `/`。
 - 錯誤密碼或找不到帳號：同一句「帳號或密碼不正確。」**禁止**回傳「此信箱不存在」或列出其他帳號。
-- 登出：頁首 `data-report-slot="slot-auth-session"` 內「登出」呼叫 `signOut`，清 cookie session，頁首回到 `slot-auth-entry`，`access_status` 畫面回到訪客。
-- Session 以 `@supabase/ssr` cookie 保存（`package.json` 已有 `@supabase/ssr`）。根 `middleware.ts` 刷新 session；matcher **排除**未來 webhook 路徑（本版尚無 webhook，先寫排除註解即可）。
+- 登出：頁首 `data-report-slot="slot-auth-session"` 內「登出」呼叫 `signOut`，清 cookie session，頁首回到 `slot-auth-entry`，報告區若仍開著則進階三槽回到佔位（丟掉 GET 真文），整體視為訪客。
+- Session 以 `@supabase/ssr` cookie 保存（`package.json` 已有 `@supabase/ssr`）。用 `createBrowserClient`／`createServerClient`；server／middleware（或 Next 16 `proxy.ts`）的 cookie adapter **必須** `getAll` + `setAll`。授權用 `getUser()`／`getClaims()`，**不要**用 `getSession()` 當唯一依據（見第 7 節問題 4）。matcher **排除**未來 webhook 路徑（本版尚無 webhook，先寫排除註解即可）。禁止做成「未登入就不能進 `/`」（見第 7 節問題 2）。
 - 重新整理 `/`：仍能讀到同一使用者；頁首顯示該列 `display_name`。
 - Next 16：`await cookies()`。`createServiceRoleClient` 繼續只走 service role；瀏覽器只使用 anon key + user session。
 
@@ -91,7 +91,7 @@
   - `display_name` = Email `@` 前綴（可之後改）
 - **建立路徑（兩層，缺一不可）**：
   1. `auth.users` INSERT trigger（`SECURITY DEFINER`）寫入預設列。
-  2. 若 trigger 未觸發（既有 user），server `ensureProfile()` 在第一次讀 session 時 upsert，**寫死**上述預設，忽略客戶端傳來的權益值。
+  2. 若 trigger 未觸發（既有 user），server `ensureProfile()` 只做 **insert-if-missing**（`INSERT … ON CONFLICT (user_id) DO NOTHING`）。**禁止**對已存在列 `UPSERT` 覆寫 `access_status`／`points_balance`／`subscription_status`／已改過的 `display_name`（見第 7 節問題 1）。新建列時忽略客戶端傳來的權益值，一律用上表預設。
 - 使用者／Client SDK **不得** `INSERT` 任意 `access_status`。
 - 讀取：已登入頁首與報告三態只讀**自己的**列；不得為了畫面去讀他人列。
 
@@ -124,12 +124,15 @@
 | 狀態 | 判斷 | 報告可見 | 下一步 |
 |---|---|---|---|
 | 訪客 | 無 session | 基本摘要；`slot-lock-*` 封條＋佔位；無進階真文 | `slot-auth-entry`；主 CTA 仍是 unit2「即將開放」 |
-| 已登入未開通 | 有 session 且 `access_status=locked` | 同免費摘要；進階鎖定 | `slot-upgrade`（可用 `slot-unlock-cta` 換文案「升級／開通」）；點擊只顯示「開通由講師受控流程處理，本版不收費」；不呼叫金流、不改 `access_status` |
+| 已登入未開通 | 有 session 且 `access_status=locked` | 同免費摘要；進階鎖定 | 沿用 `slot-unlock-cta`（**不要**另造 `slot-upgrade` selector），文案改「升級／開通」；點擊只顯示「開通由講師受控流程處理，本版不收費」；不呼叫金流、不改 `access_status` |
 | 已開通 | 有 session 且 `access_status=unlocked` | 標題「{暱稱}的進階報告」；`slot-delivery` 填入**該份 report 的** `rationale`／`path_compare`／`action_plan` 真文 | 主 CTA 隱藏或改「已開通」；`slot-followup` 仍鎖定；不附贈點數、不啟用追問 API |
 
-- 已開通進階真文**禁止**使用 unit2 `EXAMPLE_BLOCKS` 預覽假文。來源必須是 DB `reports.advanced_json`（或 Live 寫入的完整進階物件）。
-- 取得真文的唯一新通道：`GET /api/reports/[persistId]`（見下）。訪客與未開通呼叫此 API 不得拿到進階三欄。
+- 已開通進階真文**禁止**使用 unit2 `EXAMPLE_BLOCKS` 預覽假文。來源必須是 DB 該列：`rationale`／`path_compare`／`action_plan` 取 `advanced_json`；`action`／`overall`／`work`／`relationship` 取 `basic_json`（Mock 的 `advanced_json` 沒有 `action`，見第 7 節問題 6）。
+- 取得真文的唯一新通道：`GET /api/reports/[persistId]`（見下）。訪客與未開通呼叫此 API 不得拿到進階三欄。這條 GET 是本單核准的 **unlocked 變體**，**只**放寬「已開通 + 有效 session」這一個端點；`POST /api/reports` 與 `buildReportResponse` 的禁止清單不變。`AGENTS.md`／`.cursor/rules/nextjs.mdc` 的「對外永不帶進階三欄」以本檔此段為準做範圍限縮（見第 7 節問題 2）。
 - `POST /api/reports` **維持單元 1 遮罩**：任何人（含已開通）的 POST 200 仍只回 basic 淺層 + meta + `disclaimer` + 本單附加的 `persist_id`。**永不**在 POST body 帶 `advanced_json`／`rationale`／`path_compare`／`action_plan`。已開通者在 POST 成功後，用回傳的 `persist_id` 再 GET。
+- **三態主驗收路徑＝先處於該身分，再生成**。`/login`、`/register` 會卸載 `HomeClient`，訪客當下的 `persist_id` 會消失（單元 1 刻意不寫 storage）。禁止把「訪客先生成 → 離頁註冊 → 回來看同一列」當 Happy Path（見第 7 節問題 3）。
+- 登出時若報告頁仍開著：必須丟掉 GET 進階 payload，三槽回到佔位，頁首回到 `slot-auth-entry`。禁止只改 header、螢幕上仍留真文。
+- `COMMERCIAL_PREVIEW=1` 時：`access_status=unlocked` **必須覆蓋**預覽態——仍可顯示預覽條，但不得把已開通鎖回 A，也不得用 `EXAMPLE_BLOCKS` 取代 GET 真文。`.env.production` 目前為 `1`（見第 7 節問題 5）。正式本單驗收仍建議 `=0`，避免與 unit2 預覽 AC 混用。
 - `persist_id` = `reports.id`（uuid）。Mock 的 JSON `report_id` 仍可為 `rpt_demo_001`；**禁止**用 `rpt_demo_001` 當 GET 主鍵（多列同值）。`persistMaskedReport` 必須使用 `insertReport` 回傳的 `id`（現況回傳值被丟棄，見 `app/api/reports/route.ts`）。
 - unit2 `COMMERCIAL_PREVIEW=1` 的 A／B／C／D 仍只切假文，**不算**本單已開通驗收。
 
@@ -148,7 +151,9 @@
 
 - 認證：cookie session。無 session → 401 `{ "error_code": "UNAUTHENTICATED", "message": "請先登入。" }`
 - 授權：讀自身 `profiles`；`access_status !== unlocked` → 403 `{ "error_code": "FORBIDDEN", "message": "尚未開通，無法讀取進階報告。" }`，body **不含**進階三欄
+- `persistId` 必須是 uuid；`rpt_demo_001` 或非 uuid → **404**（不要讓 Postgres `22P02` 變 500）。
 - 查詢：service role 依 `reports.id = persistId` 讀列。找不到或 `generation_status !== success` 或 `advanced_json` 為空 → 404 `{ "error_code": "NOT_FOUND", "message": "找不到這份報告。" }`
+- 200 組裝：`basic_json` ∪ 進階三欄（見上）。不要只攤 `advanced_json`。
 - 200（已開通）最低欄位：
 
 ```json
@@ -188,7 +193,7 @@
 
 | HTTP | 條件 | body |
 |---|---|---|
-| 200 | 找到列並寫入 `unlocked` | `{ "user_id": "<uuid>", "access_status": "unlocked" }` |
+| 200 | 找到列並寫入 `unlocked`；**已是 `unlocked` 再打一次仍 200**，列不變 | `{ "user_id": "<uuid>", "access_status": "unlocked" }` |
 | 400 | email／user_id 皆缺或格式錯 | `{ "error_code": "VALIDATION_ERROR", "message": "請提供 email 或 user_id。" }` |
 | 401 | secret 錯或缺 | `{ "error_code": "UNAUTHENTICATED", "message": "未授權。" }` |
 | 404 | 開關關閉，或找不到對應 profile | 開關關閉不洩漏原因；找不到：`{ "error_code": "NOT_FOUND", "message": "找不到這位會員。" }` |
@@ -218,14 +223,14 @@
 ### For Story 2b
 
 - **Happy Path — 登入**: Given 已註冊帳號 When 在 `/login` 輸入正確 Email／密碼 Then 導向 `/`，頁首 `slot-auth-session` 顯示 `display_name`。
-- **Happy Path — 重整**: Given 已登入 When 重新整理 `/` Then 仍為同一使用者，不必再登入。
-- **登出**: Given 已登入 When 點登出 Then session 消失，頁首回到 `slot-auth-entry`。
+- **Happy Path — 重整**: Given 已登入 When 重新整理 `/` Then 仍為同一使用者，不必再登入。（此 AC 需先處理第 7 節問題 4 的 cookie `getAll`/`setAll`。）
+- **登出**: Given 已開通且報告頁已顯示進階真文 When 點登出 Then session 消失，頁首回到 `slot-auth-entry`，進階三槽回到佔位（無 GET 真文）。
 - **錯誤 — 密碼錯**: Given 已註冊信箱 When 輸入錯誤密碼 Then 顯示「帳號或密碼不正確。」；不透露信箱是否存在以外的資訊。
 - **邊界 — Key 不外洩**: Given 前端 bundle 與 Network When 檢查 Then 無 `SUPABASE_SERVICE_ROLE_KEY`、`MEMBERSHIP_GRANT_SECRET`；anon key 可以是 `NEXT_PUBLIC_SUPABASE_ANON_KEY`。
 
 ### For Story 3
 
-- **Happy Path**: Given 新註冊成功 When 讀自身 `profiles` Then 恰有一列：`access_status=locked`、`points_balance=0`、`subscription_status=none`，`user_id` = `auth.users.id`。
+- **Happy Path**: Given 新註冊成功 When 讀自身 `profiles` Then 恰有一列：`access_status=locked`、`points_balance=0`、`subscription_status=none`，`user_id` = `auth.users.id`。（`ensureProfile` 不得在後續重整覆寫此列權益，見第 7 節問題 1。）
 - **邊界 — 不因登入開通**: Given 首次 session When 進入報告頁 Then 進階仍鎖定；`access_status` 仍 `locked`。
 - **邊界 — 客戶端 INSERT 權益**: Given 已登入 When Client SDK `insert` 一列且 `access_status=unlocked` Then 失敗或該列未被接受為開通狀態；不得出現第二個可開通後門。
 
@@ -233,7 +238,7 @@
 
 - **Happy Path**: Given 已登入 When 把 `display_name` 改成「小園」並儲存 Then Client SDK update 成功，頁首顯示「小園」，報告 `nickname` 仍是生辰表單值。
 - **錯誤 — 空白名稱**: Given 已登入 When 送出空白 `display_name` Then 提示「請輸入顯示名稱。」；DB 值不變。
-- **權益寫入失敗**: Given 已登入（含已開通與未開通）When Client SDK `update` `access_status`／`points_balance`／`subscription_status` Then 請求失敗；重新 `select` 自身列，三個權益欄與更新前相同。
+- **權益寫入失敗**: Given 已登入（含已開通與未開通）When Client SDK `update` `access_status`／`points_balance`／`subscription_status` Then 請求失敗；重新 `select` 自身列，三個權益欄與更新前相同。（此 AC 需先處理第 7 節問題 7：先 REVOKE 表層 UPDATE。）
 
 ### For Story 5
 
@@ -245,8 +250,8 @@
 ### For Story 6
 
 - **訪客**: Given 無 session 且示範報告在頁面 When 檢視 Then 基本摘要＋鎖定槽＋`slot-auth-entry`；`GET /api/reports/{persist_id}` 回 401 且無進階三欄。
-- **已登入未開通**: Given session 且 `locked`、同一份報告 When 檢視 Then 進階仍鎖定；可見 `slot-upgrade`；點擊不改 `access_status`、不開金流。`GET` 同一 `persist_id` 回 403 且無進階三欄。
-- **已開通**: Given session 且 `unlocked`，同頁仍有該次 `persist_id` When 前端 GET 成功 Then 標題為「小圓的進階報告」（示範資料）、三槽為 canned／該列進階真文（含 7 天 `action_plan`），不是「預覽用範例」；追問框仍鎖定。
+- **已登入未開通**: Given 已登入且 `locked` When 再送出示範輸入 Then 進階仍鎖定；可見 `slot-unlock-cta`（文案可為「升級／開通」）；點擊不改 `access_status`、不開金流。`GET` 該次 `persist_id` 回 403 且無進階三欄。（此 AC 需先處理第 7 節問題 3：不要用訪客離頁登入後的舊報告。）
+- **已開通**: Given 已登入且 `unlocked` When 再送出示範輸入並 GET 該次 `persist_id` Then 標題為「小圓的進階報告」、三槽為該列進階真文（含 7 天 `action_plan`），不是「預覽用範例」；追問框仍鎖定。（此 AC 需先處理第 7 節問題 2、5、6。）
 - **POST 仍遮罩**: Given 已開通會員 When 再 `POST /api/reports` Then 200 body **沒有** `rationale`／`path_compare`／`action_plan`／`advanced_json`，但有 `persist_id`；接著 GET 才出現進階。
 - **邊界 — 預覽不算開通**: Given `NEXT_PUBLIC_COMMERCIAL_PREVIEW=1` 切到 B When 驗收「已開通」 Then 判定未通過；須 `access_status=unlocked` 且 GET 真文。
 - **邊界 — 已開通無追問**: Given 已開通 When 檢視 Then 無可用追問送出；`points_balance` 仍 0。
@@ -255,7 +260,8 @@
 ### For Story 7
 
 - **Happy Path**: Given `MEMBERSHIP_GRANT_ENABLED=1` 且 secret 正確、該 Email 已有 profile When `POST /api/dev/grant-access` Then 200 且 DB `access_status=unlocked`。
-- **重整仍開通**: Given 剛受控開通 When 重新整理再登出再登入 Then 仍為已開通三態。
+- **重整仍開通**: Given 剛受控開通 When 重新整理再登出再登入 Then 仍為已開通三態。（此 AC 需先處理第 7 節問題 1。）
+- **冪等**: Given 已是 `unlocked` When 再打一次 grant-access Then 仍 200，列維持 `unlocked`。
 - **錯誤 — 無 secret**: Given 錯或缺 Bearer When 呼叫 grant-access Then 401；目標列仍 `locked`。
 - **邊界 — 開關關閉**: Given `MEMBERSHIP_GRANT_ENABLED` 非 `1` When 呼叫 Then 404；不開通。
 - **邊界 — 前端開通無效**: Given 未開通會員 When 只在前端把畫面切成進階或 Client SDK 改 `access_status` Then GET 仍 403；DB 仍 `locked`。
@@ -280,7 +286,7 @@
 | `updated_at` | timestamptz not null default now() | 系統（update trigger） | |
 
 - RLS：`enable`。`authenticated`：`SELECT`／`UPDATE` 僅 `auth.uid() = user_id`。`anon`：無 policy。
-- 欄位權限：`GRANT SELECT` + `GRANT UPDATE (display_name)` 給 `authenticated`；**不** GRANT 權益欄的 UPDATE。另加 trigger：若 `access_status`／`points_balance`／`subscription_status` 被非 service role 變更則 `RAISE`。
+- 欄位權限（順序不可省，見第 7 節問題 7）：先 `REVOKE UPDATE ON TABLE public.profiles FROM authenticated`（以及任何預設表層 UPDATE），再 `GRANT SELECT` + `GRANT UPDATE (display_name)`。只 GRANT 單一欄、不 REVOKE 表層 UPDATE，權益欄仍可被 Client 改寫。另加 trigger：若 `access_status`／`points_balance`／`subscription_status` 被非 service role 變更則 `RAISE`。
 - INSERT：一般角色無 GRANT；只靠 `SECURITY DEFINER` trigger／ensure。
 - 不建 `orders`、`entitlements`、`point_transactions`、`subscriptions`。
 
@@ -301,7 +307,8 @@
 
 - **Supabase Auth + Postgres**：Email／密碼、cookie session、`profiles` RLS。
 - **不新增** OpenRouter 流程、不串 ECPay、無 Webhook。
-- Session client 對齊 architecture：仿 `customer-lead-collector` 的 `lib/supabase/{client,server}` + `middleware.ts`（Next 16 `await cookies()`）。現有 `createServiceRoleClient` 不得拿到瀏覽器。
+- Session client 對齊 architecture：仿 `customer-lead-collector` 的 `lib/supabase/{client,server}` + 刷新層。Next 16 官方檔名是 `proxy.ts`，`middleware.ts` 仍會載入、功能等同；擇一即可，但 cookie 必須 `getAll`/`setAll`（`@supabase/ssr` 0.10）。現有 `createServiceRoleClient` 不得拿到瀏覽器；`lib/supabase/env.ts` 是 `server-only`，browser client 不可 import 它。
+- grant-access 用 `{ email }` 時：service role 查 `auth.users` 對應 id，再更新 `profiles`（`profiles` 無 email 欄）。
 
 ### Performance / SLO
 
@@ -346,12 +353,13 @@
 
 - **與單元 1**：生成、ajv、高風險、POST 遮罩、`reports` 零 policy **保持**。只允許 POST 200 **加** `persist_id`。`insertReport` 回傳的 `id` 必須接到 HTTP。`MaskedReportView` 目前沒有 `persist_id`，不接則 Story 6 GET 無輸入。
 - **與單元 2**：具名槽位與「即將開放」對訪客／未開通仍有效。已開通必須填**真文**，禁止 `lib/commercial/preview.ts` 的 `EXAMPLE_BLOCKS`。預覽 B ≠ 已開通。`slot-unlock-cta` 在未開通改「升級／開通」占位時，點擊仍不得改 DB。
-- **編號衝突**：課程大綱／`docs/spec.md` §4 稱「單元 2 會員」；本 repo 單元 2 已是商業接點。實作跟**本檔**。`AGENTS.md`／`.cursor/rules` 寫「本版不做會員」是指單元 1 範圍，本單明確做會員。
-- **architecture 陷阱 5**（先登入再生成）本單不採用；訪客生成保留。
+- **編號衝突**：課程大綱／`docs/spec.md` §4 稱「單元 2 會員」；本 repo 單元 2 已是商業接點。實作跟**本檔**。`AGENTS.md`／`.cursor/rules/nextjs.mdc`／`supabase.mdc` 寫「本版不做會員／不讀 session／不建 membership 遷移」是指**單元 1 範圍**，本單明確做會員並讀 cookie session（見第 7 節問題 2）。
+- **architecture 陷阱 5**（先登入再生成）本單不採用；訪客生成保留。仿 CLC 的 middleware／proxy **禁止**把 `/` 設成必登入。
 - service role 進前端則 RLS 全廢。只開 RLS、沒 policy，連自己也讀不到。
 - SQL Editor 以 owner 測 RLS 會誤判通過；驗收必須 anon + 兩組使用者 JWT。
-- Email 驗證未關，課堂註冊會停在收信。
+- Email 驗證未關，課堂註冊會停在收信（hosted Supabase 預設 Confirm email＝開）。
 - 只做「能不能用」；點數不足與訂閱到期本版不判斷。
+- `lib/security/secrets-not-leaked.test.ts` 實作時把 `MEMBERSHIP_GRANT_SECRET` 列入守門名單。
 
 ### 二、規格與需求灰區 (Spec-level Gaps / Pre-dev Questions)
 
@@ -366,3 +374,55 @@
 - 若 UAT 用預覽 B 或前端切態主張已開通：暫停，以 `access_status` + GET 真文為準。
 - 若課堂臨時要扣點、訂閱週期、追問、金流：暫停，屬後續單元與本單 Won't Have。
 - 若要求把 GET 改成對未開通也回進階再由前端藏：暫停，違反單元 1 遮罩與本單 403 規則。
+
+---
+
+## 7. ⚠️ 需求前置阻塞問題 (Blocking Issues from Independent Review)
+
+獨立審查（三視角，對照現有程式碼與單元 1／2 spec）發現下列不處理則對應 AC 無法通過的強相關問題。本文第 2～5 節已按本節收斂；本節保留問題、證據與擋住的 AC。
+
+缺的 Auth 頁、`profiles` 遷移、GET、grant-access、`lib/supabase/client.ts` 屬**本次新建**，不列為缺陷。`insertReport` 已回 `id` 但 route 丟棄、`MaskedReportView` 無 `persist_id`，規格已列為必接線，不另開問題。
+
+- **問題 1：`ensureProfile` 若做成覆寫型 upsert，開通會被重整洗回 `locked`**（視角 A＋C）
+  - 證據：原句「第一次讀 session 時 upsert，寫死預設」。開通後 layout／middleware 再跑同一函式，會把 `access_status` 與已改的 `display_name` 蓋掉。
+  - 影響：Story 7「重整仍開通」、Story 4 重整後名稱、Story 2b 重整顯示名。
+  - 處理：第 2 節已改為 `INSERT … ON CONFLICT DO NOTHING`；禁止覆寫已存在列的權益欄與 `display_name`。
+  - 擋住：Story 7 重整仍開通、Story 3 Happy（後續 session）。
+
+- **問題 2：`AGENTS.md`／cursor rules 的全域禁令與本單衝突**（視角 B）
+  - 證據：`AGENTS.md`「不主動實作會員」「對外永不帶出 advanced_json」；`.cursor/rules/nextjs.mdc`「本版不讀 session」「永不把 advanced_json 回給前端」；`lib/masking/buildReportResponse.test.ts` 的 `FORBIDDEN_BODY_KEYS`；`.cursor/rules/supabase.mdc`「單元 2／4 預留檔不建立」。
+  - 影響：實作者跟規則會拒絕 cookie session、拒絕 GET 進階，或把 `/` 做成必登入。
+  - 處理：本單 GET 是唯一核准的 unlocked 變體；POST／`buildReportResponse` 禁令不變。會員與 session 以本檔為準。禁止 middleware 強制登入 `/`。
+  - 擋住：Story 1 不強迫登入、Story 2b 重整、Story 6 已開通 GET。
+
+- **問題 3：離頁登入／註冊會丟掉同頁 `persist_id`**（視角 A＋C）
+  - 證據：`components/home/HomeClient.tsx` 報告只在 `useState`；`/login`、`/register` 卸載元件。單元 1 刻意不寫 storage。
+  - 影響：原 AC「同一份訪客報告」在註冊後無法從 UI 取得舊 uuid。
+  - 處理：第 2／3 節已改為「先處於該身分，再生成」；訪客原列不當 Happy Path。
+  - 擋住：改寫前的 Story 6「同一份報告」AC。
+
+- **問題 4：`@supabase/ssr` 0.10 必須 `getAll`/`setAll`，規格原先只寫 `await cookies()`**（視角 B）
+  - 證據：`@supabase/ssr` 型別與 README：middleware 沒 `setAll` 會隨機登出；不要只靠 `getSession()`。
+  - 影響：Story 2b 重整後仍認得人。
+  - 處理：第 2／4 節已補 cookie adapter 與 `getUser`／`getClaims`。
+  - 擋住：Story 2b Happy Path — 重整。
+
+- **問題 5：production 已開 `COMMERCIAL_PREVIEW=1`，預覽 A 會蓋過已開通**（視角 C）
+  - 證據：`.env.production`；commit `eca1478`；`ReportCard.tsx` 預覽優先、`resolvePreviewView` 在 A 態鎖定；`EXAMPLE_BLOCKS` 為假文。
+  - 影響：正式站驗 Story 6 已開通會看到封條或「預覽用範例」。
+  - 處理：第 2 節已規定 `unlocked` 覆蓋預覽態；驗收本單時建議 `=0`。
+  - 擋住：Story 6 已開通（若在現有 production 驗）。
+
+- **問題 6：Mock `advanced_json` 沒有 `action`，GET 最低欄位卻列了 `action`**（視角 A）
+  - 證據：`lib/generation/fixtures/advanced.valid.json` 無 `action`；`basic.valid.json` 才有；`route.ts` Mock 兩份分存。
+  - 影響：只攤 `advanced_json` 則 GET 缺 `action`。
+  - 處理：第 2 節已改為 basic ∪ 進階三欄。
+  - 擋住：以 GET body 對契約驗收時的 Story 6。
+
+- **問題 7：只 GRANT `display_name`、不先 REVOKE 表層 UPDATE，Client 仍改得到權益欄**（視角 B＋C）
+  - 證據：Supabase Column Level Security：表層 UPDATE 仍在時，欄位 GRANT 不會拿掉其他欄。
+  - 影響：Story 4「權益寫入失敗」、Story 7「前端開通無效」。
+  - 處理：第 4 節已寫先 `REVOKE UPDATE ON TABLE` 再 GRANT 單一欄。
+  - 擋住：Story 4 權益寫入失敗。
+
+另見 `2026-09-13-ziwei-unit3-membership-issues.md`，盤點到的非阻塞問題。
