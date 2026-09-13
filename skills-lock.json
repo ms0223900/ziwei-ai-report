@@ -11,7 +11,7 @@
       "source": "ms0223900/agent-skills",
       "sourceType": "github",
       "skillPath": ".claude/skills/change-report/SKILL.md",
-      "computedHash": "15230f23ff6f08e5eca3b8691b314e797ee8ccc1fc5241adecc36d2e3c98f429"
+      "computedHash": "fbd9d21815b1ee5fb0f2d5f0522d73b498297b85e2c81d2442d408f319c39667"
     },
     "comment-trim": {
       "source": "ms0223900/agent-skills",
@@ -89,7 +89,7 @@
       "source": "ms0223900/agent-skills",
       "sourceType": "github",
       "skillPath": ".claude/skills/new-branch-cloud-agent/SKILL.md",
-      "computedHash": "93add74d8b2f0f2ad441647bc48c85f63fd4b03a0356be385468252dbea94ce6"
+      "computedHash": "2f66687dd5ce6aac734404ded0a39578e0f778e5c6fadaf486f70ef20599f3b9"
     },
     "new-branch-feature": {
       "source": "ms0223900/agent-skills",
@@ -97,11 +97,17 @@
       "skillPath": ".claude/skills/new-branch-feature/SKILL.md",
       "computedHash": "8a8e122896cc8f8dd4b0e644b561cec1cbcd7cc6e08028e47153d233bef85505"
     },
+    "next-package": {
+      "source": "ms0223900/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/next-package/SKILL.md",
+      "computedHash": "34dfb8c00b1184db1915a4c7161b55a00ab5598da0b438ab3cc4e0c73fcd1fa8"
+    },
     "next-task": {
       "source": "ms0223900/agent-skills",
       "sourceType": "github",
       "skillPath": ".claude/skills/next-task/SKILL.md",
-      "computedHash": "7c4b8f6338032303cdba284a9557a0b118ca51ac5703eeffd0432c7467b40e5b"
+      "computedHash": "4186cb64665f2beab0833bb2ad7a1c28aa8e8c8acd426f24da557ad2c294ca5d"
     },
     "pr-acceptance-checklist": {
       "source": "ms0223900/agent-skills",
@@ -113,7 +119,7 @@
       "source": "ms0223900/agent-skills",
       "sourceType": "github",
       "skillPath": ".claude/skills/pr-delivery/SKILL.md",
-      "computedHash": "4e26c43d41a4f8004f9e272e6f3644f6c21bb65d08cdeeddd10dc61afd6ba58f"
+      "computedHash": "9d7be7f069f572643690cc3d5d036e272fe89327b315e2c0d181fa7b1d361760"
     },
     "quick-debug": {
       "source": "ms0223900/agent-skills",
@@ -143,7 +149,7 @@
       "source": "ms0223900/agent-skills",
       "sourceType": "github",
       "skillPath": ".claude/skills/resolve-tracking-dir/SKILL.md",
-      "computedHash": "3cc10d8b5e777dd878ac575226113c282c2b78a65c91be111a0b64543704eaa9"
+      "computedHash": "e70b1acb4251a614630b2c5786f0c3989cf2dc164394c2f7f9b652084b536fe4"
     },
     "security-audit": {
       "source": "ms0223900/agent-skills",
