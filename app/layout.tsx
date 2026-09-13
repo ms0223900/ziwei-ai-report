@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Noto_Sans_TC, Noto_Serif_TC } from "next/font/google";
 
+import { AppHeader } from "../components/auth/AppHeader";
 import "./globals.css";
 
 const notoSansTC = Noto_Sans_TC({
@@ -43,6 +44,7 @@ export default function RootLayout({
       className={`${notoSansTC.variable} ${notoSerifTC.variable} ${ibmPlexMono.variable}`}
     >
       <body className="min-h-screen bg-background font-sans text-on-background antialiased">
+        <AppHeader />
         {children}
       </body>
     </html>

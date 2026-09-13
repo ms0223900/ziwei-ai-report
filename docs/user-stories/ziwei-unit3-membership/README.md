@@ -36,10 +36,10 @@
 
 ### Phase 2 — Auth 入口
 
-- [ ] US-007 SSR session 與刷新層
-- [ ] US-008 Email 註冊與登入頁
-- [ ] US-009 頁首登入入口與 session 區
-- [ ] US-010 更新顯示名稱
+- [x] US-007 SSR session 與刷新層
+- [x] US-008 Email 註冊與登入頁
+- [x] US-009 頁首登入入口與 session 區
+- [x] US-010 更新顯示名稱
 
 ### Phase 3 — 受控開通與進階讀取
 
@@ -94,8 +94,10 @@ Phase 4 完成條件：先處於該身分再生成，三態畫面正確；登出
 
 ## 重構掃描記錄
 
-- 已掃描至：US-006（2026-09-13）
+- 已掃描至：US-010（2026-09-13）
 - 已知待觀察熱點：
   - `lib/membership/ensureProfile.ts`（新建；只補列）
   - `supabase/migrations/20260913000000_create_profiles.sql`
-- 備註：無反模式達重構門檻。低風險，暫不重構。
+  - `components/auth/AuthSessionBar.tsx`（US-009／US-010 同檔；仍短）
+  - `lib/supabase/session.ts`／`update-session.ts`（cookie adapter 重複 getAll／setAll，未達重構門檻）
+- 備註：無反模式達重構門檻。低／中風險，暫不重構。

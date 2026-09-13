@@ -20,6 +20,19 @@ export const REPORT_SLOTS = {
   unlockCta: "slot-unlock-cta",
   followup: "slot-followup",
   subscribe: "slot-subscribe",
+  authEntry: "slot-auth-entry",
+  authSession: "slot-auth-session",
+} as const;
+
+export const AUTH_PASSWORD_MIN_LENGTH = 6;
+
+export const AUTH_MESSAGES = {
+  INVALID_EMAIL: "請輸入有效的電子信箱。",
+  PASSWORD_TOO_SHORT: "請輸入符合長度的密碼。",
+  EMAIL_TAKEN: "此信箱已註冊，請改登入。",
+  INVALID_CREDENTIALS: "帳號或密碼不正確。",
+  DISPLAY_NAME_BLANK: "請輸入顯示名稱。",
+  REGISTER_FAILED: "註冊失敗，請再試一次。",
 } as const;
 
 export type HighRiskCategory =
