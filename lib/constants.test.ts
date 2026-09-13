@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  AUTH_MESSAGES,
   DISCLAIMER,
   ERROR_MESSAGES,
   HIGH_RISK_MESSAGES,
@@ -44,7 +45,12 @@ describe("shared copy and error codes", () => {
       unlockCta: "slot-unlock-cta",
       followup: "slot-followup",
       subscribe: "slot-subscribe",
+      authEntry: "slot-auth-entry",
+      authSession: "slot-auth-session",
     });
+    expect(AUTH_MESSAGES.INVALID_EMAIL).toBe("請輸入有效的電子信箱。");
+    expect(AUTH_MESSAGES.INVALID_CREDENTIALS).toBe("帳號或密碼不正確。");
+    expect(AUTH_MESSAGES.DISPLAY_NAME_BLANK).toBe("請輸入顯示名稱。");
   });
 
   it("keeps the five high-risk sentences from the spec", () => {
