@@ -14,9 +14,36 @@
 - `INSERT … ON CONFLICT (user_id) DO NOTHING`（或等價只補列）
 
 **驗收條件**：
-- [ ] US-005 測試轉綠
-- [ ] 無對已存在列的權益／`display_name` UPDATE
-- [ ] 不從瀏覽器呼叫 service role
+- [x] US-005 測試轉綠
+- [x] 無對已存在列的權益／`display_name` UPDATE
+- [x] 不從瀏覽器呼叫 service role
+
+#### 驗收說明
+
+**整體結論**：PASS ✅
+
+> `npx vitest run lib/membership/ensureProfile.test.ts` → 3 passed。`npm run typecheck` 通過。
+
+---
+
+**AC-1：US-005 轉綠**
+
+狀態：✅ 通過
+
+- `lib/membership/ensureProfile.ts` 以 service role `upsert(..., { ignoreDuplicates: true })` 後再 `select`
+
+**AC-2：不 UPDATE 既有權益／display_name**
+
+狀態：✅ 通過
+
+- payload 固定 locked／0／none；`onConflict` + `ignoreDuplicates`
+- 測試斷言未呼叫 `update`，既有 unlocked／小圓保持
+
+**AC-3：不從瀏覽器打 service role**
+
+狀態：✅ 通過
+
+- 檔頭 `server-only`，只透過 `createServiceRoleClient`
 
 **測試策略**：Test-First
 > 理由：對 US-005 紅燈實作至綠。

@@ -31,8 +31,8 @@
 ### Phase 1 — profiles
 
 - [x] US-004 建立 profiles 遷移
-- [x] US-005 ensureProfile 測試（預期紅燈；待實作轉綠）
-- [ ] US-006 ensureProfile 實作
+- [x] US-005 ensureProfile 測試
+- [x] US-006 ensureProfile 實作
 
 ### Phase 2 — Auth 入口
 
@@ -94,5 +94,8 @@ Phase 4 完成條件：先處於該身分再生成，三態畫面正確；登出
 
 ## 重構掃描記錄
 
-- 已掃描至：尚未實作（本目錄新建）
-- 已知待觀察熱點：無（尚無本單程式變更）
+- 已掃描至：US-006（2026-09-13）
+- 已知待觀察熱點：
+  - `lib/membership/ensureProfile.ts`（新建；只補列）
+  - `supabase/migrations/20260913000000_create_profiles.sql`
+- 備註：無反模式達重構門檻。低風險，暫不重構。
