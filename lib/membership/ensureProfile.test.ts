@@ -51,6 +51,7 @@ describe("ensureProfile", () => {
     const row = await ensureProfile({
       userId: USER_ID,
       email: EMAIL,
+      // @ts-expect-error caller entitlement values must be ignored
       access_status: "unlocked",
       points_balance: 99,
     });
