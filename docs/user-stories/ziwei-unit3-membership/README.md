@@ -30,8 +30,8 @@
 
 ### Phase 1 — profiles
 
-- [ ] US-004 建立 profiles 遷移
-- [ ] US-005 ensureProfile 測試
+- [x] US-004 建立 profiles 遷移
+- [x] US-005 ensureProfile 測試（預期紅燈；待實作轉綠）
 - [ ] US-006 ensureProfile 實作
 
 ### Phase 2 — Auth 入口
