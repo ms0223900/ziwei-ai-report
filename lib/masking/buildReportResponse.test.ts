@@ -29,6 +29,7 @@ const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const specHttp200 = {
+  persist_id: PERSIST_ID,
   report_id: "rpt_demo_001",
   tier: "basic",
   nickname: "小圓",
@@ -50,6 +51,7 @@ describe("buildReportResponse", () => {
   it("returns basic fields, disclaimer, locked_fields, and persist meta", () => {
     const body = buildReportResponse({
       report: completeReport,
+      persist_id: PERSIST_ID,
       meta: persistMeta,
     });
 
@@ -65,6 +67,7 @@ describe("buildReportResponse", () => {
   it("omits advanced fields and advanced_json from the HTTP body", () => {
     const body = buildReportResponse({
       report: completeReport,
+      persist_id: PERSIST_ID,
       advanced_json: advancedValid,
       meta: persistMeta,
     });
@@ -77,6 +80,7 @@ describe("buildReportResponse", () => {
   it("forces outbound tier to basic", () => {
     const body = buildReportResponse({
       report: completeReport,
+      persist_id: PERSIST_ID,
       meta: persistMeta,
     });
 

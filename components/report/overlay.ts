@@ -3,6 +3,7 @@ import basicValid from "../../lib/generation/fixtures/basic.valid.json";
 import type { BirthRequestBody } from "../birth-form/payload";
 
 export type MaskedReportView = {
+  persist_id?: string;
   nickname: string;
   birth_date: string;
   birth_time: string | null;
@@ -66,6 +67,7 @@ export function maskedReportFromApi(
       : (readString(record.birth_time) ?? request.birth_time);
 
   return {
+    persist_id: readString(record.persist_id),
     nickname: readString(record.nickname) ?? request.nickname,
     birth_date: readString(record.birth_date) ?? request.birth_date,
     birth_time: birthTime,
