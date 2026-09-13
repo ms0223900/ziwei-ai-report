@@ -9,6 +9,7 @@ const SECRET_ENV_KEYS = [
   "OPENROUTER_API_KEY",
   "ECPAY_HASH_KEY",
   "ECPAY_HASH_IV",
+  "MEMBERSHIP_GRANT_SECRET",
 ] as const;
 
 function parseEnvExample(content: string): Record<string, string> {
@@ -82,6 +83,8 @@ describe("secrets stay off the public surface", () => {
     expect(example.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY).toBeUndefined();
     expect(example.NEXT_PUBLIC_ECPAY_HASH_KEY).toBeUndefined();
     expect(example.NEXT_PUBLIC_ECPAY_HASH_IV).toBeUndefined();
+    expect(example.NEXT_PUBLIC_MEMBERSHIP_GRANT_SECRET).toBeUndefined();
+    expect(example.MEMBERSHIP_GRANT_ENABLED).toBeDefined();
   });
 
   it("does not read secret keys from NEXT_PUBLIC_ env in app source", () => {
@@ -97,7 +100,7 @@ describe("secrets stay off the public surface", () => {
     for (const file of files) {
       const text = readFileSync(file, "utf8");
       expect(text, file).not.toMatch(
-        /process\.env\.NEXT_PUBLIC_(OPENROUTER|SUPABASE_SERVICE_ROLE|ECPAY)/,
+        /process\.env\.NEXT_PUBLIC_(OPENROUTER|SUPABASE_SERVICE_ROLE|ECPAY|MEMBERSHIP)/,
       );
     }
   });
@@ -126,6 +129,7 @@ describe("secrets stay off the public surface", () => {
       expect(text, file).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
       expect(text, file).not.toContain("ECPAY_HASH_KEY");
       expect(text, file).not.toContain("ECPAY_HASH_IV");
+      expect(text, file).not.toContain("MEMBERSHIP_GRANT_SECRET");
     }
   });
 });

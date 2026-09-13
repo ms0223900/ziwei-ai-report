@@ -24,7 +24,12 @@ const persistMeta = {
   generation_status: "success" as const,
 };
 
+const PERSIST_ID = "00000000-0000-4000-8000-000000000001";
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 const specHttp200 = {
+  persist_id: PERSIST_ID,
   report_id: "rpt_demo_001",
   tier: "basic",
   nickname: "小圓",
@@ -46,6 +51,7 @@ describe("buildReportResponse", () => {
   it("returns basic fields, disclaimer, locked_fields, and persist meta", () => {
     const body = buildReportResponse({
       report: completeReport,
+      persist_id: PERSIST_ID,
       meta: persistMeta,
     });
 
@@ -61,6 +67,7 @@ describe("buildReportResponse", () => {
   it("omits advanced fields and advanced_json from the HTTP body", () => {
     const body = buildReportResponse({
       report: completeReport,
+      persist_id: PERSIST_ID,
       advanced_json: advancedValid,
       meta: persistMeta,
     });
@@ -73,9 +80,36 @@ describe("buildReportResponse", () => {
   it("forces outbound tier to basic", () => {
     const body = buildReportResponse({
       report: completeReport,
+      persist_id: PERSIST_ID,
       meta: persistMeta,
     });
 
     expect(body.tier).toBe("basic");
+  });
+
+  it("includes uuid persist_id that is not the mock report_id", () => {
+    const body = buildReportResponse({
+      report: completeReport,
+      persist_id: PERSIST_ID,
+      meta: persistMeta,
+    });
+
+    expect(body.persist_id).toMatch(UUID_RE);
+    expect(body.persist_id).toBe(PERSIST_ID);
+    expect(body.report_id).toBe("rpt_demo_001");
+    expect(body.persist_id).not.toBe(body.report_id);
+  });
+
+  it("still omits advanced fields when persist_id is attached", () => {
+    const body = buildReportResponse({
+      report: completeReport,
+      persist_id: PERSIST_ID,
+      advanced_json: advancedValid,
+      meta: persistMeta,
+    });
+
+    for (const key of FORBIDDEN_BODY_KEYS) {
+      expect(body).not.toHaveProperty(key);
+    }
   });
 });

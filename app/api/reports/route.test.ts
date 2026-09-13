@@ -70,7 +70,10 @@ const validatedBirth = {
   focus: "工作" as const,
 };
 
+const PERSIST_ID = "11111111-1111-4111-8111-111111111111";
+
 const specHttp200 = {
+  persist_id: PERSIST_ID,
   report_id: "rpt_demo_001",
   tier: "basic" as const,
   nickname: "小圓",
@@ -114,7 +117,7 @@ describe("POST /api/reports", () => {
       data: { ...basicValid, ...advancedValid },
     });
     insertReport.mockResolvedValue({
-      id: "11111111-1111-4111-8111-111111111111",
+      id: PERSIST_ID,
       status: "basic",
       generation_status: "success",
     });
@@ -132,6 +135,41 @@ describe("POST /api/reports", () => {
       expect(json).not.toHaveProperty(key);
     }
     expect(insertReport).toHaveBeenCalledOnce();
+    expect(buildReportResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ persist_id: PERSIST_ID }),
+    );
+    expect(json.persist_id).toBe(PERSIST_ID);
+  });
+
+  it("returns a different persist_id for two successful mock valid POSTs", async () => {
+    const secondId = "22222222-2222-4222-8222-222222222222";
+    insertReport
+      .mockResolvedValueOnce({
+        id: PERSIST_ID,
+        status: "basic",
+        generation_status: "success",
+      })
+      .mockResolvedValueOnce({
+        id: secondId,
+        status: "basic",
+        generation_status: "success",
+      });
+    buildReportResponse
+      .mockReturnValueOnce(specHttp200)
+      .mockReturnValueOnce({ ...specHttp200, persist_id: secondId });
+
+    const first = await (await postReports(validBody)).json();
+    const second = await (await postReports(validBody)).json();
+
+    expect(first.persist_id).toBe(PERSIST_ID);
+    expect(second.persist_id).toBe(secondId);
+    expect(first.persist_id).not.toBe(second.persist_id);
+    expect(buildReportResponse.mock.calls[0][0].persist_id).toBe(PERSIST_ID);
+    expect(buildReportResponse.mock.calls[1][0].persist_id).toBe(secondId);
+    for (const key of FORBIDDEN_BODY_KEYS) {
+      expect(first).not.toHaveProperty(key);
+      expect(second).not.toHaveProperty(key);
+    }
   });
 
   it("returns 400 VALIDATION_ERROR and skips generate/insert", async () => {
@@ -290,7 +328,7 @@ describe("POST /api/reports live OpenRouter branch", () => {
     validateAdvanced.mockReturnValue({ ok: true, data: advancedValid });
     validateComplete.mockReturnValue({ ok: true, data: completeLive });
     insertReport.mockResolvedValue({
-      id: "11111111-1111-4111-8111-111111111111",
+      id: PERSIST_ID,
       status: "basic",
       generation_status: "success",
     });

@@ -66,7 +66,30 @@ describe("maskedReportFromApi", () => {
     expect(report.work).toBe("API 事業");
     expect(report.relationship).toBe("API 關係");
     expect(report.action).toBe("API 行動");
+    expect(report.persist_id).toBeUndefined();
     expect(JSON.stringify(report)).not.toContain("rationale");
+  });
+
+  it("forwards persist_id from a successful API body", () => {
+    const report = maskedReportFromApi(
+      {
+        persist_id: "00000000-0000-4000-8000-000000000001",
+        nickname: "阿明",
+        birth_date: "1990-01-02",
+        birth_time: "卯",
+        time_unknown: false,
+        focus: "關係",
+        overall: "API 總覽",
+        work: "API 事業",
+        relationship: "API 關係",
+        action: "API 行動",
+        disclaimer: DISCLAIMER,
+        status: "basic",
+      },
+      request,
+    );
+
+    expect(report.persist_id).toBe("00000000-0000-4000-8000-000000000001");
   });
 
   it("falls back to canned copy when the 200 body is incomplete", () => {

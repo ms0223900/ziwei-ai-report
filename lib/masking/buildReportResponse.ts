@@ -12,11 +12,13 @@ export type ReportPersistMeta = {
 
 export type BuildReportResponseInput = {
   report: Record<string, unknown>;
+  persist_id: string;
   advanced_json?: unknown;
   meta: ReportPersistMeta;
 };
 
 export type MaskedReportResponse = {
+  persist_id: string;
   report_id: string;
   tier: "basic";
   nickname: string;
@@ -52,6 +54,7 @@ export function buildReportResponse(
   const { report } = input;
 
   return {
+    persist_id: input.persist_id,
     report_id: readString(report.report_id),
     tier: "basic",
     nickname: readString(report.nickname),
