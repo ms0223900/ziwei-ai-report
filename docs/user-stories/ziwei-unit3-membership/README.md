@@ -24,9 +24,9 @@
 
 ### Phase 0 — persist_id 與 env
 
-- [ ] US-001 POST persist_id 測試
-- [ ] US-002 POST persist_id 實作
-- [ ] US-003 會員環境變數與機密守門
+- [x] US-001 POST persist_id 測試
+- [x] US-002 POST persist_id 實作
+- [x] US-003 會員環境變數與機密守門
 
 ### Phase 1 — profiles
 

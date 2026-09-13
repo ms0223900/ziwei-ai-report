@@ -106,8 +106,9 @@ async function persistMaskedReport(args: {
     focus: args.birth.focus,
   };
 
+  let row;
   try {
-    await insertReport({
+    row = await insertReport({
       nickname: args.birth.nickname,
       birth_date: args.birth.birth_date,
       birth_time: args.birth.birth_time,
@@ -132,6 +133,7 @@ async function persistMaskedReport(args: {
   return Response.json(
     buildReportResponse({
       report: basicForPersist,
+      persist_id: row.id,
       advanced_json: args.advanced,
       meta: {
         status: "basic",
