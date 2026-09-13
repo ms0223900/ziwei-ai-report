@@ -17,11 +17,36 @@ import {
   PREVIEW_NO_DEDUCT,
   REPORT_SLOTS,
   SUBSCRIBE_ACTIVE_PREVIEW,
+  MEMBERSHIP_CTA_UPGRADE,
+  MEMBERSHIP_GRANT_NOTE,
   SUBSCRIBE_LABEL,
   UPCOMING_UNLOCK_NOTE,
 } from "../../lib/constants";
+import advancedValid from "../../lib/generation/fixtures/advanced.valid.json";
+import { resolveMembershipView } from "../../lib/membership/view";
 import { overlayCannedReport } from "./overlay";
 import { ReportCard } from "./ReportCard";
+
+const unlockedMembership = resolveMembershipView({
+  accessStatus: "unlocked",
+  hasSession: true,
+  previewEnabled: true,
+  previewState: "B",
+  nickname: "小圓",
+  advanced: {
+    rationale: advancedValid.rationale,
+    path_compare: advancedValid.path_compare,
+    action_plan: [...advancedValid.action_plan],
+  },
+});
+
+const lockedMembership = resolveMembershipView({
+  accessStatus: "locked",
+  hasSession: true,
+  previewEnabled: false,
+  previewState: "A",
+  nickname: "小圓",
+});
 
 afterEach(cleanup);
 
@@ -165,6 +190,42 @@ describe("ReportCard", () => {
     expect(screen.getAllByRole("status")[0].textContent).toBe(UPCOMING_UNLOCK_NOTE);
     expect(fetchSpy).not.toHaveBeenCalled();
     fetchSpy.mockRestore();
+  });
+
+  it("renders unlocked GET text instead of preview examples", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <ReportCard
+        commercialPreviewEnabled
+        membership={unlockedMembership}
+        report={demoReport}
+      />,
+    );
+
+    await user.selectOptions(screen.getByRole("combobox", { name: "預覽態" }), "B");
+
+    expect(screen.getByRole("heading", { name: "小圓的進階報告" })).toBeTruthy();
+    expect(screen.getByText(advancedValid.rationale)).toBeTruthy();
+    expect(screen.getByText(advancedValid.path_compare.path_a)).toBeTruthy();
+    expect(screen.getByText(/第 1 天/)).toBeTruthy();
+    expect(container.textContent).not.toContain(PREVIEW_EXAMPLE_MARK);
+    expect(screen.getByText("已開通")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "解鎖完整報告" })).toBeNull();
+    expect(screen.getByPlaceholderText(FOLLOWUP_PLACEHOLDER)).toHaveProperty(
+      "readOnly",
+      true,
+    );
+  });
+
+  it("shows the instructor-controlled note for a locked member CTA", async () => {
+    const user = userEvent.setup();
+    render(<ReportCard membership={lockedMembership} report={demoReport} />);
+
+    await user.click(screen.getByRole("button", { name: MEMBERSHIP_CTA_UPGRADE }));
+
+    expect(screen.getByRole("status").textContent).toBe(MEMBERSHIP_GRANT_NOTE);
+    expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
+    expect(screen.queryByText(advancedValid.rationale)).toBeNull();
   });
 
   it("omits 女命 for a non-demo nickname", () => {

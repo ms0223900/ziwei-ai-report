@@ -3,10 +3,14 @@
 import { useState } from "react";
 import {
   LOCK_CAPTION,
+  MEMBERSHIP_CTA_UNLOCKED,
+  MEMBERSHIP_CTA_UPGRADE,
+  MEMBERSHIP_GRANT_NOTE,
   REPORT_SLOTS,
   UPCOMING_UNLOCK_NOTE,
 } from "../../lib/constants";
 import type { PreviewView } from "../../lib/commercial/preview";
+import type { MembershipAdvanced, MembershipView } from "../../lib/membership/view";
 import { CommercialSecondaryZone } from "./CommercialSecondaryZone";
 
 const LOCKED_BLOCKS = [
@@ -40,12 +44,58 @@ function PlaceholderBars() {
   );
 }
 
-export function AdvancedLockedPanel({ view }: { view: PreviewView }) {
+function RealAdvancedBody({
+  field,
+  advanced,
+}: {
+  field: (typeof LOCKED_BLOCKS)[number]["field"];
+  advanced: MembershipAdvanced;
+}) {
+  if (field === "actionPlan") {
+    return (
+      <ol className="flex list-decimal flex-col gap-1.5 pl-4 text-[13px] font-medium leading-snug text-sheet">
+        {advanced.action_plan.map((day) => (
+          <li key={day}>{day}</li>
+        ))}
+      </ol>
+    );
+  }
+
+  if (field === "rationale") {
+    return (
+      <p className="text-[13px] font-medium leading-snug text-sheet">
+        {advanced.rationale}
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5 text-[13px] font-medium leading-snug text-sheet">
+      <p>{advanced.path_compare.path_a}</p>
+      <p>{advanced.path_compare.path_b}</p>
+      <p>{advanced.path_compare.note}</p>
+    </div>
+  );
+}
+
+export function AdvancedLockedPanel({
+  membership,
+  view,
+}: {
+  membership?: MembershipView;
+  view: PreviewView;
+}) {
   const [ctaClicked, setCtaClicked] = useState(false);
+  const realAdvanced =
+    membership && !membership.advancedLocked ? membership.advanced : null;
+  const upgradeCta = membership?.ctaLabel === MEMBERSHIP_CTA_UPGRADE;
+  const showCta = membership ? membership.showCta : view.showCta;
+  const showUnlockedLabel =
+    membership && !membership.advancedLocked && !membership.showCta;
 
   return (
     <div className="flex flex-col gap-5">
-      {view.advancedLocked ? (
+      {view.advancedLocked && !realAdvanced ? (
         <div className="flex h-14 items-center justify-center">
           <div
             aria-hidden="true"
@@ -71,7 +121,9 @@ export function AdvancedLockedPanel({ view }: { view: PreviewView }) {
             <h3 className="text-[13px] font-medium leading-snug text-sheet">
               {block.title}
             </h3>
-            {view.advancedLocked || !view.exampleBlocks ? (
+            {realAdvanced ? (
+              <RealAdvancedBody advanced={realAdvanced} field={block.field} />
+            ) : view.advancedLocked || !view.exampleBlocks ? (
               <PlaceholderBars />
             ) : (
               <p className="text-[13px] font-medium leading-snug text-sheet">
@@ -82,7 +134,13 @@ export function AdvancedLockedPanel({ view }: { view: PreviewView }) {
         ))}
       </div>
 
-      {view.showCta ? (
+      {showUnlockedLabel ? (
+        <p className="text-[13px] font-medium text-ink-soft">
+          {MEMBERSHIP_CTA_UNLOCKED}
+        </p>
+      ) : null}
+
+      {showCta ? (
         <div
           className="flex flex-col gap-2"
           data-report-slot={REPORT_SLOTS.unlockCta}
@@ -93,13 +151,15 @@ export function AdvancedLockedPanel({ view }: { view: PreviewView }) {
               onClick={() => setCtaClicked(true)}
               type="button"
             >
-              解鎖完整報告
+              {upgradeCta ? MEMBERSHIP_CTA_UPGRADE : "解鎖完整報告"}
             </button>
-            <span className="text-[13px] font-medium text-ink-soft">即將開放</span>
+            {upgradeCta ? null : (
+              <span className="text-[13px] font-medium text-ink-soft">即將開放</span>
+            )}
           </div>
           {ctaClicked ? (
             <p className="text-[13px] font-medium text-ink" role="status">
-              {UPCOMING_UNLOCK_NOTE}
+              {upgradeCta ? MEMBERSHIP_GRANT_NOTE : UPCOMING_UNLOCK_NOTE}
             </p>
           ) : null}
         </div>
