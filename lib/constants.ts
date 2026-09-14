@@ -11,6 +11,9 @@ export const LOCKED_FIELDS = [
 ] as const;
 
 export const UPCOMING_UNLOCK_NOTE = "解鎖即將開放，本版不收費。";
+export const MEMBERSHIP_GRANT_NOTE = "開通由講師受控流程處理，本版不收費";
+export const MEMBERSHIP_CTA_UPGRADE = "升級／開通";
+export const MEMBERSHIP_CTA_UNLOCKED = "已開通";
 
 export const REPORT_SLOTS = {
   lockActionPlan: "slot-lock-action-plan",
@@ -55,6 +58,13 @@ export const ERROR_MESSAGES = {
   SCHEMA_INVALID: "報告格式驗證失敗，請再試一次。",
   GENERATION_FAILED: "生成失敗，請再試一次。",
   PERSIST_FAILED: "儲存失敗，請再試一次。",
+  UPDATE_FAILED: "更新失敗，請再試一次。",
+  UNAUTHORIZED: "未授權。",
+  LOGIN_REQUIRED: "請先登入。",
+  GRANT_IDENTITY_REQUIRED: "請提供 email 或 user_id。",
+  MEMBER_NOT_FOUND: "找不到這位會員。",
+  REPORT_NOT_FOUND: "找不到這份報告。",
+  ADVANCED_LOCKED: "尚未開通，無法讀取進階報告。",
 } as const;
 
 export const FOLLOWUP_PLACEHOLDER = "追問需點數或訂閱";

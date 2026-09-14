@@ -5,7 +5,10 @@ export type ErrorCode =
   | "SCHEMA_INVALID"
   | "GENERATION_FAILED"
   | "PERSIST_FAILED"
-  | "HIGH_RISK";
+  | "HIGH_RISK"
+  | "UNAUTHENTICATED"
+  | "FORBIDDEN"
+  | "NOT_FOUND";
 
 export class AppError extends Error {
   readonly error_code: ErrorCode;
@@ -33,4 +36,35 @@ export function generationFailedError(): AppError {
 
 export function persistFailedError(): AppError {
   return new AppError("PERSIST_FAILED", ERROR_MESSAGES.PERSIST_FAILED, 503);
+}
+
+export function updateFailedError(): AppError {
+  return new AppError("PERSIST_FAILED", ERROR_MESSAGES.UPDATE_FAILED, 503);
+}
+
+export function unauthorizedError(): AppError {
+  return new AppError("UNAUTHENTICATED", ERROR_MESSAGES.UNAUTHORIZED, 401);
+}
+
+export function loginRequiredError(): AppError {
+  return new AppError("UNAUTHENTICATED", ERROR_MESSAGES.LOGIN_REQUIRED, 401);
+}
+
+export function forbiddenLockedError(): AppError {
+  return new AppError("FORBIDDEN", ERROR_MESSAGES.ADVANCED_LOCKED, 403);
+}
+
+export function memberNotFoundError(): AppError {
+  return new AppError("NOT_FOUND", ERROR_MESSAGES.MEMBER_NOT_FOUND, 404);
+}
+
+export function reportNotFoundError(): AppError {
+  return new AppError("NOT_FOUND", ERROR_MESSAGES.REPORT_NOT_FOUND, 404);
+}
+
+export function jsonError(error: AppError): Response {
+  return Response.json(
+    { error_code: error.error_code, message: error.message },
+    { status: error.status },
+  );
 }
