@@ -1,5 +1,6 @@
 import { DISCLAIMER } from "../../lib/constants";
 import basicValid from "../../lib/generation/fixtures/basic.valid.json";
+import type { MembershipAdvanced } from "../../lib/membership/view";
 import type { BirthRequestBody } from "../birth-form/payload";
 
 export type MaskedReportView = {
@@ -85,4 +86,43 @@ export function maskedReportFromApi(
 export function isPersistFailedBody(body: unknown): boolean {
   const record = asRecord(body);
   return readString(record?.error_code) === "PERSIST_FAILED";
+}
+
+function readPathCompare(value: unknown): MembershipAdvanced["path_compare"] | null {
+  const record = asRecord(value);
+  if (!record) {
+    return null;
+  }
+  const pathA = readString(record.path_a);
+  const pathB = readString(record.path_b);
+  const note = readString(record.note);
+  if (!pathA || !pathB || !note) {
+    return null;
+  }
+  return { path_a: pathA, path_b: pathB, note };
+}
+
+export function advancedFromGetApi(body: unknown): MembershipAdvanced | null {
+  const record = asRecord(body);
+  if (!record || readString(record.error_code)) {
+    return null;
+  }
+
+  const rationale = readString(record.rationale);
+  const pathCompare = readPathCompare(record.path_compare);
+  const plan = record.action_plan;
+  if (!rationale || !pathCompare || !Array.isArray(plan)) {
+    return null;
+  }
+
+  const actionPlan = plan.filter((item): item is string => typeof item === "string");
+  if (actionPlan.length === 0) {
+    return null;
+  }
+
+  return {
+    rationale,
+    path_compare: pathCompare,
+    action_plan: actionPlan,
+  };
 }

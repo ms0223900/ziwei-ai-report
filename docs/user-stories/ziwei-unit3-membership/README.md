@@ -51,9 +51,9 @@
 
 ### Phase 4 — 三態畫面
 
-- [ ] US-015 會員三態視圖 測試
-- [ ] US-016 會員三態視圖 實作
-- [ ] US-017 三態報告畫面
+- [x] US-015 會員三態視圖 測試
+- [x] US-016 會員三態視圖 實作
+- [x] US-017 三態報告畫面
 
 ## 依賴鏈摘要
 
@@ -95,12 +95,13 @@ Phase 4 完成條件：先處於該身分再生成，三態畫面正確；登出
 
 ## 重構掃描記錄
 
-- 已掃描至：US-014（2026-09-13）
+- 已掃描至：US-017（2026-09-13）
 - 已知待觀察熱點：
   - `lib/membership/ensureProfile.ts`（新建；只補列）
   - `supabase/migrations/20260913000000_create_profiles.sql`
   - `components/auth/AuthSessionBar.tsx`（US-009／US-010 同檔；仍短）
   - `lib/supabase/session.ts`／`update-session.ts`（cookie adapter 重複 getAll／setAll，未達重構門檻）
-  - `lib/errors.ts`（本包新增 membership helpers／`jsonError`；POST route 仍有一份本地 `jsonError`，未達第三次抽取）
+  - `lib/errors.ts`（membership helpers／`jsonError`；POST route 仍有一份本地 `jsonError`）
   - `test/fakes/supabase.ts`（測試替身；不模擬 RLS）
-- 備註：US-018～US-014 無 churn hotspot。低風險，暫不重構。
+  - `components/report/AdvancedLockedPanel.tsx`（本包兼 preview 假文與 GET 真文；仍短）
+- 備註：US-015～US-017 無 churn hotspot。低風險，暫不重構。

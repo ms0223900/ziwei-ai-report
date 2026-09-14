@@ -11,6 +11,9 @@ export const LOCKED_FIELDS = [
 ] as const;
 
 export const UPCOMING_UNLOCK_NOTE = "解鎖即將開放，本版不收費。";
+export const MEMBERSHIP_GRANT_NOTE = "開通由講師受控流程處理，本版不收費";
+export const MEMBERSHIP_CTA_UPGRADE = "升級／開通";
+export const MEMBERSHIP_CTA_UNLOCKED = "已開通";
 
 export const REPORT_SLOTS = {
   lockActionPlan: "slot-lock-action-plan",
