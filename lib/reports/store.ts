@@ -1,6 +1,6 @@
 /**
  * ajv 通過後寫入 reports。固定 status=basic、generation_status=success。
- * 驗證失敗路徑不呼叫本函式（由 Route 保證）。本版不提供 GET。
+ * 驗證失敗路徑不呼叫本函式（由 Route 保證）。讀取進階走 GET /api/reports/[persistId]。
  */
 import "server-only";
 import { persistFailedError } from "../errors";

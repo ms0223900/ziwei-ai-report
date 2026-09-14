@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { DISCLAIMER } from "../../lib/constants";
 import {
+  advancedFromGetApi,
   isPersistFailedBody,
   maskedReportFromApi,
   overlayCannedReport,
 } from "./overlay";
+import advancedValid from "../../lib/generation/fixtures/advanced.valid.json";
 
 describe("overlayCannedReport", () => {
   it("keeps canned short copy and overlays the submitted birth fields", () => {
@@ -103,6 +105,31 @@ describe("maskedReportFromApi", () => {
       request,
     );
     expect(report.overall).toContain("未知時辰，準確度較低");
+  });
+});
+
+describe("advancedFromGetApi", () => {
+  it("reads rationale, path_compare object, and action_plan list", () => {
+    const advanced = advancedFromGetApi({
+      persist_id: "11111111-1111-4111-8111-111111111111",
+      rationale: advancedValid.rationale,
+      path_compare: advancedValid.path_compare,
+      action_plan: advancedValid.action_plan,
+    });
+
+    expect(advanced?.rationale).toBe(advancedValid.rationale);
+    expect(advanced?.path_compare).toEqual(advancedValid.path_compare);
+    expect(advanced?.action_plan).toHaveLength(7);
+  });
+
+  it("returns null on 403-style bodies so locked GET cannot leak fields", () => {
+    expect(
+      advancedFromGetApi({
+        error_code: "FORBIDDEN",
+        message: "尚未開通，無法讀取進階報告。",
+        rationale: advancedValid.rationale,
+      }),
+    ).toBeNull();
   });
 });
 

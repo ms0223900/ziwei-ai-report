@@ -7,8 +7,41 @@ import {
   DISCLAIMER,
   ERROR_MESSAGES,
   HIGH_RISK_MESSAGES,
+  MEMBERSHIP_CTA_UPGRADE,
+  MEMBERSHIP_GRANT_NOTE,
+  PREVIEW_EXAMPLE_MARK,
 } from "../../lib/constants";
+import advancedValid from "../../lib/generation/fixtures/advanced.valid.json";
 import { HomeClient } from "./HomeClient";
+
+const PERSIST_ID = "11111111-1111-4111-8111-111111111111";
+const MASKED_POST_BODY = {
+  persist_id: PERSIST_ID,
+  nickname: "小圓",
+  birth_date: "1993-07-12",
+  birth_time: null,
+  time_unknown: true,
+  focus: "工作",
+  overall: "API 原局總覽句",
+  work: "API 官祿句",
+  relationship: "API 夫妻句",
+  action: "API 行動句",
+  disclaimer: DISCLAIMER,
+  status: "basic",
+};
+const GET_ADVANCED_BODY = {
+  persist_id: PERSIST_ID,
+  nickname: "小圓",
+  overall: "API 原局總覽句",
+  work: "API 官祿句",
+  relationship: "API 夫妻句",
+  action: "API 行動句",
+  rationale: advancedValid.rationale,
+  path_compare: advancedValid.path_compare,
+  action_plan: advancedValid.action_plan,
+  locked_fields: [],
+  access_status: "unlocked",
+};
 
 afterEach(() => {
   cleanup();
@@ -261,5 +294,76 @@ describe("HomeClient 單頁 wizard（US-022）", () => {
         name: "這次沒有寫成報告，你可以再試一次。",
       }),
     ).toBeNull();
+  });
+});
+
+describe("HomeClient 會員三態", () => {
+  it("GETs advanced text after POST when unlocked", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.includes(`/api/reports/${PERSIST_ID}`)) {
+        return jsonResponse(200, GET_ADVANCED_BODY);
+      }
+      return jsonResponse(200, MASKED_POST_BODY);
+    });
+
+    render(
+      <HomeClient initialAccessStatus="unlocked" initialHasSession />,
+    );
+    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+
+    expect(await screen.findByRole("heading", { name: "小圓的進階報告" })).toBeTruthy();
+    expect(screen.getByText(advancedValid.rationale)).toBeTruthy();
+    expect(screen.getByText(/第 1 天/)).toBeTruthy();
+    expect(screen.queryByText(PREVIEW_EXAMPLE_MARK)).toBeNull();
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps locked GET failures off the card and does not open access", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.includes(`/api/reports/${PERSIST_ID}`)) {
+        return jsonResponse(403, {
+          error_code: "FORBIDDEN",
+          message: "尚未開通，無法讀取進階報告。",
+          rationale: advancedValid.rationale,
+        });
+      }
+      return jsonResponse(200, MASKED_POST_BODY);
+    });
+
+    render(<HomeClient initialAccessStatus="locked" initialHasSession />);
+    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+
+    expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
+    expect(screen.queryByText(advancedValid.rationale)).toBeNull();
+    await user.click(screen.getByRole("button", { name: MEMBERSHIP_CTA_UPGRADE }));
+    expect(screen.getByRole("status").textContent).toBe(MEMBERSHIP_GRANT_NOTE);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("drops GET text when session props become guest", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.includes(`/api/reports/${PERSIST_ID}`)) {
+        return jsonResponse(200, GET_ADVANCED_BODY);
+      }
+      return jsonResponse(200, MASKED_POST_BODY);
+    });
+
+    const { rerender } = render(
+      <HomeClient initialAccessStatus="unlocked" initialHasSession />,
+    );
+    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    expect(await screen.findByText(advancedValid.rationale)).toBeTruthy();
+
+    rerender(<HomeClient initialAccessStatus={null} initialHasSession={false} />);
+
+    expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
+    expect(screen.queryByText(advancedValid.rationale)).toBeNull();
+    expect(screen.getByText("即將開放")).toBeTruthy();
   });
 });

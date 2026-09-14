@@ -15,10 +15,43 @@
 - 200 只組 spec 列出的欄位
 
 **驗收條件**：
-- [ ] US-013 測試轉綠
-- [ ] 已開通者 POST 200 仍無進階三欄，隨後 GET 才有
-- [ ] 未開通 GET 403
-- [ ] 不新增報告列表 API
+- [x] US-013 測試轉綠
+- [x] 已開通者 POST 200 仍無進階三欄，隨後 GET 才有
+- [x] 未開通 GET 403
+- [x] 不新增報告列表 API
+
+#### 驗收說明
+
+**整體結論**：PASS ✅
+
+> `npx vitest run app/api/reports/[persistId]/route.test.ts` → 4 passed。`npm run build` 列出 `ƒ /api/reports/[persistId]`，無列表路由。本包未對遠端 reports 列做 live GET。
+
+---
+
+**AC-1：US-013 轉綠**
+
+狀態：✅ 通過
+
+- 無 session 401、locked 403、`rpt_demo_001` 404、已開通 200 組 `basic ∪` 進階三欄且無頂層 `advanced_json`
+
+**AC-2：POST 仍遮罩、GET 才有真文**
+
+狀態：✅ 通過
+
+- `buildReportResponse` 禁止清單未改；POST 測試仍斷言無進階三欄
+- GET 200 才帶 `rationale`／`path_compare`／`action_plan`，`action` 取 `basic_json`
+
+**AC-3：未開通 403**
+
+狀態：✅ 通過
+
+- `access_status !== unlocked` → 403「尚未開通，無法讀取進階報告。」且無進階欄
+
+**AC-4：無列表 API**
+
+狀態：✅ 通過
+
+- 只新增動態 `[persistId]` GET，無 `/api/reports` 列表 handler
 
 **測試策略**：Test-First
 > 理由：對 US-013 紅燈實作至綠。

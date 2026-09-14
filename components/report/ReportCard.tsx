@@ -7,6 +7,7 @@ import {
   resolvePreviewView,
   type PreviewState,
 } from "../../lib/commercial/preview";
+import type { MembershipView } from "../../lib/membership/view";
 import { AdvancedLockedPanel } from "./AdvancedLockedPanel";
 import { ChartMatrix } from "./ChartMatrix";
 import { CommercialPreviewBar } from "./CommercialPreviewBar";
@@ -22,9 +23,11 @@ const SECTION_LABELS = {
 export function ReportCard({
   report,
   commercialPreviewEnabled,
+  membership,
 }: {
   report: MaskedReportView;
   commercialPreviewEnabled?: boolean;
+  membership?: MembershipView;
 }) {
   const enabled =
     commercialPreviewEnabled ??
@@ -35,10 +38,21 @@ export function ReportCard({
     localState,
     searchParams: null,
   });
-  const view = resolvePreviewView({
+  const preview = resolvePreviewView({
     state: effectiveState,
     nickname: report.nickname,
   });
+  const unlocked = membership !== undefined && !membership.advancedLocked;
+  const view = unlocked
+    ? {
+        ...preview,
+        title: membership.title,
+        advancedLocked: false,
+        showCta: false,
+        followupLocked: true,
+        exampleBlocks: null,
+      }
+    : preview;
 
   return (
     <article className="animate-report-enter w-full max-w-[350px] rounded-sheet border border-line bg-sheet px-6 py-6 md:max-w-[576px] md:p-6">
@@ -94,7 +108,7 @@ export function ReportCard({
           {`【 行動指引・破局之著 】  ${report.action}`}
         </p>
 
-        <AdvancedLockedPanel view={view} />
+        <AdvancedLockedPanel membership={membership} view={view} />
 
         <Disclaimer text={report.disclaimer} />
       </div>
