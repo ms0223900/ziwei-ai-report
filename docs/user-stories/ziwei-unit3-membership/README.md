@@ -8,7 +8,6 @@
 
 ## 課堂前置（非 US）
 
-- **受控開通怎麼測**：見 [howto-controlled-unlock.md](./howto-controlled-unlock.md)（DB 遷移之後仍要開關、secret、grant API 或 SQL；畫面上的解鎖鈕不會開通）。
 - Supabase Auth **關閉 Confirm email**，否則註冊無 session，US-008／US-009 重整 AC 無法過。
 - 雙帳號隔離、權益欄寫入失敗：須先把 US-004 遷移套到目標專案，再用 anon + 兩組使用者 JWT 驗；SQL Editor owner 不算過關。
 
