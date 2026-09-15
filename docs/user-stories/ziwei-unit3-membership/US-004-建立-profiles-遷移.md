@@ -26,7 +26,7 @@
 
 **整體結論**：PASS ✅
 
-> 已交付 `supabase/migrations/20260913000000_create_profiles.sql`。本環境未對遠端專案執行 migrate；US-008／US-012／US-014 仍未勾。
+> 已交付 `supabase/migrations/20260913000000_create_profiles.sql`，並已套用到 `ziwei-demo`（`pjwzqyaglwhtugmouwmu`）。遠端 history：`create_profiles`（`20260915020228`）。`public.profiles` RLS on、0 列；`reports` 未加 `user_id`。雙帳號 JWT／Confirm email 仍屬課堂前置。
 
 ---
 
