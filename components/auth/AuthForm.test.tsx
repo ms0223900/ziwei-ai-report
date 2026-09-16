@@ -38,6 +38,11 @@ beforeEach(() => {
 });
 
 describe("AuthForm", () => {
+  it("posts the form so a missing JS handler cannot leak credentials in the query", () => {
+    render(<AuthForm mode="register" />);
+    expect(document.querySelector("form")?.getAttribute("method")).toBe("post");
+  });
+
   it("shows the spec email sentence and does not call Auth", async () => {
     const user = userEvent.setup();
     render(<AuthForm mode="register" />);

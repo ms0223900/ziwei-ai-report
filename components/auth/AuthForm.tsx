@@ -88,7 +88,12 @@ export function AuthForm({ mode }: AuthFormProps) {
             : "登入後重整仍會認得你。"}
         </p>
       </header>
-      <form className="flex flex-col gap-6" noValidate onSubmit={handleSubmit}>
+      <form
+        className="flex flex-col gap-6"
+        method="post"
+        noValidate
+        onSubmit={handleSubmit}
+      >
         <div className="flex flex-col gap-2">
           <label className="text-label font-medium text-ink" htmlFor={emailId}>
             電子信箱
