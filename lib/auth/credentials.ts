@@ -2,6 +2,7 @@ import {
   AUTH_MESSAGES,
   AUTH_PASSWORD_MIN_LENGTH,
 } from "../constants";
+import { isSupabasePublicEnvMissingError } from "../supabase/public-env";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -47,6 +48,18 @@ export function mapRegisterAuthError(message: string | undefined): string {
 
 export function mapLoginAuthError(): string {
   return AUTH_MESSAGES.INVALID_CREDENTIALS;
+}
+
+export function mapAuthClientStartError(
+  mode: "login" | "register",
+  error: unknown,
+): string {
+  if (isSupabasePublicEnvMissingError(error)) {
+    return AUTH_MESSAGES.PUBLIC_ENV_MISSING;
+  }
+  return mode === "register"
+    ? AUTH_MESSAGES.REGISTER_FAILED
+    : AUTH_MESSAGES.INVALID_CREDENTIALS;
 }
 
 export function validateDisplayName(

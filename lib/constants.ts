@@ -36,6 +36,8 @@ export const AUTH_MESSAGES = {
   INVALID_CREDENTIALS: "帳號或密碼不正確。",
   DISPLAY_NAME_BLANK: "請輸入顯示名稱。",
   REGISTER_FAILED: "註冊失敗，請再試一次。",
+  PUBLIC_ENV_MISSING:
+    "目前無法連上帳號服務（缺少公開的 Supabase 網址或金鑰）。",
 } as const;
 
 export type HighRiskCategory =

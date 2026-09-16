@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { getSupabasePublicEnv, readSupabasePublicEnv } from "./public-env";
+import {
+  getSupabasePublicEnv,
+  isSupabasePublicEnvMissingError,
+  readSupabasePublicEnv,
+  SUPABASE_PUBLIC_ENV_MISSING_ERROR,
+} from "./public-env";
 
 const ORIGINAL_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const ORIGINAL_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -44,7 +49,13 @@ describe("readSupabasePublicEnv", () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     expect(() => getSupabasePublicEnv()).toThrow(
-      "缺少 NEXT_PUBLIC_SUPABASE_URL 或 NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      SUPABASE_PUBLIC_ENV_MISSING_ERROR,
+    );
+    expect(
+      isSupabasePublicEnvMissingError(new Error(SUPABASE_PUBLIC_ENV_MISSING_ERROR)),
+    ).toBe(true);
+    expect(isSupabasePublicEnvMissingError(new Error("network down"))).toBe(
+      false,
     );
   });
 });
