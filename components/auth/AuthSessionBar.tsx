@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { validateDisplayName } from "../../lib/auth/credentials";
 import { REPORT_SLOTS } from "../../lib/constants";
 import { createBrowserSupabaseClient } from "../../lib/supabase/client";
+
+// TODO(prototype): 顯示名稱暫不提供頁首隨時修改；恢復時見 US-010 與下方註解區塊。
+// import { useState, type FormEvent } from "react";
+// import { validateDisplayName } from "../../lib/auth/credentials";
 
 export type AuthSessionBarProps = {
   accessStatus: "locked" | "unlocked";
@@ -15,13 +17,9 @@ export type AuthSessionBarProps = {
 export function AuthSessionBar({
   accessStatus,
   displayName,
-  userId,
+  userId: _userId,
 }: AuthSessionBarProps) {
   const router = useRouter();
-  const [name, setName] = useState(displayName);
-  const [shownName, setShownName] = useState(displayName);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
 
   async function handleLogout() {
     const supabase = createBrowserSupabaseClient();
@@ -29,6 +27,7 @@ export function AuthSessionBar({
     router.refresh();
   }
 
+  /*
   async function handleSaveName(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const parsed = validateDisplayName(name);
@@ -55,6 +54,7 @@ export function AuthSessionBar({
       setBusy(false);
     }
   }
+  */
 
   return (
     <header className="border-b border-line bg-sheet">
@@ -63,31 +63,40 @@ export function AuthSessionBar({
         data-access-status={accessStatus}
         data-report-slot={REPORT_SLOTS.authSession}
       >
-        <p className="font-serif text-label text-ink">{shownName}</p>
-        <form className="flex flex-wrap items-center gap-2" onSubmit={handleSaveName}>
-          <label className="sr-only" htmlFor="display-name">
-            顯示名稱
-          </label>
-          <input
-            className="min-h-9 w-28 rounded-control border border-line bg-sheet px-2 py-1 text-label text-ink"
-            disabled={busy}
-            id="display-name"
-            name="display_name"
-            onChange={(event) => {
-              setName(event.target.value);
-              if (error) {
-                setError(null);
-              }
-            }}
-            value={name}
-          />
-          <button
-            className="min-h-9 rounded-control border border-line px-3 text-label text-ink hover:border-seal"
-            disabled={busy}
-            type="submit"
-          >
-            儲存
-          </button>
+        <p className="font-serif text-label text-ink">{displayName}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          {/*
+          <form className="flex flex-wrap items-center gap-2" onSubmit={handleSaveName}>
+            <label className="sr-only" htmlFor="display-name">
+              顯示名稱
+            </label>
+            <input
+              className="min-h-9 w-28 rounded-control border border-line bg-sheet px-2 py-1 text-label text-ink"
+              disabled={busy}
+              id="display-name"
+              name="display_name"
+              onChange={(event) => {
+                setName(event.target.value);
+                if (error) {
+                  setError(null);
+                }
+              }}
+              value={name}
+            />
+            <button
+              className="min-h-9 rounded-control border border-line px-3 text-label text-ink hover:border-seal"
+              disabled={busy}
+              type="submit"
+            >
+              儲存
+            </button>
+          </form>
+          {error ? (
+            <p className="w-full text-label text-warn" role="alert">
+              {error}
+            </p>
+          ) : null}
+          */}
           <button
             className="min-h-9 rounded-control px-3 text-label text-ink-soft hover:text-ink"
             onClick={() => {
@@ -97,12 +106,7 @@ export function AuthSessionBar({
           >
             登出
           </button>
-        </form>
-        {error ? (
-          <p className="w-full text-label text-warn" role="alert">
-            {error}
-          </p>
-        ) : null}
+        </div>
       </div>
     </header>
   );
