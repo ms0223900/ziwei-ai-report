@@ -4,21 +4,21 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AUTH_MESSAGES } from "../../lib/constants";
+import { SUPABASE_PUBLIC_ENV_MISSING_ERROR } from "../../lib/supabase/public-env";
 import { AuthForm } from "./AuthForm";
 
 const signUp = vi.fn();
 const signInWithPassword = vi.fn();
 const push = vi.fn();
 const refresh = vi.fn();
+const createBrowserSupabaseClient = vi.hoisted(() => vi.fn());
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push, refresh }),
 }));
 
 vi.mock("../../lib/supabase/client", () => ({
-  createBrowserSupabaseClient: () => ({
-    auth: { signUp, signInWithPassword },
-  }),
+  createBrowserSupabaseClient,
 }));
 
 afterEach(() => {
@@ -27,6 +27,9 @@ afterEach(() => {
 });
 
 beforeEach(() => {
+  createBrowserSupabaseClient.mockReturnValue({
+    auth: { signUp, signInWithPassword },
+  });
   signUp.mockResolvedValue({
     data: { session: { access_token: "tok" }, user: { id: "u1" } },
     error: null,
@@ -99,6 +102,24 @@ describe("AuthForm", () => {
       AUTH_MESSAGES.INVALID_CREDENTIALS,
     );
     expect(screen.getByRole("alert").textContent).not.toContain("不存在");
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("shows the public-env sentence and does not call Auth when the browser client cannot start", async () => {
+    const user = userEvent.setup();
+    createBrowserSupabaseClient.mockImplementation(() => {
+      throw new Error(SUPABASE_PUBLIC_ENV_MISSING_ERROR);
+    });
+    render(<AuthForm mode="register" />);
+
+    await user.type(screen.getByLabelText("電子信箱"), "yuan@example.com");
+    await user.type(screen.getByLabelText("密碼"), "abcdef");
+    await user.click(screen.getByRole("button", { name: "建立帳號" }));
+
+    expect(screen.getByRole("alert").textContent).toBe(
+      AUTH_MESSAGES.PUBLIC_ENV_MISSING,
+    );
+    expect(signUp).not.toHaveBeenCalled();
     expect(push).not.toHaveBeenCalled();
   });
 });

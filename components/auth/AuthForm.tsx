@@ -3,11 +3,11 @@
 import { useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
+  mapAuthClientStartError,
   mapLoginAuthError,
   mapRegisterAuthError,
   validateAuthFields,
 } from "../../lib/auth/credentials";
-import { AUTH_MESSAGES } from "../../lib/constants";
 import { createBrowserSupabaseClient } from "../../lib/supabase/client";
 
 export type AuthFormMode = "login" | "register";
@@ -71,12 +71,8 @@ export function AuthForm({ mode }: AuthFormProps) {
       }
       router.push("/");
       router.refresh();
-    } catch {
-      setError(
-        mode === "register"
-          ? AUTH_MESSAGES.REGISTER_FAILED
-          : AUTH_MESSAGES.INVALID_CREDENTIALS,
-      );
+    } catch (error) {
+      setError(mapAuthClientStartError(mode, error));
     } finally {
       setBusy(false);
     }
