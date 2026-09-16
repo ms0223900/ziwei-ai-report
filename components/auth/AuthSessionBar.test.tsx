@@ -2,16 +2,12 @@
 
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { REPORT_SLOTS } from "../../lib/constants";
 import { AuthSessionBar } from "./AuthSessionBar";
 
 const signOut = vi.fn();
-const refresh = vi.fn();
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh }),
-}));
+const reload = vi.fn();
 
 vi.mock("../../lib/supabase/client", () => ({
   createBrowserSupabaseClient: () => ({
@@ -25,6 +21,12 @@ vi.mock("../../lib/supabase/client", () => ({
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  vi.unstubAllGlobals();
+});
+
+beforeEach(() => {
+  signOut.mockResolvedValue({ error: null });
+  vi.stubGlobal("location", { ...window.location, reload });
 });
 
 describe("AuthSessionBar", () => {
@@ -45,7 +47,7 @@ describe("AuthSessionBar", () => {
 
     await user.click(screen.getByRole("button", { name: "登出" }));
     expect(signOut).toHaveBeenCalledOnce();
-    expect(refresh).toHaveBeenCalledOnce();
+    expect(reload).toHaveBeenCalledOnce();
   });
 
   it("does not offer inline display name editing while US-010 UI is commented out", () => {

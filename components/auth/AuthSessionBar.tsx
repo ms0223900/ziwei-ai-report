@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { REPORT_SLOTS } from "../../lib/constants";
 import { createBrowserSupabaseClient } from "../../lib/supabase/client";
 
@@ -19,12 +18,11 @@ export function AuthSessionBar({
   displayName,
   userId: _userId,
 }: AuthSessionBarProps) {
-  const router = useRouter();
-
   async function handleLogout() {
     const supabase = createBrowserSupabaseClient();
     await supabase.auth.signOut();
-    router.refresh();
+    // HomeClient 報告 state 在 client；僅 refresh 會留下已登出仍見報告的畫面。
+    window.location.reload();
   }
 
   /*
