@@ -40,7 +40,7 @@
 - [x] US-007 SSR session 與刷新層
 - [x] US-008 Email 註冊與登入頁
 - [x] US-009 頁首登入入口與 session 區
-- [x] US-010 更新顯示名稱
+- [⚠️] US-010 更新顯示名稱（頁首編輯 UI 暫註解）
 
 ### Phase 3 — 受控開通與進階讀取
 
@@ -78,7 +78,7 @@ US-015 ─────► US-016 ─────► US-017
 
 Phase 0 完成條件：POST 200 有 uuid `persist_id`、仍無進階三欄；env 與機密守門就位。  
 Phase 1 完成條件：`profiles` SQL 可套用；`ensureProfile` 只補列、不覆寫權益。  
-Phase 2 完成條件：可註冊／登入／登出／重整；頁首有入口；訪客仍可 POST；可改 `display_name`。  
+Phase 2 完成條件：可註冊／登入／登出／重整；頁首有入口；訪客仍可 POST；`display_name` 僅顯示（頁首隨改暫停，見 US-010）。  
 Phase 3 完成條件：受控 grant 可開通；GET 僅已開通回進階真文。  
 Phase 4 完成條件：先處於該身分再生成，三態畫面正確；登出清真文；預覽 B ≠ 已開通。
 
