@@ -16,6 +16,7 @@
 **驗收條件**：
 - [x] 可 seed locked profile，並用 email 找到 user
 - [x] `update access_status` 後再讀仍是 `unlocked`
+- [x] `update` 未 `select` 時 `data` 為 null 但仍寫入；`select` 後才回列
 - [x] 可依 `reports.id` 讀回 basic／advanced JSON
 - [x] `upsert ignoreDuplicates` 不覆寫既有權益／display_name
 - [x] 不連遠端、不讀 `SUPABASE_SERVICE_ROLE_KEY`
@@ -24,7 +25,7 @@
 
 **整體結論**：PASS ✅
 
-> `npx vitest run test/fakes/supabase.test.ts` → 5 passed。記憶體 Map 模擬 `profiles`／`reports`／`auth.admin`，不連遠端。
+> `npx vitest run test/fakes/supabase.test.ts` → 6 passed。`update` 對齊 PostgREST：未 `select` 不回列，仍寫入 Map。
 
 ---
 
@@ -42,19 +43,26 @@
 - `from("profiles").update({ access_status: "unlocked" }).eq("user_id", …)` 寫入同一 Map
 - 第二次 `select().single()` 仍是 `unlocked`
 
-**AC-3：依 reports.id 讀 JSON**
+**AC-3：update 未 select 不回列**
+
+狀態：✅ 通過
+
+- `includeRepresentation` 僅在 `select()` 後為 true
+- `returns no row from update unless select is chained` 斷言空 data 仍寫入
+
+**AC-4：依 reports.id 讀 JSON**
 
 狀態：✅ 通過
 
 - `seedFakeReport()` + `from("reports").eq("id", …).single()` 回 basic／advanced
 
-**AC-4：ignoreDuplicates 不覆寫**
+**AC-5：ignoreDuplicates 不覆寫**
 
 狀態：✅ 通過
 
 - upsert 遇到既有列且 `ignoreDuplicates: true` 時回原列，`小園`／`unlocked` 不變
 
-**AC-5：不連遠端、不讀 service role**
+**AC-6：不連遠端、不讀 service role**
 
 狀態：✅ 通過
 

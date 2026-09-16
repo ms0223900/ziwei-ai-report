@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+usage() {
+  echo "Usage: $0 <email>" >&2
+  exit 1
+}
+
+EMAIL="${1:-}"
+[[ -n "$EMAIL" ]] || usage
+
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 set -a
@@ -9,7 +17,6 @@ source "$ROOT/.env.production"
 set +a
 
 BASE="https://ziwei-ai-report.vercel.app"
-EMAIL="ms0223900@gmail.com"
 
 if [[ -z "${MEMBERSHIP_GRANT_SECRET:-}" ]]; then
   echo "MEMBERSHIP_GRANT_SECRET missing in .env.production" >&2

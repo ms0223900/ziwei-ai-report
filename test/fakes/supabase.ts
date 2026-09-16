@@ -70,9 +70,11 @@ function createTableApi(
   let pendingInsert: Record<string, unknown> | null = null;
   let pendingUpdate: Record<string, unknown> | null = null;
   let upsertIgnoreDuplicates = false;
+  let includeRepresentation = false;
 
   const api = {
     select() {
+      includeRepresentation = true;
       return api;
     },
     insert(row: Record<string, unknown>) {
@@ -115,6 +117,9 @@ function createTableApi(
         }
         const next = { ...current, ...pendingUpdate };
         store.set(String((next as { [key: string]: unknown })[idKey]), next as never);
+        if (!includeRepresentation) {
+          return { data: null, error: null };
+        }
         return { data: next, error: null };
       }
 

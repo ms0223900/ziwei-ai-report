@@ -134,7 +134,7 @@ where user_id = '<auth user uuid>';
 | 400 | email 與 user_id 都缺 | `請提供 email 或 user_id。` |
 | 401 | Bearer 錯或缺 | `未授權。` 目標列仍 `locked` |
 | 404 | 開關不是 `1`（空 body，不洩漏） | 或找不到會員：`找不到這位會員。` |
-| 503 | DB 更新失敗 | `更新失敗，請再試一次。` |
+| 503 | DB 更新失敗（不是「已是 unlocked」） | `更新失敗，請再試一次。` |
 
 查 DB 是否真的開通（SQL Editor）：
 
@@ -155,6 +155,7 @@ limit 20;
 | --- | --- |
 | grant 404、空 body | `MEMBERSHIP_GRANT_ENABLED` 不是剛好 `1`，或部署還沒吃到新 env |
 | grant 401 | `Authorization: Bearer …` 與 server 的 `MEMBERSHIP_GRANT_SECRET` 不一致 |
+| grant 503 但 DB 已 unlocked | 舊版把 update 空回傳列當失敗；修過後應 200 |
 | grant 404「找不到這位會員」 | Email 還沒註冊，或大小寫／空白不符；或 `profiles` 列不存在 |
 | 已 grant 畫面仍鎖定 | 不是同一個帳號；或沒重整；或走了訪客離頁那條舊報告 |
 | 看到「預覽用範例」 | 那是預覽 B，不是 GET 真文。請確認 `access_status=unlocked` 且標題是「進階報告」 |

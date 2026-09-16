@@ -87,14 +87,18 @@ export async function POST(request: Request): Promise<Response> {
       .from("profiles")
       .update({ access_status: "unlocked" })
       .eq("user_id", userId)
+      .select("user_id, access_status")
       .maybeSingle();
 
-    if (error || !data) {
+    if (error) {
       return jsonError(
-        error?.message === "not found"
+        error.message === "not found"
           ? memberNotFoundError()
           : updateFailedError(),
       );
+    }
+    if (!data) {
+      return jsonError(memberNotFoundError());
     }
 
     return Response.json({
