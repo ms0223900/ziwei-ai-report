@@ -77,6 +77,21 @@ describe("POST /api/dev/grant-access", () => {
     });
   });
 
+  it("returns 200 when the profile is already unlocked", async () => {
+    seedFakeUser(state.memory, { id: USER_ID, email: "yuan@example.com" }, {
+      access_status: "unlocked",
+    });
+    const response = await postGrant(
+      { email: "yuan@example.com" },
+      { Authorization: `Bearer ${SECRET}` },
+    );
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      user_id: USER_ID,
+      access_status: "unlocked",
+    });
+  });
+
   it("returns 401 when the secret is wrong and keeps the row locked", async () => {
     const response = await postGrant(
       { email: "yuan@example.com" },

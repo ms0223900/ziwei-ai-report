@@ -61,6 +61,30 @@ describe("fake supabase memory", () => {
     expect(data?.access_status).toBe("unlocked");
   });
 
+  it("returns no row from update unless select is chained", async () => {
+    const memory = createFakeSupabaseMemory();
+    seedFakeUser(memory, { id: USER_ID, email: "yuan@example.com" });
+    const client = createFakeServiceRoleClient(memory);
+
+    const withoutSelect = await client
+      .from("profiles")
+      .update({ access_status: "unlocked" })
+      .eq("user_id", USER_ID)
+      .maybeSingle();
+    expect(withoutSelect).toEqual({ data: null, error: null });
+    expect(memory.profiles.get(USER_ID)?.access_status).toBe("unlocked");
+
+    seedFakeUser(memory, { id: USER_ID, email: "yuan@example.com" });
+    const withSelect = await client
+      .from("profiles")
+      .update({ access_status: "unlocked" })
+      .eq("user_id", USER_ID)
+      .select()
+      .maybeSingle();
+    expect(withSelect.data?.access_status).toBe("unlocked");
+    expect(withSelect.error).toBeNull();
+  });
+
   it("returns a seeded report by id for GET assembly", async () => {
     const memory = createFakeSupabaseMemory();
     seedFakeReport(memory, {
