@@ -3,11 +3,11 @@
 import { useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
+  mapAuthClientStartError,
   mapLoginAuthError,
   mapRegisterAuthError,
   validateAuthFields,
 } from "../../lib/auth/credentials";
-import { AUTH_MESSAGES } from "../../lib/constants";
 import { createBrowserSupabaseClient } from "../../lib/supabase/client";
 
 export type AuthFormMode = "login" | "register";
@@ -71,12 +71,8 @@ export function AuthForm({ mode }: AuthFormProps) {
       }
       router.push("/");
       router.refresh();
-    } catch {
-      setError(
-        mode === "register"
-          ? AUTH_MESSAGES.REGISTER_FAILED
-          : AUTH_MESSAGES.INVALID_CREDENTIALS,
-      );
+    } catch (error) {
+      setError(mapAuthClientStartError(mode, error));
     } finally {
       setBusy(false);
     }
@@ -92,7 +88,12 @@ export function AuthForm({ mode }: AuthFormProps) {
             : "登入後重整仍會認得你。"}
         </p>
       </header>
-      <form className="flex flex-col gap-6" noValidate onSubmit={handleSubmit}>
+      <form
+        className="flex flex-col gap-6"
+        method="post"
+        noValidate
+        onSubmit={handleSubmit}
+      >
         <div className="flex flex-col gap-2">
           <label className="text-label font-medium text-ink" htmlFor={emailId}>
             電子信箱

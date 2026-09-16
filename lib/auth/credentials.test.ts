@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { AUTH_MESSAGES } from "../constants";
+import { SUPABASE_PUBLIC_ENV_MISSING_ERROR } from "../supabase/public-env";
 import {
+  mapAuthClientStartError,
   mapLoginAuthError,
   mapRegisterAuthError,
   validateAuthFields,
@@ -51,6 +53,21 @@ describe("auth error mapping", () => {
     );
     expect(mapLoginAuthError()).toBe(AUTH_MESSAGES.INVALID_CREDENTIALS);
     expect(mapLoginAuthError()).not.toContain("不存在");
+  });
+
+  it("maps a missing public env throw to the setup sentence instead of generic register failure", () => {
+    expect(
+      mapAuthClientStartError(
+        "register",
+        new Error(SUPABASE_PUBLIC_ENV_MISSING_ERROR),
+      ),
+    ).toBe(AUTH_MESSAGES.PUBLIC_ENV_MISSING);
+    expect(mapAuthClientStartError("register", new Error("network down"))).toBe(
+      AUTH_MESSAGES.REGISTER_FAILED,
+    );
+    expect(mapAuthClientStartError("login", new Error("network down"))).toBe(
+      AUTH_MESSAGES.INVALID_CREDENTIALS,
+    );
   });
 });
 
