@@ -47,7 +47,7 @@
 
 狀態：✅ 通過
 
-- `AuthSessionBar` 呼叫 `signOut` 後 `router.refresh()`，layout 改渲染 `AuthEntry`
+- `AuthSessionBar` 呼叫 `signOut` 後 `window.location.reload()`，頁首回 `AuthEntry` 且首頁 client 報告 state 清空
 
 **AC-4：訪客 POST 不 401**
 
