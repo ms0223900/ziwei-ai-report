@@ -58,7 +58,7 @@
   As a 回跳時 Webhook 尚未到達的會員, I want 處理中頁輪詢本地訂單或後端呼叫 `QueryTradeInfo`, So that 畫面最終能對上已付款狀態。本單 Ticket 列為 Should Have。
 
 - **Story 12 — 點數／訂閱接點（Later）**  
-  As a 課程學員, I want 同一套訂單＋ReturnURL＋冪等的接點說明與官方文件清單, So that 單元 5／6 可接，但本單不實作加點／訂閱週期。
+  As a 課程學員, I want 同一套訂單＋單一 ReturnURL＋冪等，並在驗簽後依訂單 `plan_id` 分支履約, So that 單元 5／6 可接；本單元只實作 `unlock_report_lifetime` 解鎖分支，不加點。
 
 - **Story 13 — 正式環境預覽不得當真開通**  
   As a 正式站訪客或會員, I want 單元 2 開發預覽（假文／A–D 遮罩）不得被當成已付款開通, So that 單元 4 交付後 live 體驗只跟 `access_status` 與真實報告走。若正式建置仍開著預覽開關，系統必須跳出警告，而不是繼續供應預覽 overlay。
@@ -209,6 +209,7 @@ Content-Type：`application/x-www-form-urlencoded`（不是 JSON）。
 
 - 本單只在 SOP／註解列官方文件：[信用卡定期定額](https://developers.ecpay.com.tw/2868)、[定期定額付款結果通知](https://developers.ecpay.com.tw/5631)、[定期定額訂單查詢](https://developers.ecpay.com.tw/2892/)、[定期定額訂單作業](https://developers.ecpay.com.tw/2900/)。
 - **不**改 `points_balance`／`subscription_status`。父 GTD 若要求「點數或訂閱擇一完整套用」，屬後續單元，不在本 AC。
+- **Later 履約分流（未來掛點，非本單元 AC）**：同一條 `ReturnURL`（不要依方案各開 webhook）。流程：驗 `CheckMacValue` → 用 `MerchantTradeNo` 找 `orders` → 對金額 → **讀該列 `plan_id`** → 依方案分支履約（解鎖／加點／之後的類型）。綠界 `CustomField` 可選回傳，**來源真相是 DB `plan_id`**。本單元只實作 `unlock_report_lifetime` 的解鎖分支；不得把 `points_balance` 寫入列為本單 MVP AC。
 
 ### For Story 13 — 正式環境預覽警告（不用新的 env 名稱）
 
