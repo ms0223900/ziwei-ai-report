@@ -26,7 +26,7 @@
 
 ### Phase 0 — env 與 matcher
 
-- [ ] US-001 金流環境變數與機密守門
+- [x] US-001 金流環境變數與機密守門
 - [ ] US-002 proxy 排除 webhook 測試
 - [ ] US-003 proxy 排除 webhook 實作
 
