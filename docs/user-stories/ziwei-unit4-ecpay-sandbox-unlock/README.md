@@ -37,7 +37,7 @@
 
 ### Phase 2 — 簽章與方案
 
-- [ ] US-006 CheckMacValue 測試
+- [x] US-006 CheckMacValue 測試（預期紅燈；待實作轉綠）
 - [ ] US-007 CheckMacValue 實作
 - [ ] US-008 方案表與交易編號 測試
 - [ ] US-009 方案表與交易編號 實作
