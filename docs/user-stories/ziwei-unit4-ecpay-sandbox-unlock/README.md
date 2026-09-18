@@ -44,7 +44,7 @@
 
 ### Phase 3 — 建單
 
-- [ ] US-010 checkout 建單 測試
+- [x] US-010 checkout 建單 測試（預期紅燈；待實作轉綠）
 - [ ] US-011 checkout 建單 實作
 
 ### Phase 4 — Webhook
