@@ -1,0 +1,109 @@
+import { ERROR_MESSAGES } from "../../../../lib/constants";
+import { computeCheckMacValue } from "../../../../lib/ecpay/check-mac";
+import {
+  alreadyUnlockedError,
+  jsonError,
+  loginRequiredError,
+  paymentUnavailableError,
+  persistFailedError,
+  validationError,
+} from "../../../../lib/errors";
+import { generateMerchantTradeNo } from "../../../../lib/payments/merchant-trade-no";
+import { readEcpayCheckoutEnv } from "../../../../lib/payments/checkout-env";
+import { resolveCheckoutPlan } from "../../../../lib/payments/plans";
+import { createServiceRoleClient } from "../../../../lib/supabase/server";
+import { getSessionUser } from "../../../../lib/supabase/session";
+
+export const dynamic = "force-dynamic";
+
+function pad2(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
+function formatMerchantTradeDate(now = new Date()): string {
+  return `${now.getFullYear()}/${pad2(now.getMonth() + 1)}/${pad2(now.getDate())} ${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+}
+
+async function parseBody(request: Request): Promise<Record<string, unknown>> {
+  try {
+    const body = await request.json();
+    if (body && typeof body === "object" && !Array.isArray(body)) {
+      return body as Record<string, unknown>;
+    }
+  } catch {
+    // 無效 JSON 視為沒有 plan_id
+  }
+  return {};
+}
+
+export async function POST(request: Request): Promise<Response> {
+  const user = await getSessionUser();
+  if (!user) {
+    return jsonError(loginRequiredError());
+  }
+
+  const body = await parseBody(request);
+  const planId = typeof body.plan_id === "string" ? body.plan_id : "";
+  const plan = resolveCheckoutPlan(planId);
+  if (!plan) {
+    return jsonError(validationError(ERROR_MESSAGES.UNSUPPORTED_PLAN));
+  }
+
+  const client = await createServiceRoleClient();
+  const { data: profile } = await client
+    .from("profiles")
+    .select()
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const accessStatus =
+    profile && typeof profile === "object"
+      ? (profile as { access_status?: string }).access_status
+      : undefined;
+  if (accessStatus === "unlocked") {
+    return jsonError(alreadyUnlockedError());
+  }
+
+  const env = readEcpayCheckoutEnv();
+  if (!env) {
+    return jsonError(paymentUnavailableError());
+  }
+
+  const merchantTradeNo = generateMerchantTradeNo();
+  const { error: insertError } = await client.from("orders").insert({
+    user_id: user.id,
+    plan_id: plan.planId,
+    merchant_trade_no: merchantTradeNo,
+    amount: plan.amount,
+    currency: plan.currency,
+    status: "pending",
+    trade_no: null,
+    payment_date: null,
+  });
+  if (insertError) {
+    return jsonError(persistFailedError());
+  }
+
+  const fields: Record<string, string> = {
+    MerchantID: env.merchantId,
+    MerchantTradeNo: merchantTradeNo,
+    MerchantTradeDate: formatMerchantTradeDate(),
+    PaymentType: "aio",
+    TotalAmount: String(plan.amount),
+    TradeDesc: plan.tradeDesc,
+    ItemName: plan.itemName,
+    ReturnURL: env.returnUrl,
+    ClientBackURL: env.clientBackUrl,
+    ChoosePayment: "Credit",
+    EncryptType: "1",
+  };
+  fields.CheckMacValue = computeCheckMacValue(
+    fields,
+    env.hashKey,
+    env.hashIV,
+  );
+
+  return Response.json({
+    checkout_url: env.checkoutUrl,
+    fields,
+  });
+}

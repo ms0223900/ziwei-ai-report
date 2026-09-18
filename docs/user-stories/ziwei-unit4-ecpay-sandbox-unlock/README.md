@@ -44,8 +44,8 @@
 
 ### Phase 3 — 建單
 
-- [ ] US-010 checkout 建單 測試
-- [ ] US-011 checkout 建單 實作
+- [x] US-010 checkout 建單 測試
+- [x] US-011 checkout 建單 實作
 
 ### Phase 4 — Webhook
 
@@ -122,7 +122,7 @@ Phase 7 完成條件：SOP 可走五類驗測；grant 保留且非正式付款�
 
 ## 重構掃描記錄
 
-- 已掃描至：US-009（2026-09-18）
+- 已掃描至：US-011（2026-09-18）
 - 已知待觀察熱點（開工後更新）：
   - `proxy.ts`／`lib/supabase/session-guards.test.ts`
   - `test/fakes/supabase.ts`
