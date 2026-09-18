@@ -8,6 +8,14 @@ function readSource(relativePath: string) {
   return readFileSync(path.join(ROOT, relativePath), "utf8");
 }
 
+function matcherStringLiterals(source: string): string[] {
+  const block = source.match(/matcher:\s*\[([\s\S]*?)\]/)?.[1] ?? "";
+  const withoutComments = block
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/.*$/gm, "");
+  return [...withoutComments.matchAll(/"((?:\\.|[^"\\])*)"/g)].map((m) => m[1]);
+}
+
 describe("SSR session wiring", () => {
   it("writes cookies with getAll/setAll and authorizes with getUser", () => {
     const session = readSource("lib/supabase/session.ts");
@@ -33,11 +41,16 @@ describe("SSR session wiring", () => {
     expect(client).not.toContain("createServiceRoleClient");
   });
 
-  it("does not force login on / and excludes future webhook paths", () => {
+  it("does not force login on /", () => {
     const proxy = readSource("proxy.ts");
     expect(proxy).toContain("updateSession");
     expect(proxy).not.toMatch(/redirect\(/);
-    expect(proxy).toContain("api/ecpay/");
-    expect(proxy).toContain("webhook");
+  });
+
+  it("excludes the live ECPay webhook path from matcher literals", () => {
+    const literals = matcherStringLiterals(readSource("proxy.ts"));
+    expect(literals.some((pattern) => pattern.includes("api/payments/ecpay/webhook"))).toBe(
+      true,
+    );
   });
 });

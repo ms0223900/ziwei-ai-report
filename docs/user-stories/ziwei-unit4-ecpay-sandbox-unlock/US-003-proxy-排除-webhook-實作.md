@@ -12,9 +12,41 @@
 - `proxy.ts` 排除實際 Webhook 路徑（可同時保留 `api/ecpay/`）
 
 **驗收條件**：
-- [ ] US-002 測試轉綠
-- [ ] matcher 排除 `/api/payments/ecpay/webhook`
-- [ ] 未把 `/` 改成必登入
+- [x] US-002 測試轉綠
+- [x] matcher 排除 `/api/payments/ecpay/webhook`
+- [x] 未把 `/` 改成必登入
+
+#### 驗收說明
+
+**整體結論**：PASS ✅
+
+> `npx vitest run lib/supabase/session-guards.test.ts lib/security/secrets-not-leaked.test.ts` 8 passed。
+
+---
+
+**AC-1：US-002 測試轉綠**
+
+狀態：✅ 通過
+
+- `lib/supabase/session-guards.test.ts` 的 webhook matcher 斷言已綠
+
+---
+
+**AC-2：matcher 排除實際 Webhook 路徑**
+
+狀態：✅ 通過
+
+- `proxy.ts` 的 `config.matcher` negative lookahead 含 `api/payments/ecpay/webhook`，並保留 `api/ecpay/`
+
+---
+
+**AC-3：未把／改成必登入**
+
+狀態：✅ 通過
+
+- `proxy.ts` 仍只呼叫 `updateSession`，無 `redirect(`
+
+**測試策略**：Test-First
 
 **測試策略**：Test-First  
 > 理由：對 US-002 紅燈實作至綠。

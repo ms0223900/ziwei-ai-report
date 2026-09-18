@@ -12,6 +12,18 @@ const SECRET_ENV_KEYS = [
   "MEMBERSHIP_GRANT_SECRET",
 ] as const;
 
+const ECPAY_EXAMPLE_KEYS = [
+  "ECPAY_MERCHANT_ID",
+  "ECPAY_HASH_KEY",
+  "ECPAY_HASH_IV",
+  "ECPAY_CHECKOUT_URL",
+  "ECPAY_QUERY_URL",
+  "ECPAY_RETURN_URL",
+  "ECPAY_CLIENT_BACK_URL",
+  "ECPAY_ENV",
+  "APP_BASE_URL",
+] as const;
+
 function parseEnvExample(content: string): Record<string, string> {
   const out: Record<string, string> = {};
   for (const line of content.split("\n")) {
@@ -85,6 +97,19 @@ describe("secrets stay off the public surface", () => {
     expect(example.NEXT_PUBLIC_ECPAY_HASH_IV).toBeUndefined();
     expect(example.NEXT_PUBLIC_MEMBERSHIP_GRANT_SECRET).toBeUndefined();
     expect(example.MEMBERSHIP_GRANT_ENABLED).toBeDefined();
+
+    for (const key of ECPAY_EXAMPLE_KEYS) {
+      expect(example).toHaveProperty(key);
+      expect(example[`NEXT_PUBLIC_${key}`]).toBeUndefined();
+    }
+    expect(example.ECPAY_HASH_KEY).toBe("");
+    expect(example.ECPAY_HASH_IV).toBe("");
+    expect(example.ECPAY_QUERY_URL).toBe("");
+    expect(example.ECPAY_CHECKOUT_URL).toMatch(/^https:\/\/payment-stage\.ecpay\.com\.tw\//);
+
+    const exampleRaw = readFileSync(path.join(ROOT, ".env.example"), "utf8");
+    expect(exampleRaw).not.toMatch(/本版不使用/);
+    expect(exampleRaw).not.toMatch(/NEXT_PUBLIC_ECPAY_HASH_/);
   });
 
   it("does not read secret keys from NEXT_PUBLIC_ env in app source", () => {
