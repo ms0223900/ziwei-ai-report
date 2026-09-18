@@ -26,9 +26,9 @@
 
 ### Phase 0 — env 與 matcher
 
-- [ ] US-001 金流環境變數與機密守門
-- [ ] US-002 proxy 排除 webhook 測試
-- [ ] US-003 proxy 排除 webhook 實作
+- [x] US-001 金流環境變數與機密守門
+- [x] US-002 proxy 排除 webhook 測試（預期紅燈；待實作轉綠）
+- [x] US-003 proxy 排除 webhook 實作
 
 ### Phase 1 — orders 與 fake
 
@@ -122,7 +122,7 @@ Phase 7 完成條件：SOP 可走五類驗測；grant 保留且非正式付款�
 
 ## 重構掃描記錄
 
-- 已掃描至：（尚未開工）
+- 已掃描至：US-003（2026-09-18）
 - 已知待觀察熱點（開工後更新）：
   - `proxy.ts`／`lib/supabase/session-guards.test.ts`
   - `test/fakes/supabase.ts`
