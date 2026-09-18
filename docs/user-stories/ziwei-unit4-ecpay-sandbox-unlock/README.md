@@ -32,7 +32,7 @@
 
 ### Phase 1 — orders 與 fake
 
-- [ ] US-004 建立 orders 遷移
+- [x] US-004 建立 orders 遷移
 - [ ] US-005 記憶體 fake orders
 
 ### Phase 2 — 簽章與方案
@@ -122,7 +122,7 @@ Phase 7 完成條件：SOP 可走五類驗測；grant 保留且非正式付款�
 
 ## 重構掃描記錄
 
-- 已掃描至：US-003（2026-09-18）
+- 已掃描至：US-004（2026-09-18）
 - 已知待觀察熱點（開工後更新）：
   - `proxy.ts`／`lib/supabase/session-guards.test.ts`
   - `test/fakes/supabase.ts`
