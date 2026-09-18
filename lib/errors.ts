@@ -8,7 +8,9 @@ export type ErrorCode =
   | "HIGH_RISK"
   | "UNAUTHENTICATED"
   | "FORBIDDEN"
-  | "NOT_FOUND";
+  | "NOT_FOUND"
+  | "CONFLICT"
+  | "PAYMENT_UNAVAILABLE";
 
 export class AppError extends Error {
   readonly error_code: ErrorCode;
@@ -60,6 +62,18 @@ export function memberNotFoundError(): AppError {
 
 export function reportNotFoundError(): AppError {
   return new AppError("NOT_FOUND", ERROR_MESSAGES.REPORT_NOT_FOUND, 404);
+}
+
+export function alreadyUnlockedError(): AppError {
+  return new AppError("CONFLICT", ERROR_MESSAGES.ALREADY_UNLOCKED, 409);
+}
+
+export function paymentUnavailableError(): AppError {
+  return new AppError(
+    "PAYMENT_UNAVAILABLE",
+    ERROR_MESSAGES.PAYMENT_UNAVAILABLE,
+    500,
+  );
 }
 
 export function jsonError(error: AppError): Response {

@@ -4,7 +4,7 @@ import {
   createFakeSupabaseMemory,
   seedFakeUser,
   type FakeSupabaseMemory,
-} from "../../../../../test/fakes/supabase";
+} from "../../../../test/fakes/supabase";
 
 const USER_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const HASH_KEY = "testHashKeyFixture";
@@ -15,12 +15,12 @@ const state: { memory: FakeSupabaseMemory; userId: string | null } = {
   userId: USER_ID,
 };
 
-vi.mock("../../../../../lib/supabase/server", () => ({
+vi.mock("../../../../lib/supabase/server", () => ({
   createServiceRoleClient: async () =>
     createFakeServiceRoleClient(state.memory),
 }));
 
-vi.mock("../../../../../lib/supabase/session", () => ({
+vi.mock("../../../../lib/supabase/session", () => ({
   getSessionUser: async () =>
     state.userId
       ? { id: state.userId, email: "yuan@example.com" }
@@ -69,8 +69,19 @@ function checkoutFields(body: Record<string, unknown>): Record<string, unknown> 
   return body;
 }
 
+const PAYMENT_ENV_KEYS = [
+  "ECPAY_MERCHANT_ID",
+  "ECPAY_HASH_KEY",
+  "ECPAY_HASH_IV",
+  "ECPAY_CHECKOUT_URL",
+  "ECPAY_RETURN_URL",
+  "ECPAY_CLIENT_BACK_URL",
+] as const;
+
 describe("POST /api/payments/checkout", () => {
-  const originalEnv = { ...process.env };
+  const originalPaymentEnv = Object.fromEntries(
+    PAYMENT_ENV_KEYS.map((key) => [key, process.env[key]]),
+  ) as Record<(typeof PAYMENT_ENV_KEYS)[number], string | undefined>;
 
   beforeEach(() => {
     state.memory = createFakeSupabaseMemory();
@@ -81,7 +92,14 @@ describe("POST /api/payments/checkout", () => {
   });
 
   afterEach(() => {
-    process.env = { ...originalEnv };
+    for (const key of PAYMENT_ENV_KEYS) {
+      const value = originalPaymentEnv[key];
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
     state.userId = USER_ID;
   });
 
@@ -170,5 +188,15 @@ describe("POST /api/payments/checkout", () => {
     const order = [...state.memory.orders.values()][0];
     expect(order?.merchant_trade_no).toBe(fields.MerchantTradeNo);
     expect(order?.status).toBe("pending");
+  });
+
+  it("allows a second pending order for the same locked member", async () => {
+    const first = await postCheckout({ plan_id: "unlock_report_lifetime" });
+    const second = await postCheckout({ plan_id: "unlock_report_lifetime" });
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+    expect(state.memory.orders.size).toBe(2);
+    const nos = [...state.memory.orders.values()].map((row) => row.merchant_trade_no);
+    expect(new Set(nos).size).toBe(2);
   });
 });
