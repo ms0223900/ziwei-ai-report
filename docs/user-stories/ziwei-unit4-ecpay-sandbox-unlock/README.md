@@ -39,8 +39,8 @@
 
 - [x] US-006 CheckMacValue 測試
 - [x] US-007 CheckMacValue 實作
-- [x] US-008 方案表與交易編號 測試（預期紅燈；待實作轉綠）
-- [ ] US-009 方案表與交易編號 實作
+- [x] US-008 方案表與交易編號 測試
+- [x] US-009 方案表與交易編號 實作
 
 ### Phase 3 — 建單
 
@@ -122,7 +122,7 @@ Phase 7 完成條件：SOP 可走五類驗測；grant 保留且非正式付款�
 
 ## 重構掃描記錄
 
-- 已掃描至：US-007（2026-09-18）
+- 已掃描至：US-009（2026-09-18）
 - 已知待觀察熱點（開工後更新）：
   - `proxy.ts`／`lib/supabase/session-guards.test.ts`
   - `test/fakes/supabase.ts`
