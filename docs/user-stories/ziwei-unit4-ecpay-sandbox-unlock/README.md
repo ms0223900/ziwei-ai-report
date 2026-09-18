@@ -27,7 +27,7 @@
 ### Phase 0 — env 與 matcher
 
 - [x] US-001 金流環境變數與機密守門
-- [ ] US-002 proxy 排除 webhook 測試
+- [x] US-002 proxy 排除 webhook 測試（預期紅燈；待實作轉綠）
 - [ ] US-003 proxy 排除 webhook 實作
 
 ### Phase 1 — orders 與 fake
