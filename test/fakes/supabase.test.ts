@@ -142,4 +142,76 @@ describe("fake supabase memory", () => {
     expect(FAKE_SOURCE).not.toContain("process.env");
     expect(FAKE_SOURCE).not.toContain("createClient");
   });
+
+  it("inserts selects and updates orders without simulating RLS", async () => {
+    const memory = createFakeSupabaseMemory();
+    const client = createFakeServiceRoleClient(memory);
+    const inserted = await client
+      .from("orders")
+      .insert({
+        user_id: USER_ID,
+        plan_id: "unlock_report_lifetime",
+        merchant_trade_no: "ABC123",
+        amount: 99,
+        currency: "TWD",
+        status: "pending",
+      })
+      .select()
+      .single();
+
+    expect(inserted.error).toBeNull();
+    expect(inserted.data).toMatchObject({
+      user_id: USER_ID,
+      merchant_trade_no: "ABC123",
+      status: "pending",
+      amount: 99,
+    });
+    expect(inserted.data?.id).toBeTruthy();
+
+    const selected = await client
+      .from("orders")
+      .select()
+      .eq("merchant_trade_no", "ABC123")
+      .single();
+    expect(selected.data?.plan_id).toBe("unlock_report_lifetime");
+
+    const withoutSelect = await client
+      .from("orders")
+      .update({ status: "paid" })
+      .eq("merchant_trade_no", "ABC123")
+      .maybeSingle();
+    expect(withoutSelect).toEqual({ data: null, error: null });
+    expect(memory.orders.get(String(inserted.data?.id))?.status).toBe("paid");
+
+    expect(FAKE_SOURCE).not.toContain("auth.uid");
+    expect(FAKE_SOURCE).not.toContain("row level security");
+  });
+
+  it("rejects a duplicate merchant_trade_no insert", async () => {
+    const memory = createFakeSupabaseMemory();
+    const client = createFakeServiceRoleClient(memory);
+    await client.from("orders").insert({
+      user_id: USER_ID,
+      plan_id: "unlock_report_lifetime",
+      merchant_trade_no: "DUP001",
+      amount: 99,
+      currency: "TWD",
+      status: "pending",
+    });
+
+    const duplicate = await client.from("orders").insert({
+      user_id: USER_ID,
+      plan_id: "unlock_report_lifetime",
+      merchant_trade_no: "DUP001",
+      amount: 99,
+      currency: "TWD",
+      status: "pending",
+    });
+
+    expect(duplicate.data).toBeNull();
+    expect(duplicate.error).toMatchObject({
+      message: "duplicate merchant_trade_no",
+    });
+    expect(memory.orders.size).toBe(1);
+  });
 });
