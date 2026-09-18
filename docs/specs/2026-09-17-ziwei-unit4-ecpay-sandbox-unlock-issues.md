@@ -24,16 +24,14 @@
 - **證據**：`supabase/migrations/20260905000000_create_reports.sql`；`app/api/reports/[persistId]/route.ts`
 - **建議後續**：若要「只能看自己的報告」，另開 ticket 加 owner 綁定（屬單元 3 Could Have／Won't）。
 
-## 問題 4：正式環境預覽條可能與真實解鎖並列
+## 已關閉（已寫進主規格，不再另開單）
 
-- **來源視角**：視角 C
-- **問題描述**：`.env.production` 若仍開 `COMMERCIAL_PREVIEW`，locked 會員可能看到單元 2 假文。單元 3 規定 unlocked 覆蓋預覽。付款 AC 以 `access_status` 與 GET 真文為準。
-- **證據**：`lib/membership/view.ts`；單元 2／3 spec 預覽規則
-- **建議後續**：課堂 demo 關掉 preview，或另單清 `.env.production`。
+### 原問題 4：正式環境預覽條可能與真實解鎖並列
 
-## 問題 5：grant 與付款搶同一欄
+- **狀態**：關閉 — 併入主 spec **Story 13**（Functional Specs + AC：正式 Happy、誤設警告、locked／unlocked、本機 overlay）。
+- **不再建議**：另開 ticket 只關 `.env.production`。關預設值與誤設警告都是本單 MVP。
 
-- **來源視角**：視角 C
-- **問題描述**：講師 grant 與 Webhook 都寫 `access_status`。可先 grant 再付款（Story 2 應 409）或先付款再 grant（應 200 已開通）。不是缺陷，但課堂易搞混兩條開通路徑。
-- **證據**：`app/api/dev/grant-access/route.ts`
-- **建議後續**：SOP 註明金手指非正式金流驗測。
+### 原問題 5：grant 與付款搶同一欄
+
+- **狀態**：關閉 — 併入主 spec **Story 14** 與 Story 10 SOP（課堂繞過 vs 官方付款；grant→409 checkout；pay→grant 200；pending 再 grant）。
+- **不再建議**：只當 SOP 備註／下個 sprint。`POST /api/dev/grant-access` 必須保留。

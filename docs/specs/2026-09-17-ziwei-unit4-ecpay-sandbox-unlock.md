@@ -15,8 +15,8 @@
 - **Goal**: 已登入且 `locked` 的會員只送方案 ID `unlock_report_lifetime` → 後端建 `orders`（pending）並導轉綠界測試付款頁 → 僅 `ReturnURL` 驗簽、對單、對金額、排除 `SimulatePaid=1`、且 `RtnCode=1` 後才把訂單改 `paid` 並將該會員 `access_status` 改為 `unlocked`。同一 `MerchantTradeNo` 重送回 `1|OK` 且不再解鎖。`ClientBackURL` 只顯示處理中。
 - **Impacted Areas**:
   - 新建：`supabase/migrations/`（`orders` 表 + RLS；檔名自訂時間戳，勿沿用 architecture 佔位名 `003_payments.sql` 若會衝突）、`lib/payments/plans.ts`、`lib/ecpay/`（CheckMacValue 簽／驗共用）、`app/api/payments/`（建單）、`app/api/payments/ecpay/webhook/route.ts`、`app/orders/processing/page.tsx`（或同等 App Router 路徑）、Tunnel／除錯 SOP 文件（課程可讀，例如 `docs/user-stories/` 後續拆解時再放 howto）
-  - 改動：`proxy.ts` matcher（必須排除實際 Webhook 路徑，現況只排除 `/api/ecpay/`，與 Ticket 假設 `/api/payments/ecpay/webhook` 不一致）、`lib/supabase/session-guards.test.ts`（現寫死 `api/ecpay/`）、`components/report/AdvancedLockedPanel.tsx`、`lib/membership/view.ts`、`lib/constants.ts`（未開通 CTA 從「即將開放／講師受控、本版不收費」改為可啟動付款；訪客與 locked 都走「解鎖完整報告」，勿沿用 `ctaLabel === MEMBERSHIP_CTA_UPGRADE` 二分）、相關測試（`view.test.ts`、`HomeClient.test.tsx`、`ReportCard.test.tsx`）、`.env.example`（補 Ticket 列的 ECPay URL 變數；Hash 槽位維持空字串）、`test/fakes/supabase.ts`（記憶體表加 `orders`，`from("orders")` 不可 throw；`merchant_trade_no` unique）
-  - 沿用、本單不改 schema：`profiles`（`20260913000000_create_profiles.sql`：欄名即 `access_status`，列舉 `locked`／`unlocked`）、`app/api/dev/grant-access`（課堂金手指保留，非正式付款路徑）、單元 1 生成／遮罩／ajv、單元 2 預覽假文規則
+  - 改動：`proxy.ts` matcher（必須排除實際 Webhook 路徑，現況只排除 `/api/ecpay/`，與 Ticket 假設 `/api/payments/ecpay/webhook` 不一致）、`lib/supabase/session-guards.test.ts`（現寫死 `api/ecpay/`）、`components/report/AdvancedLockedPanel.tsx`、`lib/membership/view.ts`、`lib/constants.ts`（未開通 CTA 從「即將開放／講師受控、本版不收費」改為可啟動付款；訪客與 locked 都走「解鎖完整報告」，勿沿用 `ctaLabel === MEMBERSHIP_CTA_UPGRADE` 二分）、相關測試（`view.test.ts`、`HomeClient.test.tsx`、`ReportCard.test.tsx`）、`.env.example`（補 Ticket 列的 ECPay URL 變數；Hash 槽位維持空字串）、`.env.production`（單元 4 後正式預設關閉預覽）、`lib/commercial/preview.ts`／`CommercialPreviewBar`／`ReportCard.tsx`（正式環境不得把單元 2 預覽當真開通）、`test/fakes/supabase.ts`（記憶體表加 `orders`，`from("orders")` 不可 throw；`merchant_trade_no` unique）
+  - 沿用、本單不改 schema：`profiles`（`20260913000000_create_profiles.sql`：欄名即 `access_status`，列舉 `locked`／`unlocked`）、`app/api/dev/grant-access`（**保留**；課堂金手指，非正式付款路徑，見 Story 14）、單元 1 生成／遮罩／ajv
   - 明確不做：第二家金流、站內付、正式商店、退款、發票、`OrderResultURL` 解鎖、點數加扣、訂閱週期、ngrok、另建 entitlement 表、改 `profiles` schema、`reports.user_id`
 - **Stakeholders**: 已登入未開通會員；已開通會員；訪客；課程學員／講師；綠界 Stage 後端（`ReturnURL`）
 
@@ -59,6 +59,12 @@
 
 - **Story 12 — 點數／訂閱接點（Later）**  
   As a 課程學員, I want 同一套訂單＋ReturnURL＋冪等的接點說明與官方文件清單, So that 單元 5／6 可接，但本單不實作加點／訂閱週期。
+
+- **Story 13 — 正式環境預覽不得當真開通**  
+  As a 正式站訪客或會員, I want 單元 2 開發預覽（假文／A–D 遮罩）不得被當成已付款開通, So that 單元 4 交付後 live 體驗只跟 `access_status` 與真實報告走。若正式建置仍開著預覽開關，系統必須跳出警告，而不是繼續供應預覽 overlay。
+
+- **Story 14 — 講師 grant 金手指（課堂繞過）**  
+  As a 講師／學員, I want 繼續使用 `POST /api/dev/grant-access` 把指定會員設為 `unlocked`, So that 課堂能驗三態而不走綠界；我同時能分辨這不是官方付款路徑，且與 checkout／Webhook 的互動有明確規則。
 
 ---
 
@@ -142,7 +148,7 @@ Request JSON：
 | 已 `unlocked` | 409 | 「此帳號已開通，無需再次付款。」 |
 | 金流環境變數缺漏 | 500 | 「付款服務暫時無法使用，請稍後再試。」 |
 
-未開通 CTA：改為啟動上述建單（文案 Ticket 指定「解鎖完整報告」）。拿掉「即將開放，本版不收費」與「開通由講師受控流程處理，本版不收費」作為**未開通主路徑**文案（grant API 仍可存在，非正式 UI）。
+未開通 CTA：改為啟動上述建單（文案 Ticket 指定「解鎖完整報告」）。拿掉「即將開放，本版不收費」與「開通由講師受控流程處理，本版不收費」作為**未開通主路徑**文案。`POST /api/dev/grant-access` **必須保留**（非正式 UI／課堂繞過，見 Story 14），不得當成付款 CTA。
 
 ### For Story 4 — ClientBackURL
 
@@ -188,6 +194,8 @@ Content-Type：`application/x-www-form-urlencoded`（不是 JSON）。
 8. 回跳頁在 Webhook 前保持處理中。
 9. 除錯超過 5 分鐘仍不通：改切 Checkpoint 或固定 payload，不要無限卡 Tunnel。
 10. 程式可部署正式公開網域，但綠界端本版仍用沙盒 MerchantID、測試金鑰、`payment-stage`；切正式環境必須整組更換，禁止混用。
+11. **課堂金手指 vs 官方付款（必寫進 SOP）**：五類金流驗測（成功／等待／失敗／簽章錯／重送）**必須**走綠界 ReturnURL，**禁止**用 grant 冒充 Story 5～9。`POST /api/dev/grant-access` 只用於「不付款也能看三態／進階 GET」的課堂繞過；互動規則見 Story 14。
+12. **正式環境預覽**：`.env.production` 的 `NEXT_PUBLIC_COMMERCIAL_PREVIEW` 應為 `0`（現況為 `1`，本單須改）。若正式建置仍為 `1`，必須跳出警告且不得供應預覽 overlay（Story 13）。
 
 五類驗測：成功、回跳等待、取消／失敗、簽章錯誤、事件重送。
 
@@ -201,6 +209,45 @@ Content-Type：`application/x-www-form-urlencoded`（不是 JSON）。
 
 - 本單只在 SOP／註解列官方文件：[信用卡定期定額](https://developers.ecpay.com.tw/2868)、[定期定額付款結果通知](https://developers.ecpay.com.tw/5631)、[定期定額訂單查詢](https://developers.ecpay.com.tw/2892/)、[定期定額訂單作業](https://developers.ecpay.com.tw/2900/)。
 - **不**改 `points_balance`／`subscription_status`。父 GTD 若要求「點數或訂閱擇一完整套用」，屬後續單元，不在本 AC。
+
+### For Story 13 — 正式環境預覽警告（不用新的 env 名稱）
+
+沿用既有公開標記 `NEXT_PUBLIC_COMMERCIAL_PREVIEW`（`1` 才算開啟；與單元 2 相同）。環境邊界用 Next 既有的 `NODE_ENV`，**不要**新增專案 env：
+
+| 判定 | 條件 |
+|---|---|
+| 本機開發 | `NODE_ENV` 不是 `production`（`next dev`） |
+| 正式／production 建置 | `NODE_ENV === "production"`（`next build`／`next start`／Vercel Production；含誤把 preview 打進 `.env.production`） |
+
+行為：
+
+- **Happy（正式設定正確）**：`NODE_ENV=production` 且 `NEXT_PUBLIC_COMMERCIAL_PREVIEW` 不是 `1`（建議 `.env.production` 改為 `0`）。不渲染單元 2 預覽條、不切 A／B／C／D、不使用 `EXAMPLE_BLOCKS`。`locked` 看鎖定區＋付款 CTA；`unlocked` 看 GET 真文。
+- **本機開發仍允許 overlay**：`NODE_ENV` 非 `production` 且 `NEXT_PUBLIC_COMMERCIAL_PREVIEW=1` 時，單元 2 預覽條與假文規則可繼續；`unlocked` 仍覆蓋假文（單元 3 已有）。這不是 live 開通。
+- **錯誤／誤設（正式仍開預覽）**：`NODE_ENV=production` 且 `NEXT_PUBLIC_COMMERCIAL_PREVIEW=1` 時：
+  1. 報告頁（含鎖定區）必須**跳出可見警告**（`role="alert"`），繁中固定：「設定錯誤：正式環境不應開啟開發預覽。此畫面不是已付款開通。」
+  2. **禁止**供應預覽 overlay：不顯示可切 A／B／C／D 的預覽條、不用 `EXAMPLE_BLOCKS` 填進階三欄、不得把標題／CTA 畫成「已開通」除非 `access_status` 真的是 `unlocked`。
+  3. `locked`（含訪客）：仍鎖定占位＋本單解鎖 CTA／登入彈窗；警告與鎖定並存。
+  4. `unlocked`：仍走單元 3 GET 真文；警告與真文並存；真文不是預覽假文。
+- 禁止用 query 參數在正式環境打開 B／C／D（單元 2 已禁；本單維持）。
+
+### For Story 14 — grant-access 課堂繞過（非正式付款）
+
+**保留** `POST /api/dev/grant-access`（單元 3 契約不變）：`MEMBERSHIP_GRANT_ENABLED=1` 才接受，否則 404；`Authorization: Bearer $MEMBERSHIP_GRANT_SECRET`；service role 寫 `access_status=unlocked`。禁止刪 route、禁止接到「解鎖完整報告」按鈕、禁止用它取代 ReturnURL。
+
+官方付款路徑：checkout → 綠界 → Webhook。grant 是講師課堂繞過。
+
+與 checkout／Webhook 互動（同一 `access_status` 欄）：
+
+| 情境 | 系統行為 |
+|---|---|
+| 僅 grant、未付款 | `access_status=unlocked`；**不**寫 `orders`、不打綠界。之後 GET 進階依單元 3。**不算** Story 5 金流驗收。 |
+| 先 grant 再 checkout | 已 `unlocked` → 建單 **409**「此帳號已開通，無需再次付款。」（Story 2） |
+| 先付款 Webhook 成功再 grant | grant 仍 **200**、回已是 `unlocked`（單元 3 冪等）；不改訂單、不加點、不新增履約。 |
+| 先 pending 訂單、尚未 paid，再 grant | grant 可把人開成 `unlocked`；該筆訂單仍 pending，直到 Webhook。之後成功通知走 Story 6：訂單可改 paid，**不得**第二次「解鎖」以外的權益副作用。失敗／`SimulatePaid=1` 仍不解鎖（已是 unlocked 則維持）。 |
+| 已 unlocked（無論 grant 或付款）再收到成功 Webhook | `1\|OK`，不重複解鎖。 |
+| Client SDK 改 `access_status` | 仍失敗（trigger）。 |
+
+畫面：未開通主 CTA 不再寫「開通由講師受控流程處理」；grant 只留 SOP／howto，不進付款主路徑文案。
 
 ---
 
@@ -256,7 +303,8 @@ Content-Type：`application/x-www-form-urlencoded`（不是 JSON）。
 
 - Scenario 1: Given 本機或公開 HTTPS When 依 SOP 設定 `ECPAY_RETURN_URL` Then 綠界 Stage 能 POST 到 Webhook（Tunnel 或既有網域擇一即可）。
 - Scenario 2: Given SOP When 執行五類驗測清單 Then 文件逐步對應 Story 4～9 的結果（成功、等待、失敗、簽章錯、重送）。
-- Scenario 3（邊界）: Given Client SDK 以已登入身份 `update profiles.access_status` When 嘗試改為 `unlocked` Then 失敗（既有 trigger）；付款成功解鎖只能走 Webhook／grant 受控後端。
+- Scenario 3（邊界）: Given Client SDK 以已登入身份 `update profiles.access_status` When 嘗試改為 `unlocked` Then 失敗（既有 trigger）；官方付款解鎖只走 Webhook；grant 是課堂繞過（Story 14），不能用來勾五類金流驗測。
+- Scenario 4: Given SOP When 學員讀除錯文件 Then 文件寫明 grant ≠ 官方付款，以及 `NEXT_PUBLIC_COMMERCIAL_PREVIEW` 在正式建置應為 `0`、誤設時有 Story 13 警告。
 
 ### For Story 11
 
@@ -265,6 +313,22 @@ Content-Type：`application/x-www-form-urlencoded`（不是 JSON）。
 ### For Story 12
 
 - Scenario 1: Given 本單範圍 When 程式合併 Then 無對 `points_balance` 加值、無 `PeriodReturnURL` 訂閱週期實作；僅允許註解／SOP 連結官方文件。
+
+### For Story 13
+
+- Scenario 1（Happy／正式）: Given `NODE_ENV=production` 且 `NEXT_PUBLIC_COMMERCIAL_PREVIEW` 不是 `1` When 訪客或 `locked`／`unlocked` 會員打開報告頁 Then 無預覽條、無 A／B／C／D 切換、無「預覽用範例」假文；`locked` 為鎖定＋解鎖 CTA；`unlocked` 為 GET 真文；無本 Story 警告。
+- Scenario 2（錯誤／誤設）: Given `NODE_ENV=production` 且 `NEXT_PUBLIC_COMMERCIAL_PREVIEW=1` When 打開報告頁 Then 出現 `role="alert"` 文案「設定錯誤：正式環境不應開啟開發預覽。此畫面不是已付款開通。」且**沒有**預覽 overlay（無四態切換、無 `EXAMPLE_BLOCKS`）。
+- Scenario 3（邊界／正式＋locked）: Given Scenario 2 且 `access_status=locked` 或無 session When 檢視進階三欄 Then 仍為鎖定占位，不得顯示預覽 B 假開通文；警告仍在。
+- Scenario 4（邊界／正式＋unlocked）: Given Scenario 2 且 `access_status=unlocked` 並持有可 GET 的 `persist_id` When 載入進階 Then 三欄為 GET 真文不是假文；警告與真文並存。
+- Scenario 5（邊界／本機開發）: Given `NODE_ENV` 不是 `production` 且 `NEXT_PUBLIC_COMMERCIAL_PREVIEW=1` When 打開報告頁 Then 允許單元 2 預覽條與 overlay；**不**要求本 Story 的正式環境警告。
+
+### For Story 14
+
+- Scenario 1（Happy／課堂繞過）: Given `MEMBERSHIP_GRANT_ENABLED=1`、secret 正確、會員 `locked` When `POST /api/dev/grant-access` Then 200、`access_status=unlocked`、**不**新增 `orders`、不導轉綠界。此結果**不能**用來勾 Story 5 金流 AC。
+- Scenario 2（錯誤／非官方路徑）: Given 報告頁未開通 CTA When 點「解鎖完整報告」 Then 走 Story 1 或 Story 3，**不**呼叫 `/api/dev/grant-access`。
+- Scenario 3（邊界／grant 後付款）: Given grant 後已 `unlocked` When `POST /api/payments/checkout` Then 409「此帳號已開通，無需再次付款。」
+- Scenario 4（邊界／付款後 grant）: Given Webhook 已 paid 且 `unlocked` When 再 grant 同一會員 Then 200 且仍 `unlocked`；訂單列不變。
+- Scenario 5（邊界／開關）: Given `MEMBERSHIP_GRANT_ENABLED` 不是 `1` When POST grant Then 404，與單元 3 相同。
 
 ---
 
@@ -300,9 +364,11 @@ Ticket「訂單表是否交由另一頁統一定稿」：本規格以本 Ticket 
 | `POST /api/payments/checkout` | 已登入會員 | Supabase cookie session（`getUser()`）；server 寫 `orders` |
 | `POST /api/payments/ecpay/webhook` | 綠界後端 | CheckMacValue；**無**使用者 session；matcher 排除 |
 | `GET /orders/processing` | 瀏覽器 | 可要求登入；不解鎖 |
-| `POST /api/dev/grant-access` | 講師金手指 | 沿用單元 3；非正式付款 |
+| `POST /api/dev/grant-access` | 講師課堂繞過 | 沿用單元 3：`MEMBERSHIP_GRANT_ENABLED=1` + Bearer `MEMBERSHIP_GRANT_SECRET`；**不是**官方付款；互動見 Story 14 |
 
-無權限／角色系統擴充。HashKey／HashIV／service role 不得進 `NEXT_PUBLIC_*`。
+無權限／角色系統擴充。HashKey／HashIV／service role／`MEMBERSHIP_GRANT_SECRET` 不得進 `NEXT_PUBLIC_*`。
+
+預覽開關只沿用 `NEXT_PUBLIC_COMMERCIAL_PREVIEW`；正式 vs 本機用 `NODE_ENV`，不新增 env 名稱。`.env.production` 本單應把 `NEXT_PUBLIC_COMMERCIAL_PREVIEW` 設為 `0`。
 
 ### External Services
 
@@ -348,6 +414,8 @@ APP_BASE_URL=
 - Story 11 QueryTradeInfo＋處理中輪詢：MVP: false — Ticket Should Have；靜態處理中可先交付
 - 固定 Payload 重播檔：MVP: false — Ticket Should Have
 - Story 12 點數／訂閱完整實作：MVP: false — Ticket Won't Have；僅文件接點
+- Story 13 正式環境預覽警告＋關閉 overlay：MVP: true
+- Story 14 保留 grant 並文件化與付款互動：MVP: true
 - 官方 SDK 算檢查碼：MVP: false — Ticket Could Have；手寫 SHA256 步驟即可
 - 第二家金流、站內付、正式商店、退款、發票、OrderResultURL、ngrok、ATM／CVS 取號：MVP: false — Ticket Won't Have
 
@@ -364,7 +432,7 @@ APP_BASE_URL=
 - `MerchantTradeNo` 超過 20 或重複會建單失敗；產生器要測碰撞。
 - 金鑰放前端或 Stage／Prod Hash 混用會驗簽失敗或誤解鎖。
 - `test/fakes/supabase.ts` 目前只有 `profiles`／`reports`；Webhook 單元測試需擴充 `orders`。
-- grant-access 與付款解鎖都寫 `access_status`；兩者都必須走 service role。不要刪 grant（課堂備援），也不要用 grant 冒充付款 AC。
+- grant-access 與付款解鎖都寫 `access_status`；兩者都必須走 service role。**保留** grant（Story 14 課堂繞過）。五類金流 AC 禁用 grant 過關。`.env.production` 現為 `NEXT_PUBLIC_COMMERCIAL_PREVIEW=1`，本單須改 `0`，且 production+`1` 仍要警告（Story 13）。
 - 回應 `1|OK` 必須在狀態寫入成功之後；先回 OK 再寫入失敗會造成綠界不再重試、本地未開通。已 `paid` 但仍 `locked` 時，重送必須補解鎖。
 - 同一會員可產生多筆 `pending`（重複點解鎖）。冪等只保證單一 `MerchantTradeNo`。實作可選擇：已有 pending 則重用同一單。未選時至少不得把第二筆成功通知寫成第二次「從 locked 解鎖」以外的副作用（已 unlocked 則 Story 2／6）。
 - Next.js 文件若與訓練資料不符，以 `node_modules/next/dist/docs/` 為準。
