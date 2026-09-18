@@ -21,10 +21,25 @@ export type FakeReport = {
   nickname?: string;
 };
 
+export type FakeOrderStatus = "pending" | "paid" | "failed";
+
+export type FakeOrder = {
+  id: string;
+  user_id: string;
+  plan_id: string;
+  merchant_trade_no: string;
+  amount: number;
+  currency: string;
+  status: FakeOrderStatus;
+  trade_no: string | null;
+  payment_date: string | null;
+};
+
 export type FakeSupabaseMemory = {
   users: Map<string, FakeUser>;
   profiles: Map<string, FakeProfile>;
   reports: Map<string, FakeReport>;
+  orders: Map<string, FakeOrder>;
 };
 
 type Filter = { column: string; value: unknown };
@@ -34,6 +49,7 @@ export function createFakeSupabaseMemory(): FakeSupabaseMemory {
     users: new Map(),
     profiles: new Map(),
     reports: new Map(),
+    orders: new Map(),
   };
 }
 
@@ -60,12 +76,53 @@ function matches(row: Record<string, unknown>, filters: Filter[]) {
   return filters.every((filter) => row[filter.column] === filter.value);
 }
 
-function createTableApi(
-  memory: FakeSupabaseMemory,
-  table: "profiles" | "reports",
+type FakeTable = "profiles" | "reports" | "orders";
+
+function tableConfig(memory: FakeSupabaseMemory, table: FakeTable) {
+  if (table === "profiles") {
+    return {
+      store: memory.profiles,
+      idKey: "user_id",
+      uniqueKeys: [] as string[],
+    };
+  }
+  if (table === "reports") {
+    return { store: memory.reports, idKey: "id", uniqueKeys: [] as string[] };
+  }
+  return {
+    store: memory.orders,
+    idKey: "id",
+    uniqueKeys: ["merchant_trade_no"],
+  };
+}
+
+function uniqueConflict(
+  store: Map<string, unknown>,
+  idKey: string,
+  id: string,
+  row: Record<string, unknown>,
+  uniqueKeys: string[],
 ) {
-  const store = table === "profiles" ? memory.profiles : memory.reports;
-  const idKey = table === "profiles" ? "user_id" : "id";
+  for (const key of uniqueKeys) {
+    const value = row[key];
+    if (value === undefined || value === null) {
+      continue;
+    }
+    for (const existing of store.values()) {
+      const record = existing as Record<string, unknown>;
+      if (String(record[idKey]) === id) {
+        continue;
+      }
+      if (record[key] === value) {
+        return { message: `duplicate ${key}` };
+      }
+    }
+  }
+  return null;
+}
+
+function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
+  const { store, idKey, uniqueKeys } = tableConfig(memory, table);
   const filters: Filter[] = [];
   let pendingInsert: Record<string, unknown> | null = null;
   let pendingUpdate: Record<string, unknown> | null = null;
@@ -99,10 +156,21 @@ function createTableApi(
     },
     async maybeSingle() {
       if (pendingInsert) {
-        const id = String(pendingInsert[idKey] ?? "");
+        const id = String(pendingInsert[idKey] ?? crypto.randomUUID());
+        pendingInsert[idKey] = id;
         const existing = store.get(id);
         if (existing && upsertIgnoreDuplicates) {
           return { data: existing, error: null };
+        }
+        const conflict = uniqueConflict(
+          store as Map<string, unknown>,
+          idKey,
+          id,
+          pendingInsert,
+          uniqueKeys,
+        );
+        if (conflict) {
+          return { data: null, error: conflict };
         }
         store.set(id, { ...(existing ?? {}), ...pendingInsert } as never);
         return { data: store.get(id) ?? null, error: null };
@@ -115,8 +183,19 @@ function createTableApi(
         if (!current) {
           return { data: null, error: { message: "not found" } };
         }
-        const next = { ...current, ...pendingUpdate };
-        store.set(String((next as { [key: string]: unknown })[idKey]), next as never);
+        const next = { ...current, ...pendingUpdate } as Record<string, unknown>;
+        const nextId = String(next[idKey]);
+        const conflict = uniqueConflict(
+          store as Map<string, unknown>,
+          idKey,
+          nextId,
+          next,
+          uniqueKeys,
+        );
+        if (conflict) {
+          return { data: null, error: conflict };
+        }
+        store.set(nextId, next as never);
         if (!includeRepresentation) {
           return { data: null, error: null };
         }
@@ -151,7 +230,7 @@ function createTableApi(
 export function createFakeServiceRoleClient(memory: FakeSupabaseMemory) {
   return {
     from(table: string) {
-      if (table === "profiles" || table === "reports") {
+      if (table === "profiles" || table === "reports" || table === "orders") {
         return createTableApi(memory, table);
       }
       throw new Error(`fake supabase: unsupported table ${table}`);

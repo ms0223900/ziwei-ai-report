@@ -13,9 +13,40 @@
 - 擴充 `test/fakes/supabase.ts` 與對應 `*.test.ts`
 
 **驗收條件**：
-- [ ] `from("orders")` 可 insert／select／update
-- [ ] 重複 `merchant_trade_no` insert 失敗（unique）
-- [ ] 不模擬遠端 RLS（與 unit3 fake 相同）
+- [x] `from("orders")` 可 insert／select／update
+- [x] 重複 `merchant_trade_no` insert 失敗（unique）
+- [x] 不模擬遠端 RLS（與 unit3 fake 相同）
+
+#### 驗收說明
+
+**整體結論**：PASS ✅
+
+> `npx vitest run test/fakes/supabase.test.ts app/api/dev/grant-access/route.test.ts app/api/reports/[persistId]/route.test.ts` 17 passed。契約測試留給 US-010／US-012。
+
+---
+
+**AC-1：from("orders") 可 insert／select／update**
+
+狀態：✅ 通過
+
+- `test/fakes/supabase.ts` 的 `from("orders")` 走記憶體 `orders` Map
+- 測試覆蓋 insert＋select、以及未 `.select()` 的 update 仍寫入、回空 data
+
+---
+
+**AC-2：merchant_trade_no unique**
+
+狀態：✅ 通過
+
+- 重複 insert 回 `duplicate merchant_trade_no`，Map size 仍為 1
+
+---
+
+**AC-3：不模擬遠端 RLS**
+
+狀態：✅ 通過
+
+- fake 來源不含 `auth.uid`／row level security；寫入不依角色擋下（與 unit3 相同）
 
 **測試策略**：Test-After  
 > 理由：測試替身擴表，補跑 fake 測試即可；契約測試留給 US-010／US-012。
