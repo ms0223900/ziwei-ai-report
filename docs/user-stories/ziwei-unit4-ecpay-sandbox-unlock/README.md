@@ -67,8 +67,8 @@
 ### Phase 7 — SOP、grant、接點
 
 - [x] US-020 Tunnel 與五類驗測 SOP
-- [ ] US-021 grant 與付款互動 測試
-- [ ] US-022 grant 與付款互動 實作
+- [x] US-021 grant 與付款互動 測試
+- [x] US-022 grant 與付款互動 實作
 - [ ] US-023 plan_id 履約分流接點說明
 
 ## 依賴鏈摘要
@@ -122,6 +122,6 @@ Phase 7 完成條件：SOP 可走五類驗測；grant 保留且非正式付款�
 
 ## 重構掃描記錄
 
-- 已掃描至：US-019（2026-09-19）
+- 已掃描至：US-022（2026-09-19）
 - 已知待觀察熱點：無
-- 備註：US-018／US-019 窗：`preview.ts` 新增政策函式、`ReportCard` 掛 alert。無 churn hotspot（產品檔各只被實作任務觸及一次）。低風險，暫不重構。
+- 備註：US-020～022 窗：產品碼無異動（SOP 文件＋grant 回歸測試）。無 churn hotspot。低風險，暫不重構。
