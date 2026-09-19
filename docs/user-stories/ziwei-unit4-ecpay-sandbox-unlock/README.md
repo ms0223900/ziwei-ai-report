@@ -61,8 +61,8 @@
 
 ### Phase 6 — 正式預覽
 
-- [ ] US-018 正式環境預覽警告 測試
-- [ ] US-019 正式環境預覽警告 實作
+- [x] US-018 正式環境預覽警告 測試（預期紅燈；待實作轉綠）
+- [x] US-019 正式環境預覽警告 實作
 
 ### Phase 7 — SOP、grant、接點
 
@@ -122,6 +122,6 @@ Phase 7 完成條件：SOP 可走五類驗測；grant 保留且非正式付款�
 
 ## 重構掃描記錄
 
-- 已掃描至：US-017（2026-09-19）
+- 已掃描至：US-019（2026-09-19）
 - 已知待觀察熱點：無
-- 備註：US-014～US-017 掃描後已執行 Feature × Medium：解鎖 CTA／登入彈窗／checkout fetch 抽至 `UnlockCheckoutCta.tsx`。`ReportCard.test.tsx` 僅測試檔 churn，不列熱點。
+- 備註：US-018／US-019 窗：`preview.ts` 新增政策函式、`ReportCard` 掛 alert。無 churn hotspot（產品檔各只被實作任務觸及一次）。低風險，暫不重構。

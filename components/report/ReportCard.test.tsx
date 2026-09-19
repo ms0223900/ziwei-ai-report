@@ -47,7 +47,10 @@ const lockedMembership = resolveMembershipView({
   nickname: "小圓",
 });
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllEnvs();
+});
 
 const demoReport = overlayCannedReport({
   nickname: "小圓",
@@ -243,6 +246,22 @@ describe("ReportCard", () => {
     expect(screen.queryByText("開通由講師受控流程處理，本版不收費")).toBeNull();
     expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
     expect(screen.queryByText(advancedValid.rationale)).toBeNull();
+  });
+
+  it("alerts in production when preview stays on and keeps the unlock CTA", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    render(
+      <ReportCard commercialPreviewEnabled membership={lockedMembership} report={demoReport} />,
+    );
+
+    expect(screen.getByRole("alert").textContent).toBe(
+      "設定錯誤：正式環境不應開啟開發預覽。此畫面不是已付款開通。",
+    );
+    expect(screen.queryByText(PREVIEW_BANNER)).toBeNull();
+    expect(
+      screen.getByRole("button", { name: MEMBERSHIP_CTA_UNLOCK_REPORT }),
+    ).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
   });
 
   it("omits 女命 for a non-demo nickname", () => {
