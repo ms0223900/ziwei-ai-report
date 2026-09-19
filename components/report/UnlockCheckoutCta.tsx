@@ -3,10 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ERROR_MESSAGES, REPORT_SLOTS } from "../../lib/constants";
-import {
-  parseCheckoutFields,
-  submitEcpayTopLevelForm,
-} from "../../lib/payments/submit-ecpay-form";
+import { parseCheckoutClientResult } from "../../lib/payments/checkout-client-result";
+import { submitEcpayTopLevelForm } from "../../lib/payments/submit-ecpay-form";
 
 const UNLOCK_PLAN_ID = "unlock_report_lifetime";
 
@@ -42,40 +40,17 @@ export function UnlockCheckoutCta({
         json = {};
       }
 
-      if (response.status === 401) {
+      const result = parseCheckoutClientResult(response.status, json);
+      if (result.type === "login") {
         setLoginOpen(true);
         return;
       }
-
-      if (!response.ok) {
-        const message =
-          json &&
-          typeof json === "object" &&
-          "message" in json &&
-          typeof json.message === "string"
-            ? json.message
-            : ERROR_MESSAGES.PAYMENT_UNAVAILABLE;
-        setCheckoutError(message);
+      if (result.type === "error") {
+        setCheckoutError(result.message);
         return;
       }
 
-      const checkoutUrl =
-        json &&
-        typeof json === "object" &&
-        "checkout_url" in json &&
-        typeof json.checkout_url === "string"
-          ? json.checkout_url
-          : "";
-      const fields =
-        json && typeof json === "object" && "fields" in json
-          ? parseCheckoutFields(json.fields)
-          : null;
-      if (!checkoutUrl || !fields) {
-        setCheckoutError(ERROR_MESSAGES.PAYMENT_UNAVAILABLE);
-        return;
-      }
-
-      submitEcpayTopLevelForm(checkoutUrl, fields);
+      submitEcpayTopLevelForm(result.checkoutUrl, result.fields);
     } catch {
       setCheckoutError(ERROR_MESSAGES.PAYMENT_UNAVAILABLE);
     } finally {

@@ -53,7 +53,7 @@ AdvancedLockedPanel          鎖定區版面、已開通標、CommercialSecondar
   - props：`ctaLabel: string`、`hasSession: boolean`
   - 內含現況三個 `useState` 與 `handleUnlockClick`（搬移，不改分支語意）
   - 登入對話框留在此元件（與 CTA 同生命週期）
-- **可選同檔或** `lib/payments/checkout-response.ts`：抽出「從 `unknown` 讀 `message`／`checkout_url`／`fields`」的窄化，避免元件內重複 `typeof json === "object"`。若抽出，補最小單元測試（與 `parseCheckoutFields` 同風格）。若搬移後函式仍短，允許留在元件內，不為拆而拆。
+- **已抽出** `lib/payments/checkout-client-result.ts` 的 `parseCheckoutClientResult(status, json)`（`login`／`error`／`submit`）。`fetch` 與 `setLoginOpen` 仍在 CTA。測試：`lib/payments/checkout-client-result.test.ts`。禁止 import `checkout-env.ts`。
 - **`AdvancedLockedPanel`**：刪除 checkout state／handler／dialog／殘句；`showCta` 時渲染 `<UnlockCheckoutCta ctaLabel={…} hasSession={…} />`。`hasSession` 仍為 `membership?.authSlot === REPORT_SLOTS.authSession`。對話框改由 CTA 元件持有（`showCta` 變 false 時一併卸載）。
 - **測試**：`AdvancedLockedPanel.test.tsx` 繼續從面板點 CTA（黑盒）。不把測試改成只測新元件，以免 US-016 契約從組合點消失。
 - **視覺**：className、文案、role、slot 原樣搬移。
@@ -66,7 +66,7 @@ AdvancedLockedPanel          鎖定區版面、已開通標、CommercialSecondar
 2. 面板改為組合；刪殘句。
 3. 視重複程度決定是否抽 checkout JSON helper。
 4. 跑：
-   - `npx vitest run lib/payments/submit-ecpay-form.test.ts components/report/AdvancedLockedPanel.test.tsx components/report/ReportCard.test.tsx components/home/HomeClient.test.tsx`
+   - `npx vitest run lib/payments/checkout-client-result.test.ts lib/payments/submit-ecpay-form.test.ts components/report/AdvancedLockedPanel.test.tsx components/report/ReportCard.test.tsx components/home/HomeClient.test.tsx`
    - `npm run lint`、`npm run typecheck`
 5. 更新 README「重構掃描記錄」：移除 `AdvancedLockedPanel` 高風險待確認；保留測試檔 churn 觀察或一併刪（僅測試、不構成範圍）。
 
