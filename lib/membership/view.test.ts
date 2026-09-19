@@ -23,21 +23,35 @@ function baseInput(
   };
 }
 
+const PAYMENT_DENIAL_COPY = [
+  "即將開放",
+  "解鎖即將開放，本版不收費。",
+  "開通由講師受控流程處理，本版不收費",
+  "升級／開通",
+];
+
+function expectNoPaymentDenialCopy(view: ReturnType<typeof resolveMembershipView>) {
+  const serialized = JSON.stringify(view);
+  for (const phrase of PAYMENT_DENIAL_COPY) {
+    expect(serialized).not.toContain(phrase);
+  }
+}
+
 describe("resolveMembershipView", () => {
-  it("keeps guest on basic title, locked advanced, upcoming CTA, and auth entry", () => {
+  it("keeps guest on basic title, locked advanced, unlock-report CTA, and auth entry", () => {
     const view = resolveMembershipView(baseInput());
 
     expect(view.title).toBe("小圓的基本分析");
     expect(view.advancedLocked).toBe(true);
     expect(view.showCta).toBe(true);
-    expect(view.ctaLabel).toBe("即將開放");
-    expect(view.ctaNote).toBe("解鎖即將開放，本版不收費。");
+    expect(view.ctaLabel).toBe("解鎖完整報告");
     expect(view.followupLocked).toBe(true);
     expect(view.authSlot).toBe(REPORT_SLOTS.authEntry);
     expect(view.advanced).toBeNull();
+    expectNoPaymentDenialCopy(view);
   });
 
-  it("uses upgrade CTA for a locked member and does not unlock", () => {
+  it("uses unlock-report CTA for a locked member and does not unlock", () => {
     const view = resolveMembershipView(
       baseInput({
         hasSession: true,
@@ -48,11 +62,11 @@ describe("resolveMembershipView", () => {
     expect(view.title).toBe("小圓的基本分析");
     expect(view.advancedLocked).toBe(true);
     expect(view.showCta).toBe(true);
-    expect(view.ctaLabel).toBe("升級／開通");
-    expect(view.ctaNote).toBe("開通由講師受控流程處理，本版不收費");
+    expect(view.ctaLabel).toBe("解鎖完整報告");
     expect(view.followupLocked).toBe(true);
     expect(view.authSlot).toBe(REPORT_SLOTS.authSession);
     expect(view.advanced).toBeNull();
+    expectNoPaymentDenialCopy(view);
   });
 
   it("uses passed advanced text for unlocked and keeps followup locked", () => {
@@ -67,6 +81,7 @@ describe("resolveMembershipView", () => {
     expect(view.advancedLocked).toBe(false);
     expect(view.showCta).toBe(false);
     expect(view.ctaLabel).toBe("已開通");
+    expect(JSON.stringify(view)).not.toContain("解鎖完整報告");
     expect(view.followupLocked).toBe(true);
     expect(view.advanced?.rationale).toBe(REAL_ADVANCED.rationale);
     expect(view.advanced?.action_plan).toHaveLength(7);
