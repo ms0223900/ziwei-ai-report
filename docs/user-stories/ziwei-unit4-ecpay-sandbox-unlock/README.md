@@ -123,8 +123,5 @@ Phase 7 完成條件：SOP 可走五類驗測；grant 保留且非正式付款�
 ## 重構掃描記錄
 
 - 已掃描至：US-017（2026-09-19）
-- 已知待觀察熱點（開工後更新）：
-  - `proxy.ts`／`lib/supabase/session-guards.test.ts`
-  - `test/fakes/supabase.ts`
-  - `lib/membership/view.ts`、`components/report/AdvancedLockedPanel.tsx`
-  - `lib/commercial/preview.ts`／`CommercialPreviewBar`
+- 已知待觀察熱點：無
+- 備註：US-014～US-017 掃描後已執行 Feature × Medium：解鎖 CTA／登入彈窗／checkout fetch 抽至 `UnlockCheckoutCta.tsx`。`ReportCard.test.tsx` 僅測試檔 churn，不列熱點。
