@@ -15,11 +15,57 @@
 - 寫入成功後才回 `1|OK`
 
 **驗收條件**：
-- [ ] US-012 測試轉綠
-- [ ] 已 unlocked＋pending 的成功通知仍將訂單標 paid 再回 `1|OK`
-- [ ] Client SDK 仍不能改 `access_status`
-- [ ] 不實作 QueryTradeInfo
-- [ ] 不把 grant 當本路徑
+- [x] US-012 測試轉綠
+- [x] 已 unlocked＋pending 的成功通知仍將訂單標 paid 再回 `1|OK`
+- [x] Client SDK 仍不能改 `access_status`
+- [x] 不實作 QueryTradeInfo
+- [x] 不把 grant 當本路徑
+
+#### 驗收說明
+
+**整體結論**：PASS ✅
+
+> `npx vitest run app/api/payments/ecpay/webhook/route.test.ts` 12 passed；`tsc --noEmit` 通過。Mutation：`SimulatePaid === "1"` 改 `"2"` 後履約斷言變紅，已還原。
+
+---
+
+**AC-1：US-012 測試轉綠**
+
+狀態：✅ 通過
+
+- `app/api/payments/ecpay/webhook/route.test.ts` 全綠
+
+---
+
+**AC-2：unlocked＋pending 成功通知仍標 paid**
+
+狀態：✅ 通過
+
+- `app/api/payments/ecpay/webhook/route.ts` 的 `POST()` 在 `access_status === unlocked` 時仍 `markOrderPaid()`，不重寫 points／subscription
+
+---
+
+**AC-3：Client SDK 仍不能改 access_status**
+
+狀態：✅ 通過
+
+- 本任務未改 `supabase/migrations/20260913000000_create_profiles.sql`：`grant update (display_name)` + `profiles_guard_entitlements` 仍擋非 service_role 改權益欄
+
+---
+
+**AC-4：不實作 QueryTradeInfo**
+
+狀態：✅ 通過
+
+- `route.ts` 無 QueryTradeInfo
+
+---
+
+**AC-5：不把 grant 當本路徑**
+
+狀態：✅ 通過
+
+- `route.ts` 未 import `/api/dev/grant-access`；解鎖只走 service role 更新 `profiles.access_status`
 
 **測試策略**：Test-First  
 > 理由：對 US-012 紅燈實作至綠。
