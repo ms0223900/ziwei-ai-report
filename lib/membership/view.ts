@@ -1,17 +1,13 @@
 import type { PreviewState } from "../commercial/preview";
 import {
+  MEMBERSHIP_CTA_UNLOCK_REPORT,
   MEMBERSHIP_CTA_UNLOCKED,
-  MEMBERSHIP_CTA_UPGRADE,
-  MEMBERSHIP_GRANT_NOTE,
   REPORT_SLOTS,
-  UPCOMING_UNLOCK_NOTE,
 } from "../constants";
 
-export const MEMBERSHIP_CTA_UPCOMING = "即將開放";
 export {
+  MEMBERSHIP_CTA_UNLOCK_REPORT,
   MEMBERSHIP_CTA_UNLOCKED,
-  MEMBERSHIP_CTA_UPGRADE,
-  MEMBERSHIP_GRANT_NOTE,
 };
 
 export type MembershipAccessStatus = "locked" | "unlocked";
@@ -41,6 +37,7 @@ export type MembershipView = {
   showCta: boolean;
   ctaLabel: string;
   ctaNote: string | null;
+  followupLocked: boolean;
   authSlot: string;
   advanced: MembershipAdvanced | null;
 };
@@ -56,8 +53,9 @@ export function resolveMembershipView(
       title: `${input.nickname}的基本分析`,
       advancedLocked: true,
       showCta: true,
-      ctaLabel: MEMBERSHIP_CTA_UPCOMING,
-      ctaNote: UPCOMING_UNLOCK_NOTE,
+      ctaLabel: MEMBERSHIP_CTA_UNLOCK_REPORT,
+      ctaNote: null,
+      followupLocked: true,
       authSlot: REPORT_SLOTS.authEntry,
       advanced: null,
     };
@@ -68,8 +66,9 @@ export function resolveMembershipView(
       title: `${input.nickname}的基本分析`,
       advancedLocked: true,
       showCta: true,
-      ctaLabel: MEMBERSHIP_CTA_UPGRADE,
-      ctaNote: MEMBERSHIP_GRANT_NOTE,
+      ctaLabel: MEMBERSHIP_CTA_UNLOCK_REPORT,
+      ctaNote: null,
+      followupLocked: true,
       authSlot: REPORT_SLOTS.authSession,
       advanced: null,
     };
@@ -81,6 +80,7 @@ export function resolveMembershipView(
     showCta: false,
     ctaLabel: MEMBERSHIP_CTA_UNLOCKED,
     ctaNote: null,
+    followupLocked: true,
     authSlot: REPORT_SLOTS.authSession,
     advanced: input.advanced ?? null,
   };
