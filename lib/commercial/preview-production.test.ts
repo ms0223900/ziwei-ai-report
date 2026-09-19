@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { PREVIEW_EXAMPLE_MARK } from "../constants";
 import {
@@ -87,5 +88,10 @@ describe("resolveCommercialPreviewPolicy — Story 13", () => {
     expect(policy.alertMessage).toBeNull();
     expect(policy.effectiveState).toBe("C");
     expect(view.exampleBlocks?.rationale).toContain(PREVIEW_EXAMPLE_MARK);
+  });
+
+  it("defaults .env.production preview to 0", () => {
+    const text = readFileSync(".env.production", "utf8");
+    expect(text).toMatch(/^NEXT_PUBLIC_COMMERCIAL_PREVIEW=0$/m);
   });
 });

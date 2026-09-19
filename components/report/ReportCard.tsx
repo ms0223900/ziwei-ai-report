@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import {
-  isCommercialPreviewEnabled,
-  resolveEffectivePreviewState,
+  resolveCommercialPreviewPolicy,
   resolvePreviewView,
   type PreviewState,
 } from "../../lib/commercial/preview";
@@ -29,17 +28,19 @@ export function ReportCard({
   commercialPreviewEnabled?: boolean;
   membership?: MembershipView;
 }) {
-  const enabled =
-    commercialPreviewEnabled ??
-    isCommercialPreviewEnabled(process.env.NEXT_PUBLIC_COMMERCIAL_PREVIEW);
   const [localState, setLocalState] = useState<PreviewState>("A");
-  const effectiveState = resolveEffectivePreviewState({
-    enabled,
+  const policy = resolveCommercialPreviewPolicy({
+    nodeEnv: process.env.NODE_ENV,
+    previewRaw:
+      commercialPreviewEnabled === undefined
+        ? process.env.NEXT_PUBLIC_COMMERCIAL_PREVIEW
+        : commercialPreviewEnabled
+          ? "1"
+          : "0",
     localState,
-    searchParams: null,
   });
   const preview = resolvePreviewView({
-    state: effectiveState,
+    state: policy.effectiveState,
     nickname: report.nickname,
   });
   const unlocked = membership !== undefined && !membership.advancedLocked;
@@ -56,7 +57,16 @@ export function ReportCard({
 
   return (
     <article className="animate-report-enter w-full max-w-[350px] rounded-sheet border border-line bg-sheet px-6 py-6 md:max-w-[576px] md:p-6">
-      {enabled ? (
+      {policy.showAlert ? (
+        <p
+          className="mb-4 text-[13px] font-medium leading-snug text-ink"
+          role="alert"
+        >
+          {policy.alertMessage}
+        </p>
+      ) : null}
+
+      {policy.overlayEnabled ? (
         <CommercialPreviewBar onChange={setLocalState} state={localState} />
       ) : null}
 
