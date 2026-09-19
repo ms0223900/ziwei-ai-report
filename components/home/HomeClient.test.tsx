@@ -7,8 +7,7 @@ import {
   DISCLAIMER,
   ERROR_MESSAGES,
   HIGH_RISK_MESSAGES,
-  MEMBERSHIP_CTA_UPGRADE,
-  MEMBERSHIP_GRANT_NOTE,
+  MEMBERSHIP_CTA_UNLOCK_REPORT,
   PREVIEW_EXAMPLE_MARK,
 } from "../../lib/constants";
 import advancedValid from "../../lib/generation/fixtures/advanced.valid.json";
@@ -339,8 +338,11 @@ describe("HomeClient 會員三態", () => {
 
     expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
     expect(screen.queryByText(advancedValid.rationale)).toBeNull();
-    await user.click(screen.getByRole("button", { name: MEMBERSHIP_CTA_UPGRADE }));
-    expect(screen.getByRole("status").textContent).toBe(MEMBERSHIP_GRANT_NOTE);
+    expect(
+      screen.getByRole("button", { name: MEMBERSHIP_CTA_UNLOCK_REPORT }),
+    ).toBeTruthy();
+    expect(screen.queryByText("即將開放")).toBeNull();
+    expect(screen.queryByText("開通由講師受控流程處理，本版不收費")).toBeNull();
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
@@ -364,6 +366,9 @@ describe("HomeClient 會員三態", () => {
 
     expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
     expect(screen.queryByText(advancedValid.rationale)).toBeNull();
-    expect(screen.getByText("即將開放")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: MEMBERSHIP_CTA_UNLOCK_REPORT }),
+    ).toBeTruthy();
+    expect(screen.queryByText("即將開放")).toBeNull();
   });
 });

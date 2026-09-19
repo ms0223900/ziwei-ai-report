@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import {
   LOCK_CAPTION,
+  MEMBERSHIP_CTA_UNLOCK_REPORT,
   MEMBERSHIP_CTA_UNLOCKED,
-  MEMBERSHIP_CTA_UPGRADE,
-  MEMBERSHIP_GRANT_NOTE,
   REPORT_SLOTS,
-  UPCOMING_UNLOCK_NOTE,
 } from "../../lib/constants";
 import type { PreviewView } from "../../lib/commercial/preview";
 import type { MembershipAdvanced, MembershipView } from "../../lib/membership/view";
@@ -85,11 +82,10 @@ export function AdvancedLockedPanel({
   membership?: MembershipView;
   view: PreviewView;
 }) {
-  const [ctaClicked, setCtaClicked] = useState(false);
   const realAdvanced =
     membership && !membership.advancedLocked ? membership.advanced : null;
-  const upgradeCta = membership?.ctaLabel === MEMBERSHIP_CTA_UPGRADE;
   const showCta = membership ? membership.showCta : view.showCta;
+  const ctaLabel = membership?.ctaLabel ?? MEMBERSHIP_CTA_UNLOCK_REPORT;
   const showUnlockedLabel =
     membership && !membership.advancedLocked && !membership.showCta;
 
@@ -148,20 +144,11 @@ export function AdvancedLockedPanel({
           <div className="flex items-center gap-3">
             <button
               className="min-h-11 rounded-control bg-seal px-5 py-3 text-button text-sheet transition-colors duration-[var(--primitive-duration-hover)] hover:bg-seal-deep"
-              onClick={() => setCtaClicked(true)}
               type="button"
             >
-              {upgradeCta ? MEMBERSHIP_CTA_UPGRADE : "解鎖完整報告"}
+              {ctaLabel}
             </button>
-            {upgradeCta ? null : (
-              <span className="text-[13px] font-medium text-ink-soft">即將開放</span>
-            )}
           </div>
-          {ctaClicked ? (
-            <p className="text-[13px] font-medium text-ink" role="status">
-              {upgradeCta ? MEMBERSHIP_GRANT_NOTE : UPCOMING_UNLOCK_NOTE}
-            </p>
-          ) : null}
         </div>
       ) : null}
 

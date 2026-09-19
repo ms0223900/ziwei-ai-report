@@ -12,9 +12,40 @@
 - 視圖旗標與常數；畫面接線留給 US-016
 
 **驗收條件**：
-- [ ] US-014 測試轉綠
-- [ ] 相關元件測試改跟新文案（HomeClient／ReportCard 若斷言舊文案則一併改）
-- [ ] 不在本任務接 grant API
+- [x] US-014 測試轉綠
+- [x] 相關元件測試改跟新文案（HomeClient／ReportCard 若斷言舊文案則一併改）
+- [x] 不在本任務接 grant API
+
+#### 驗收說明
+
+**整體結論**：PASS ✅
+
+> `npx vitest run lib/membership/view.test.ts components/home/HomeClient.test.tsx components/report/ReportCard.test.tsx` 32 passed。Mutation：訪客 `ctaLabel` 改回「即將開放」後 view 測試變紅，已還原。畫面接線留給 US-016。
+
+---
+
+**AC-1：US-014 測試轉綠**
+
+狀態：✅ 通過
+
+- `lib/membership/view.ts` 訪客／locked 皆 `MEMBERSHIP_CTA_UNLOCK_REPORT`，`ctaNote` 為 null
+
+---
+
+**AC-2：相關元件測試改跟新文案**
+
+狀態：✅ 通過
+
+- `AdvancedLockedPanel.tsx` 不再用 `ctaLabel === MEMBERSHIP_CTA_UPGRADE` 二分
+- `HomeClient.test.tsx`／`ReportCard.test.tsx` 改斷言「解鎖完整報告」、主路徑無即將開放／講師受控收費句
+
+---
+
+**AC-3：不在本任務接 grant API**
+
+狀態：✅ 通過
+
+- 面板與視圖未呼叫 `/api/dev/grant-access`
 
 **測試策略**：Test-First  
 > 理由：對 US-014 紅燈實作至綠。

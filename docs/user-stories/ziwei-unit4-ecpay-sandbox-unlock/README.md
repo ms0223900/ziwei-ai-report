@@ -55,7 +55,7 @@
 ### Phase 5 — CTA 與回跳
 
 - [x] US-014 未開通付款 CTA 測試（預期紅燈；待實作轉綠）
-- [ ] US-015 未開通付款 CTA 實作
+- [x] US-015 未開通付款 CTA 實作
 - [ ] US-016 訪客登入彈窗與綠界導轉
 - [ ] US-017 付款處理中頁
 
@@ -122,7 +122,7 @@ Phase 7 完成條件：SOP 可走五類驗測；grant 保留且非正式付款�
 
 ## 重構掃描記錄
 
-- 已掃描至：US-013（2026-09-18）
+- 已掃描至：US-015（2026-09-19）
 - 已知待觀察熱點（開工後更新）：
   - `proxy.ts`／`lib/supabase/session-guards.test.ts`
   - `test/fakes/supabase.ts`

@@ -17,8 +17,7 @@ import {
   PREVIEW_NO_DEDUCT,
   REPORT_SLOTS,
   SUBSCRIBE_ACTIVE_PREVIEW,
-  MEMBERSHIP_CTA_UPGRADE,
-  MEMBERSHIP_GRANT_NOTE,
+  MEMBERSHIP_CTA_UNLOCK_REPORT,
   SUBSCRIBE_LABEL,
   UPCOMING_UNLOCK_NOTE,
 } from "../../lib/constants";
@@ -166,14 +165,16 @@ describe("ReportCard", () => {
     expect(screen.getByText(DISCLAIMER)).toBeTruthy();
   });
 
-  it("shows the upcoming-unlock note without changing status after CTA click", async () => {
+  it("keeps unlock-report CTA from changing access after click", async () => {
     const user = userEvent.setup();
     render(<ReportCard report={demoReport} />);
 
-    await user.click(screen.getByRole("button", { name: "解鎖完整報告" }));
+    await user.click(
+      screen.getByRole("button", { name: MEMBERSHIP_CTA_UNLOCK_REPORT }),
+    );
 
-    expect(screen.getByRole("status").textContent).toBe(UPCOMING_UNLOCK_NOTE);
-    expect(screen.getByText("即將開放")).toBeTruthy();
+    expect(screen.queryByText("解鎖即將開放，本版不收費。")).toBeNull();
+    expect(screen.queryByText("即將開放")).toBeNull();
     expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
   });
 
@@ -217,13 +218,15 @@ describe("ReportCard", () => {
     );
   });
 
-  it("shows the instructor-controlled note for a locked member CTA", async () => {
+  it("shows unlock-report CTA for a locked member without instructor-fee copy", async () => {
     const user = userEvent.setup();
     render(<ReportCard membership={lockedMembership} report={demoReport} />);
 
-    await user.click(screen.getByRole("button", { name: MEMBERSHIP_CTA_UPGRADE }));
+    await user.click(
+      screen.getByRole("button", { name: MEMBERSHIP_CTA_UNLOCK_REPORT }),
+    );
 
-    expect(screen.getByRole("status").textContent).toBe(MEMBERSHIP_GRANT_NOTE);
+    expect(screen.queryByText("開通由講師受控流程處理，本版不收費")).toBeNull();
     expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
     expect(screen.queryByText(advancedValid.rationale)).toBeNull();
   });
