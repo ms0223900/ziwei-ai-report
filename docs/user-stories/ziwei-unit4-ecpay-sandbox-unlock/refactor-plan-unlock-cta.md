@@ -3,7 +3,9 @@
 **類型**：Feature  
 **規模**：Medium  
 **測試策略**：無獨立 US「測試策略」欄（純重構）→ 維持既有測試、不強制新增；重構前後跑同一組 Vitest。  
-**狀態**：規劃中（實作前須獨立審查）
+**狀態**：獨立審查通過（go；P2 如下，實作時一併守）
+
+獨立審查（2026-09-19）無 P0／P1。實作守則：`fetch` 只留在 `UnlockCheckoutCta`，禁止 import `lib/payments/checkout-env.ts`（`server-only`）；401 分支整段搬走；`hasSession` 不得寫成 `Boolean(membership)`。對話框隨 CTA 卸載視為刻意收斂（僅無 membership＋預覽切態會與現況 DOM 不同）。US-019 警告預期在 `ReportCard`／preview，不為它預留 CTA props。若抽出 `checkout-response` 測試，須併入 vitest 指令。
 
 ## 1. 現況與問題
 
@@ -15,7 +17,7 @@
 - 訪客登入對話框
 - `CommercialSecondaryZone`
 
-US-015 改 CTA 文案與二分邏輯；US-016 把 checkout 與彈窗疊進同一檔。US-019 仍會再碰此面板。`handleUnlockClick` 後有一行無效陳述（與 `showUnlockedLabel` 相同的 `membership && …`），屬搬移殘句。
+US-015 改 CTA 文案與二分邏輯；US-016 把 checkout 與彈窗疊進同一檔。US-019 輸出是 preview／預覽條／報告頁警告，不是本面板；本次不為它預留 props。`handleUnlockClick` 後有一行無效陳述（與 `showUnlockedLabel` 相同的 `membership && …`），屬搬移殘句。
 
 既有付款送出已在 `lib/payments/submit-ecpay-form.ts`。repo 沒有 `hooks/` 目錄；同目錄拆分慣例是 sibling 元件（`CommercialSecondaryZone.tsx`、`CommercialPreviewBar.tsx`）。
 
@@ -52,11 +54,11 @@ AdvancedLockedPanel          鎖定區版面、已開通標、CommercialSecondar
   - 內含現況三個 `useState` 與 `handleUnlockClick`（搬移，不改分支語意）
   - 登入對話框留在此元件（與 CTA 同生命週期）
 - **可選同檔或** `lib/payments/checkout-response.ts`：抽出「從 `unknown` 讀 `message`／`checkout_url`／`fields`」的窄化，避免元件內重複 `typeof json === "object"`。若抽出，補最小單元測試（與 `parseCheckoutFields` 同風格）。若搬移後函式仍短，允許留在元件內，不為拆而拆。
-- **`AdvancedLockedPanel`**：刪除 checkout state／handler／dialog／殘句；`showCta` 時渲染 `<UnlockCheckoutCta ctaLabel={…} hasSession={…} />`。`hasSession` 仍為 `membership?.authSlot === REPORT_SLOTS.authSession`。
+- **`AdvancedLockedPanel`**：刪除 checkout state／handler／dialog／殘句；`showCta` 時渲染 `<UnlockCheckoutCta ctaLabel={…} hasSession={…} />`。`hasSession` 仍為 `membership?.authSlot === REPORT_SLOTS.authSession`。對話框改由 CTA 元件持有（`showCta` 變 false 時一併卸載）。
 - **測試**：`AdvancedLockedPanel.test.tsx` 繼續從面板點 CTA（黑盒）。不把測試改成只測新元件，以免 US-016 契約從組合點消失。
 - **視覺**：className、文案、role、slot 原樣搬移。
 
-依賴方向：View（CTA）→ `lib/payments` → 瀏覽器 `fetch`／form。不把 Hash／service role 拉進 client。不改 Route Handler。
+依賴方向：`UnlockCheckoutCta` 自己 `fetch("/api/payments/checkout")`；`lib/payments` 只提供 JSON 窄化（若抽）與既有 `parseCheckoutFields`／`submitEcpayTopLevelForm`。禁止從 CTA import `checkout-env.ts`。不把 Hash／service role 拉進 client。不改 Route Handler。
 
 ## 3. 實作步驟
 
