@@ -180,6 +180,9 @@ export async function POST(request: Request): Promise<Response> {
     return reject("order or amount mismatch");
   }
 
+  // Later (unit 5/6): branch on DB orders.plan_id here — not ECPay CustomField.
+  // This unit only fulfills unlock_report_lifetime → unlocked; no points / PeriodReturnURL.
+
   const simulatePaid = trimField(fields, "SimulatePaid");
   if (simulatePaid === "1") {
     return ok();
