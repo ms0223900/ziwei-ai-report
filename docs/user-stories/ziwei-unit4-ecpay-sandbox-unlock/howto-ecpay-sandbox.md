@@ -165,7 +165,48 @@ ECPAY_ENV=stage
 
 ---
 
-## 9. 建議操作順序（最短路徑）
+## 9. `plan_id` 履約分流接點（Story 12／Later）
+
+本單元**只**履約 `unlock_report_lifetime` → `access_status=unlocked`。  
+單元 5／6 若加點或訂閱，掛在**同一條** `ReturnURL`（`POST /api/payments/ecpay/webhook`），**不要**依方案再開第二條 webhook。
+
+### 來源真相是 DB，不是綠界 CustomField
+
+建單時把方案寫進 `orders.plan_id`（見 `lib/payments/plans.ts`）。Webhook 成功路徑：
+
+1. 驗 `CheckMacValue`
+2. 用 `MerchantTradeNo` 找 `orders`
+3. 對 `TradeAmt` 與建單金額
+4. **讀該列 `plan_id`**（資料庫），再分支履約
+
+綠界 `CustomField` 可選回傳，**不能**當履約依據。改方案常數或改通知欄都不得繞過 DB。
+
+程式掛點（本單元不改行為，只標位置）：
+
+- 建單方案表：`lib/payments/plans.ts`（未知 `plan_id` 不建單）
+- Webhook 分流：`app/api/payments/ecpay/webhook/route.ts` 在驗簽、找單、對金額之後；目前一律走解鎖，尚未 `switch (plan_id)`
+
+### 本單元明確不做
+
+| 項目 | 本單元 |
+| --- | --- |
+| 加點／改 `points_balance` | **不做**；Webhook／grant 成功後欄位應維持原值 |
+| 改 `subscription_status` | **不做** |
+| `PeriodReturnURL` 定期定額週期通知 | **不實作** |
+| QueryTradeInfo／處理中輪詢 | **不實作**（`ECPAY_QUERY_URL` 只留槽位，見 §3） |
+
+單元 4 各 US **沒有**把 mutation `points_balance`／`subscription_status` 列為實作 AC（US-012／US-022 還斷言「不加點」）。後續單元才可新增加點 AC。
+
+官方文件（僅接點，不當成本單元實作）：
+
+- [信用卡定期定額](https://developers.ecpay.com.tw/2868)
+- [定期定額付款結果通知](https://developers.ecpay.com.tw/5631)
+- [定期定額訂單查詢](https://developers.ecpay.com.tw/2892/)
+- [定期定額訂單作業](https://developers.ecpay.com.tw/2900/)
+
+---
+
+## 10. 建議操作順序（最短路徑）
 
 1. 選「已有 HTTPS」或 `cloudflared`，設好 Return／Back URL  
 2. 登入 locked 會員，產生一份報告  
@@ -174,4 +215,5 @@ ECPAY_ENV=stage
 5. 再各做一次：返回商店（等待）、失敗、改壞 MAC、重送同一成功 payload  
 6. 另開時間用 grant 看三態；**不要**把那次寫進五類紀錄  
 
-未走完五類、或中間用 grant 頂替 Webhook，都**不要**把 Story 5～9 勾成通過。
+未走完五類、或中間用 grant 頂替 Webhook，都**不要**把 Story 5～9 勾成通過。  
+Story 12 加點／訂閱**不要**在本單元勾成通過；只確認 SOP 接點與「不加點」即可。
