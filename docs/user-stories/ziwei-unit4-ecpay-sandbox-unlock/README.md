@@ -50,7 +50,7 @@
 ### Phase 4 — Webhook
 
 - [x] US-012 webhook 處理 測試（預期紅燈；待實作轉綠）
-- [ ] US-013 webhook 處理 實作
+- [x] US-013 webhook 處理 實作
 
 ### Phase 5 — CTA 與回跳
 
@@ -122,7 +122,7 @@ Phase 7 完成條件：SOP 可走五類驗測；grant 保留且非正式付款�
 
 ## 重構掃描記錄
 
-- 已掃描至：US-011（2026-09-18）；US-012 純測試略過重構掃描
+- 已掃描至：US-013（2026-09-18）
 - 已知待觀察熱點（開工後更新）：
   - `proxy.ts`／`lib/supabase/session-guards.test.ts`
   - `test/fakes/supabase.ts`
