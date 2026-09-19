@@ -123,7 +123,5 @@ Phase 7 完成條件：SOP 可走五類驗測；grant 保留且非正式付款�
 ## 重構掃描記錄
 
 - 已掃描至：US-017（2026-09-19）
-- 已知待觀察熱點：
-  - `components/report/AdvancedLockedPanel.tsx`（US-015／US-016 同檔；US-016 為 US-011＋US-015 多對一匯聚、US-015 扇出至 US-016／US-019；2026-09-19 判定高風險 Feature × Medium，待確認是否執行 `/refactor`）
-  - `components/report/ReportCard.test.tsx`（US-015／US-016 測試檔 churn；不單獨構成重構範圍）
-- 備註：本次窗 US-014～US-017。反模式未命中（面板 265 行、無 §1.4）。US-017 為獨立 `/orders/processing`，無 churn。開工佔位熱點（`proxy.ts`、`test/fakes/supabase.ts`、`lib/commercial/preview.ts`）本次窗未再觸及，已自清單移除。
+- 已知待觀察熱點：無
+- 備註：US-014～US-017 掃描後已執行 Feature × Medium：解鎖 CTA／登入彈窗／checkout fetch 抽至 `UnlockCheckoutCta.tsx`。`ReportCard.test.tsx` 僅測試檔 churn，不列熱點。
