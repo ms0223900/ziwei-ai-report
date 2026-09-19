@@ -14,10 +14,48 @@
 - 擴 `app/api/dev/grant-access/route.test.ts`（fake 含 orders）
 
 **驗收條件**：
-- [ ] 斷言 grant 200 且 orders 列數不變
-- [ ] 斷言開關非 1 → 404
-- [ ] 斷言 grant 後不呼叫綠界 URL
-- [ ] 本任務不要求因「尚無 grant route」而紅燈（route 已存在）
+- [x] 斷言 grant 200 且 orders 列數不變
+- [x] 斷言開關非 1 → 404
+- [x] 斷言 grant 後不呼叫綠界 URL
+- [x] 本任務不要求因「尚無 grant route」而紅燈（route 已存在）
+
+#### 驗收說明
+
+**整體結論**：PASS ✅
+
+> Test-After。`npx vitest run app/api/dev/grant-access/route.test.ts` 8 passed。Mutation：暫時在 grant 插入 `orders` 後「列數不變」變紅（expected 1 / received 2），已還原。
+
+---
+
+**AC-1：grant 200 且 orders 列數不變**
+
+狀態：✅ 通過
+
+- `app/api/dev/grant-access/route.test.ts` 的 `unlocks without inserting or mutating orders` 對 pending 單 snapshot 後比對 Map
+
+---
+
+**AC-2：開關非 1 → 404**
+
+狀態：✅ 通過
+
+- 既有案例擴成：`MEMBERSHIP_GRANT_ENABLED=0` 仍 404、仍 locked、orders 不變、不 fetch
+
+---
+
+**AC-3：grant 後不呼叫綠界 URL**
+
+狀態：✅ 通過
+
+- `does not call an ECPay checkout URL` stub `fetch`，成功 grant 後 `not.toHaveBeenCalled()`
+
+---
+
+**AC-4：不要求因尚無 grant route 而紅燈**
+
+狀態：✅ 通過
+
+- `app/api/dev/grant-access/route.ts` 已存在；本任務是回歸擴充，測試直接綠燈
 
 **測試策略**：Test-After  
 > 理由：grant 契約已在單元 3；本任務是擴 fake 後的回歸，不是新功能先紅。
