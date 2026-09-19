@@ -66,7 +66,7 @@
 
 ### Phase 7 — SOP、grant、接點
 
-- [ ] US-020 Tunnel 與五類驗測 SOP
+- [x] US-020 Tunnel 與五類驗測 SOP
 - [ ] US-021 grant 與付款互動 測試
 - [ ] US-022 grant 與付款互動 實作
 - [ ] US-023 plan_id 履約分流接點說明
