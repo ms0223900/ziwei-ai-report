@@ -173,6 +173,7 @@ describe("ReportCard", () => {
       screen.getByRole("button", { name: MEMBERSHIP_CTA_UNLOCK_REPORT }),
     );
 
+    expect(screen.getByRole("dialog", { name: "請先登入" })).toBeTruthy();
     expect(screen.queryByText("解鎖即將開放，本版不收費。")).toBeNull();
     expect(screen.queryByText("即將開放")).toBeNull();
     expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
@@ -220,6 +221,19 @@ describe("ReportCard", () => {
 
   it("shows unlock-report CTA for a locked member without instructor-fee copy", async () => {
     const user = userEvent.setup();
+    HTMLFormElement.prototype.submit = vi.fn();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          checkout_url:
+            "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5",
+          fields: { MerchantID: "3002607", TotalAmount: "99" },
+        }),
+      })),
+    );
     render(<ReportCard membership={lockedMembership} report={demoReport} />);
 
     await user.click(
