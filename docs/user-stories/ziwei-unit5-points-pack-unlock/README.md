@@ -32,7 +32,7 @@
 ### Phase 1 — schema 與 fake
 
 - [x] US-003 建立點數與解鎖關聯遷移
-- [ ] US-004 加點與扣點 RPC 遷移
+- [x] US-004 加點與扣點 RPC 遷移
 - [ ] US-005 記憶體 fake 點數與 RPC
 
 ### Phase 2 — 建單閘門
