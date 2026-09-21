@@ -107,7 +107,7 @@ describe("point ledger and unlocks migration", () => {
     const sql = stripComments(LEDGER_SQL);
     expect(sql).not.toMatch(/alter table public\.profiles/i);
     expect(sql).not.toMatch(/fulfilled_at/i);
-    expect(sql).not.toMatch(/access_status/i);
+    expect(sql).not.toMatch(/update\s+public\.profiles/i);
     expect(PROFILES_SQL).toMatch(/profiles_guard_entitlements/);
     expect(stripComments(ORDERS_SQL)).not.toMatch(/fulfilled_at/i);
   });
