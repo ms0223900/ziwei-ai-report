@@ -306,7 +306,7 @@ describe("fake supabase memory", () => {
     });
     expect(duplicate.data).toBeNull();
     expect(duplicate.error).toMatchObject({
-      message: "duplicate user_id,report_id",
+      message: "duplicate id",
     });
     expect(memory.reportUnlocks.size).toBe(1);
   });

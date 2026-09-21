@@ -212,6 +212,7 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
   let pendingInsert: Record<string, unknown> | null = null;
   let pendingUpdate: Record<string, unknown> | null = null;
   let upsertIgnoreDuplicates = false;
+  let isUpsert = false;
   let includeRepresentation = false;
 
   const api = {
@@ -221,6 +222,7 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
     },
     insert(row: Record<string, unknown>) {
       pendingInsert = { ...row };
+      isUpsert = false;
       return api;
     },
     upsert(
@@ -228,6 +230,7 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
       options?: { onConflict?: string; ignoreDuplicates?: boolean },
     ) {
       pendingInsert = { ...row };
+      isUpsert = true;
       upsertIgnoreDuplicates = options?.ignoreDuplicates === true;
       return api;
     },
@@ -254,6 +257,9 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
         const existing = store.get(id);
         if (existing && upsertIgnoreDuplicates) {
           return { data: existing, error: null };
+        }
+        if (existing && !isUpsert) {
+          return { data: null, error: { message: `duplicate ${idKey}` } };
         }
         const conflict = uniqueConflict(
           store as Map<string, unknown>,
