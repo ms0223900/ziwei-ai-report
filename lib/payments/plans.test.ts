@@ -12,6 +12,17 @@ describe("checkout plan catalog", () => {
     });
   });
 
+  it("returns amount, item copy, and +5 credit for the points pack", () => {
+    expect(resolveCheckoutPlan("points_pack_5")).toEqual({
+      planId: "points_pack_5",
+      amount: 49,
+      currency: "TWD",
+      itemName: "紫微斗數點數包（5 點）",
+      tradeDesc: "紫微斗數點數包（5 點）",
+      creditPoints: 5,
+    });
+  });
+
   it("fails unknown plan ids without returning a price", () => {
     const unknown = resolveCheckoutPlan("not_a_supported_plan");
     expect(unknown).toBeNull();
