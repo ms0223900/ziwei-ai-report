@@ -166,6 +166,38 @@ describe("POST /api/payments/checkout", () => {
     expect(String(fields.TotalAmount)).toBe("99");
   });
 
+  it("stores amount 49 for points_pack_5 even when the body sends amount 1", async () => {
+    const response = await postCheckout({
+      plan_id: "points_pack_5",
+      amount: 1,
+      points: 99,
+      ItemName: "fake",
+    });
+    expect(response.status).toBe(200);
+    const orders = [...state.memory.orders.values()];
+    expect(orders).toHaveLength(1);
+    expect(orders[0]?.amount).toBe(49);
+    expect(orders[0]?.currency).toBe("TWD");
+    expect(orders[0]?.status).toBe("pending");
+    expect(orders[0]?.plan_id).toBe("points_pack_5");
+    const fields = checkoutFields(await readJson(response));
+    expect(String(fields.TotalAmount)).toBe("49");
+    expect(fields.ItemName).toBe("紫微斗數點數包（5 點）");
+  });
+
+  it("returns 200 for an unlocked member buying points_pack_5", async () => {
+    seedFakeUser(state.memory, { id: USER_ID, email: "yuan@example.com" }, {
+      access_status: "unlocked",
+    });
+    const response = await postCheckout({ plan_id: "points_pack_5" });
+    expect(response.status).toBe(200);
+    const orders = [...state.memory.orders.values()];
+    expect(orders).toHaveLength(1);
+    expect(orders[0]?.status).toBe("pending");
+    expect(orders[0]?.plan_id).toBe("points_pack_5");
+    expect(orders[0]?.amount).toBe(49);
+  });
+
   it("returns form POST fields for a locked member", async () => {
     const response = await postCheckout({
       plan_id: "unlock_report_lifetime",
