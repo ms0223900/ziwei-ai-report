@@ -7,6 +7,7 @@ import {
   createFakeSupabaseMemory,
   seedFakeReport,
   seedFakeUser,
+  setFakeRpc,
 } from "./supabase";
 
 const FAKE_SOURCE = readFileSync(
@@ -16,6 +17,7 @@ const FAKE_SOURCE = readFileSync(
 
 const USER_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const REPORT_ID = "11111111-1111-4111-8111-111111111111";
+const ORDER_ID = "22222222-2222-4222-8222-222222222222";
 
 describe("fake supabase memory", () => {
   it("seeds a locked profile and finds the user by email", async () => {
@@ -213,5 +215,125 @@ describe("fake supabase memory", () => {
       message: "duplicate merchant_trade_no",
     });
     expect(memory.orders.size).toBe(1);
+  });
+
+  it("inserts point_transactions and report_unlocks without throwing", async () => {
+    const memory = createFakeSupabaseMemory();
+    const client = createFakeServiceRoleClient(memory);
+    const credit = await client.from("point_transactions").insert({
+      user_id: USER_ID,
+      delta: 5,
+      type: "credit_purchase",
+      source_order_id: ORDER_ID,
+      report_id: null,
+    });
+    expect(credit.error).toBeNull();
+    expect(credit.data).toMatchObject({
+      user_id: USER_ID,
+      source_order_id: ORDER_ID,
+      delta: 5,
+    });
+
+    const unlock = await client.from("report_unlocks").insert({
+      user_id: USER_ID,
+      report_id: REPORT_ID,
+      transaction_id: String(
+        (credit.data as { id?: string } | null)?.id ?? "tx",
+      ),
+    });
+    expect(unlock.error).toBeNull();
+    expect(unlock.data).toMatchObject({
+      user_id: USER_ID,
+      report_id: REPORT_ID,
+    });
+  });
+
+  it("stores reports.user_id including null", async () => {
+    const memory = createFakeSupabaseMemory();
+    seedFakeReport(memory, {
+      id: REPORT_ID,
+      generation_status: "success",
+      basic_json: {},
+      advanced_json: null,
+      user_id: null,
+    });
+    const client = createFakeServiceRoleClient(memory);
+    const guest = await client.from("reports").select().eq("id", REPORT_ID).single();
+    expect(guest.data?.user_id).toBeNull();
+
+    await client
+      .from("reports")
+      .update({ user_id: USER_ID })
+      .eq("id", REPORT_ID)
+      .maybeSingle();
+    expect(memory.reports.get(REPORT_ID)?.user_id).toBe(USER_ID);
+  });
+
+  it("rejects a duplicate credit source_order_id", async () => {
+    const memory = createFakeSupabaseMemory();
+    const client = createFakeServiceRoleClient(memory);
+    await client.from("point_transactions").insert({
+      user_id: USER_ID,
+      delta: 5,
+      type: "credit_purchase",
+      source_order_id: ORDER_ID,
+    });
+    const duplicate = await client.from("point_transactions").insert({
+      user_id: USER_ID,
+      delta: 5,
+      type: "credit_purchase",
+      source_order_id: ORDER_ID,
+    });
+    expect(duplicate.data).toBeNull();
+    expect(duplicate.error).toMatchObject({
+      message: "duplicate source_order_id",
+    });
+    expect(memory.pointTransactions.size).toBe(1);
+  });
+
+  it("rejects a duplicate report_unlocks pair", async () => {
+    const memory = createFakeSupabaseMemory();
+    const client = createFakeServiceRoleClient(memory);
+    await client.from("report_unlocks").insert({
+      user_id: USER_ID,
+      report_id: REPORT_ID,
+      transaction_id: "tx-1",
+    });
+    const duplicate = await client.from("report_unlocks").insert({
+      user_id: USER_ID,
+      report_id: REPORT_ID,
+      transaction_id: "tx-2",
+    });
+    expect(duplicate.data).toBeNull();
+    expect(duplicate.error).toMatchObject({
+      message: "duplicate id",
+    });
+    expect(memory.reportUnlocks.size).toBe(1);
+  });
+
+  it("exposes rpc stubs that tests can inject without throwing", async () => {
+    const memory = createFakeSupabaseMemory();
+    const client = createFakeServiceRoleClient(memory);
+    const missing = await client.rpc("fulfill_points_pack_order", {
+      order_id: ORDER_ID,
+    });
+    expect(missing).toEqual({ data: null, error: null });
+
+    setFakeRpc(memory, "unlock_report_with_point", {
+      data: { ok: true, reason: "unlocked", points_balance: 4 },
+      error: null,
+    });
+    const injected = await client.rpc("unlock_report_with_point", {
+      report_id: REPORT_ID,
+      p_user_id: USER_ID,
+    });
+    expect(injected.data).toMatchObject({
+      ok: true,
+      reason: "unlocked",
+      points_balance: 4,
+    });
+    expect(FAKE_SOURCE).toContain(
+      "do not prove Story 4 / 5 / 8 migrations were applied",
+    );
   });
 });
