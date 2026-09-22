@@ -17,10 +17,49 @@
 - 回傳至少：`ok`、`reason`、`points_balance`
 
 **驗收條件**：
-- [ ] 加點函式與餘額更新同一事務；unique 衝突當已履約
-- [ ] 扣點函式簽名含 `p_user_id`；不讀 `auth.uid()` 當擁有者
-- [ ] 任一步失敗整筆回滾：不能「已扣點無解鎖」或「已解鎖無紀錄」
-- [ ] 不寫 `access_status`／`reports.status` 來代表單點解鎖
+- [x] 加點函式與餘額更新同一事務；unique 衝突當已履約
+- [x] 扣點函式簽名含 `p_user_id`；不讀 `auth.uid()` 當擁有者
+- [x] 任一步失敗整筆回滾：不能「已扣點無解鎖」或「已解鎖無紀錄」
+- [x] 不寫 `access_status`／`reports.status` 來代表單點解鎖
+
+#### 驗收說明
+
+**整體結論**：PASS ✅
+
+> `npx vitest run supabase/migrations/points-rpc.migration.test.ts` 4 passed。先 insert credit 再 +5；unique_violation 視為 already_fulfilled。`unlock_report_with_point(report_id, p_user_id)` 不讀 `auth.uid()`。未套用遠端、未勾 US-009／US-013。
+
+---
+
+**AC-1：加點同一事務、unique 當已履約**
+
+狀態：✅ 通過
+
+- `supabase/migrations/20260921000001_points_rpc.sql` 的 `fulfill_points_pack_order()`：insert credit 在 `points_balance + 5` 之前；`unique_violation` → `already_fulfilled`
+
+---
+
+**AC-2：p_user_id、不讀 auth.uid 當擁有者**
+
+狀態：✅ 通過
+
+- `unlock_report_with_point(report_id uuid, p_user_id uuid)`；擁有者比對 `v_owner is distinct from p_user_id`
+- RPC 檔無 `auth.uid()`；EXECUTE 僅 `service_role`
+
+---
+
+**AC-3：扣點與解鎖同一區塊、衝突回滾**
+
+狀態：✅ 通過
+
+- debit insert 與 `report_unlocks` insert 同在 begin／exception；`unique_violation` → `already_unlocked`（子區塊回滾）
+
+---
+
+**AC-4：不寫 access_status／reports.status**
+
+狀態：✅ 通過
+
+- 無 `SET access_status`、無 `reports.status`、無 `fulfilled_at`
 
 **測試策略**：Test-After  
 > 理由：驗收靠 SQL 函式與套用後呼叫，單元測試 fake 證不了真實事務。

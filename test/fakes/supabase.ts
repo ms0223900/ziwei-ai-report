@@ -19,7 +19,32 @@ export type FakeReport = {
   basic_json: Record<string, unknown>;
   advanced_json: Record<string, unknown> | null;
   nickname?: string;
+  user_id?: string | null;
 };
+
+export type FakePointTransaction = {
+  id: string;
+  user_id: string;
+  delta: number;
+  type: "credit_purchase" | "debit_unlock";
+  source_order_id: string | null;
+  report_id: string | null;
+};
+
+export type FakeReportUnlock = {
+  id: string;
+  user_id: string;
+  report_id: string;
+  transaction_id: string;
+};
+
+export type FakeRpcResult = { data: unknown; error: unknown };
+
+export type FakeRpcHandler =
+  | FakeRpcResult
+  | ((
+      args: Record<string, unknown> | undefined,
+    ) => FakeRpcResult | Promise<FakeRpcResult>);
 
 export type FakeOrderStatus = "pending" | "paid" | "failed";
 
@@ -40,6 +65,9 @@ export type FakeSupabaseMemory = {
   profiles: Map<string, FakeProfile>;
   reports: Map<string, FakeReport>;
   orders: Map<string, FakeOrder>;
+  pointTransactions: Map<string, FakePointTransaction>;
+  reportUnlocks: Map<string, FakeReportUnlock>;
+  rpc: Map<string, FakeRpcHandler>;
 };
 
 type Filter = { column: string; value: unknown };
@@ -50,7 +78,18 @@ export function createFakeSupabaseMemory(): FakeSupabaseMemory {
     profiles: new Map(),
     reports: new Map(),
     orders: new Map(),
+    pointTransactions: new Map(),
+    reportUnlocks: new Map(),
+    rpc: new Map(),
   };
+}
+
+export function setFakeRpc(
+  memory: FakeSupabaseMemory,
+  name: string,
+  result: FakeRpcHandler,
+) {
+  memory.rpc.set(name, result);
 }
 
 export function seedFakeUser(
@@ -76,7 +115,12 @@ function matches(row: Record<string, unknown>, filters: Filter[]) {
   return filters.every((filter) => row[filter.column] === filter.value);
 }
 
-type FakeTable = "profiles" | "reports" | "orders";
+type FakeTable =
+  | "profiles"
+  | "reports"
+  | "orders"
+  | "point_transactions"
+  | "report_unlocks";
 
 function tableConfig(memory: FakeSupabaseMemory, table: FakeTable) {
   if (table === "profiles") {
@@ -84,15 +128,38 @@ function tableConfig(memory: FakeSupabaseMemory, table: FakeTable) {
       store: memory.profiles,
       idKey: "user_id",
       uniqueKeys: [] as string[],
+      uniqueComposites: [] as string[][],
     };
   }
   if (table === "reports") {
-    return { store: memory.reports, idKey: "id", uniqueKeys: [] as string[] };
+    return {
+      store: memory.reports,
+      idKey: "id",
+      uniqueKeys: [] as string[],
+      uniqueComposites: [] as string[][],
+    };
+  }
+  if (table === "point_transactions") {
+    return {
+      store: memory.pointTransactions,
+      idKey: "id",
+      uniqueKeys: ["source_order_id"],
+      uniqueComposites: [] as string[][],
+    };
+  }
+  if (table === "report_unlocks") {
+    return {
+      store: memory.reportUnlocks,
+      idKey: "id",
+      uniqueKeys: [] as string[],
+      uniqueComposites: [["user_id", "report_id"]],
+    };
   }
   return {
     store: memory.orders,
     idKey: "id",
     uniqueKeys: ["merchant_trade_no"],
+    uniqueComposites: [] as string[][],
   };
 }
 
@@ -102,6 +169,7 @@ function uniqueConflict(
   id: string,
   row: Record<string, unknown>,
   uniqueKeys: string[],
+  uniqueComposites: string[][] = [],
 ) {
   for (const key of uniqueKeys) {
     const value = row[key];
@@ -118,15 +186,33 @@ function uniqueConflict(
       }
     }
   }
+  for (const columns of uniqueComposites) {
+    if (columns.some((column) => row[column] === undefined || row[column] === null)) {
+      continue;
+    }
+    for (const existing of store.values()) {
+      const record = existing as Record<string, unknown>;
+      if (String(record[idKey]) === id) {
+        continue;
+      }
+      if (columns.every((column) => record[column] === row[column])) {
+        return { message: `duplicate ${columns.join(",")}` };
+      }
+    }
+  }
   return null;
 }
 
 function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
-  const { store, idKey, uniqueKeys } = tableConfig(memory, table);
+  const { store, idKey, uniqueKeys, uniqueComposites } = tableConfig(
+    memory,
+    table,
+  );
   const filters: Filter[] = [];
   let pendingInsert: Record<string, unknown> | null = null;
   let pendingUpdate: Record<string, unknown> | null = null;
   let upsertIgnoreDuplicates = false;
+  let isUpsert = false;
   let includeRepresentation = false;
 
   const api = {
@@ -136,6 +222,7 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
     },
     insert(row: Record<string, unknown>) {
       pendingInsert = { ...row };
+      isUpsert = false;
       return api;
     },
     upsert(
@@ -143,6 +230,7 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
       options?: { onConflict?: string; ignoreDuplicates?: boolean },
     ) {
       pendingInsert = { ...row };
+      isUpsert = true;
       upsertIgnoreDuplicates = options?.ignoreDuplicates === true;
       return api;
     },
@@ -156,11 +244,22 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
     },
     async maybeSingle() {
       if (pendingInsert) {
-        const id = String(pendingInsert[idKey] ?? crypto.randomUUID());
+        const derivedUnlockId =
+          table === "report_unlocks" &&
+          pendingInsert.user_id != null &&
+          pendingInsert.report_id != null
+            ? `${String(pendingInsert.user_id)}:${String(pendingInsert.report_id)}`
+            : null;
+        const id = String(
+          pendingInsert[idKey] ?? derivedUnlockId ?? crypto.randomUUID(),
+        );
         pendingInsert[idKey] = id;
         const existing = store.get(id);
         if (existing && upsertIgnoreDuplicates) {
           return { data: existing, error: null };
+        }
+        if (existing && !isUpsert) {
+          return { data: null, error: { message: `duplicate ${idKey}` } };
         }
         const conflict = uniqueConflict(
           store as Map<string, unknown>,
@@ -168,6 +267,7 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
           id,
           pendingInsert,
           uniqueKeys,
+          uniqueComposites,
         );
         if (conflict) {
           return { data: null, error: conflict };
@@ -191,6 +291,7 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
           nextId,
           next,
           uniqueKeys,
+          uniqueComposites,
         );
         if (conflict) {
           return { data: null, error: conflict };
@@ -230,10 +331,27 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
 export function createFakeServiceRoleClient(memory: FakeSupabaseMemory) {
   return {
     from(table: string) {
-      if (table === "profiles" || table === "reports" || table === "orders") {
+      if (
+        table === "profiles" ||
+        table === "reports" ||
+        table === "orders" ||
+        table === "point_transactions" ||
+        table === "report_unlocks"
+      ) {
         return createTableApi(memory, table);
       }
       throw new Error(`fake supabase: unsupported table ${table}`);
+    },
+    // Fake .rpc() stubs do not prove Story 4 / 5 / 8 migrations were applied.
+    async rpc(fn: string, args?: Record<string, unknown>) {
+      const handler = memory.rpc.get(fn);
+      if (typeof handler === "function") {
+        return handler(args);
+      }
+      if (handler) {
+        return handler;
+      }
+      return { data: null, error: null };
     },
     auth: {
       admin: {
