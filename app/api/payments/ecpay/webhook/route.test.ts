@@ -4,6 +4,7 @@ import {
   createFakeServiceRoleClient,
   createFakeSupabaseMemory,
   seedFakeUser,
+  setFakeRpc,
   type FakeOrder,
   type FakeSupabaseMemory,
 } from "../../../../../test/fakes/supabase";
@@ -161,6 +162,66 @@ function orderRow() {
 
 function profileRow() {
   return state.memory.profiles.get(USER_ID);
+}
+
+function creditsFor(orderId: string) {
+  return [...state.memory.pointTransactions.values()].filter(
+    (row) => row.type === "credit_purchase" && row.source_order_id === orderId,
+  );
+}
+
+function installFulfillRpc() {
+  setFakeRpc(state.memory, "fulfill_points_pack_order", (args) => {
+    const orderId = String(args?.order_id ?? "");
+    const order = state.memory.orders.get(orderId);
+    const profile = order ? state.memory.profiles.get(order.user_id) : undefined;
+    if (!order || !profile) {
+      return {
+        data: [{ ok: false, reason: "not_found", points_balance: 0 }],
+        error: null,
+      };
+    }
+    if (creditsFor(order.id).length > 0) {
+      return {
+        data: [
+          {
+            ok: true,
+            reason: "already_fulfilled",
+            points_balance: profile.points_balance,
+          },
+        ],
+        error: null,
+      };
+    }
+    const id = `credit-${order.id}`;
+    state.memory.pointTransactions.set(id, {
+      id,
+      user_id: order.user_id,
+      delta: 5,
+      type: "credit_purchase",
+      source_order_id: order.id,
+      report_id: null,
+    });
+    profile.points_balance += 5;
+    return {
+      data: [
+        {
+          ok: true,
+          reason: "credited",
+          points_balance: profile.points_balance,
+        },
+      ],
+      error: null,
+    };
+  });
+}
+
+function seedPointsPackOrder(overrides: Partial<FakeOrder> = {}) {
+  return seedPendingOrder({
+    plan_id: "points_pack_5",
+    amount: 49,
+    ...overrides,
+  });
 }
 
 describe("POST /api/payments/ecpay/webhook", () => {
@@ -357,5 +418,160 @@ describe("POST /api/payments/ecpay/webhook", () => {
     expect(profileRow()?.access_status).toBe("unlocked");
     expect(profileRow()?.points_balance).toBe(7);
     expect(profileRow()?.subscription_status).toBe("none");
+  });
+
+  it("credits points_pack_5 and leaves access_status unchanged", async () => {
+    seedPointsPackOrder();
+    installFulfillRpc();
+
+    const response = await postWebhook(successFields({ TradeAmt: "49" }));
+    const body = await readBody(response);
+
+    expect(response.status).toBe(200);
+    expect(body).toBe("1|OK");
+    expect(orderRow()?.status).toBe("paid");
+    expect(profileRow()?.points_balance).toBe(5);
+    expect(profileRow()?.access_status).toBe("locked");
+    expect(profileRow()?.subscription_status).toBe("none");
+    expect(creditsFor(ORDER_ID)).toHaveLength(1);
+    expect(creditsFor(ORDER_ID)[0]?.delta).toBe(5);
+    expect(state.memory.reportUnlocks.size).toBe(0);
+  });
+
+  it("does not credit again when the points pack already has a credit", async () => {
+    seedPointsPackOrder({
+      status: "paid",
+      trade_no: TRADE_NO,
+    });
+    seedFakeUser(
+      state.memory,
+      { id: USER_ID, email: "yuan@example.com" },
+      { access_status: "locked", points_balance: 5 },
+    );
+    state.memory.pointTransactions.set("credit-existing", {
+      id: "credit-existing",
+      user_id: USER_ID,
+      delta: 5,
+      type: "credit_purchase",
+      source_order_id: ORDER_ID,
+      report_id: null,
+    });
+    installFulfillRpc();
+
+    const response = await postWebhook(successFields({ TradeAmt: "49" }));
+    const body = await readBody(response);
+
+    expect(response.status).toBe(200);
+    expect(body).toBe("1|OK");
+    expect(orderRow()?.status).toBe("paid");
+    expect(profileRow()?.points_balance).toBe(5);
+    expect(profileRow()?.access_status).toBe("locked");
+    expect(creditsFor(ORDER_ID)).toHaveLength(1);
+  });
+
+  it("backfills a credit when a paid points pack has none", async () => {
+    seedPointsPackOrder({
+      status: "paid",
+      trade_no: TRADE_NO,
+    });
+    installFulfillRpc();
+
+    const response = await postWebhook(successFields({ TradeAmt: "49" }));
+    const body = await readBody(response);
+
+    expect(response.status).toBe(200);
+    expect(body).toBe("1|OK");
+    expect(profileRow()?.points_balance).toBe(5);
+    expect(profileRow()?.access_status).toBe("locked");
+    expect(creditsFor(ORDER_ID)).toHaveLength(1);
+  });
+
+  it("does not add points or unlock rows when a lifetime plan succeeds", async () => {
+    const response = await postWebhook(successFields());
+    const body = await readBody(response);
+
+    expect(body).toBe("1|OK");
+    expect(orderRow()?.status).toBe("paid");
+    expect(profileRow()?.access_status).toBe("unlocked");
+    expect(profileRow()?.points_balance).toBe(0);
+    expect(state.memory.pointTransactions.size).toBe(0);
+    expect(state.memory.reportUnlocks.size).toBe(0);
+  });
+
+  it("compensates a paid lifetime order without adding points", async () => {
+    seedPendingOrder({ status: "paid", trade_no: TRADE_NO });
+
+    const response = await postWebhook(successFields());
+    const body = await readBody(response);
+
+    expect(body).toBe("1|OK");
+    expect(profileRow()?.access_status).toBe("unlocked");
+    expect(profileRow()?.points_balance).toBe(0);
+    expect(state.memory.pointTransactions.size).toBe(0);
+  });
+
+  it("does not credit a points pack when SimulatePaid is 1", async () => {
+    seedPointsPackOrder();
+    installFulfillRpc();
+
+    const response = await postWebhook(
+      successFields({ TradeAmt: "49", SimulatePaid: "1" }),
+    );
+    const body = await readBody(response);
+
+    expect(body).toBe("1|OK");
+    expect(orderRow()?.status).not.toBe("paid");
+    expect(profileRow()?.points_balance).toBe(0);
+    expect(profileRow()?.access_status).toBe("locked");
+    expect(creditsFor(ORDER_ID)).toHaveLength(0);
+  });
+
+  it("does not credit a points pack when RtnCode is not 1", async () => {
+    seedPointsPackOrder();
+    installFulfillRpc();
+
+    const response = await postWebhook(
+      successFields({ TradeAmt: "49", RtnCode: "0" }),
+    );
+    const body = await readBody(response);
+
+    expect(body).toBe("1|OK");
+    expect(orderRow()?.status).toBe("failed");
+    expect(profileRow()?.points_balance).toBe(0);
+    expect(profileRow()?.access_status).toBe("locked");
+    expect(creditsFor(ORDER_ID)).toHaveLength(0);
+  });
+
+  it("acks an unknown plan_id without changing entitlements", async () => {
+    seedPendingOrder({ plan_id: "not_a_plan", amount: 49 });
+    installFulfillRpc();
+
+    const response = await postWebhook(successFields({ TradeAmt: "49" }));
+    const body = await readBody(response);
+
+    expect(body).toBe("1|OK");
+    expect(orderRow()?.status).toBe("paid");
+    expect(profileRow()?.access_status).toBe("locked");
+    expect(profileRow()?.points_balance).toBe(0);
+    expect(creditsFor(ORDER_ID)).toHaveLength(0);
+  });
+
+  it("dispatches from the stored plan_id when CustomField says lifetime", async () => {
+    seedPointsPackOrder();
+    installFulfillRpc();
+
+    const response = await postWebhook(
+      successFields({
+        TradeAmt: "49",
+        CustomField1: "unlock_report_lifetime",
+      }),
+    );
+    const body = await readBody(response);
+
+    expect(body).toBe("1|OK");
+    expect(orderRow()?.plan_id).toBe("points_pack_5");
+    expect(profileRow()?.points_balance).toBe(5);
+    expect(profileRow()?.access_status).toBe("locked");
+    expect(creditsFor(ORDER_ID)).toHaveLength(1);
   });
 });
