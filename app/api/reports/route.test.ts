@@ -20,6 +20,7 @@ const {
   validateComplete,
   insertReport,
   buildReportResponse,
+  getSessionUser,
 } = vi.hoisted(() => ({
   validateBirth: vi.fn(),
   scanHighRisk: vi.fn(),
@@ -30,6 +31,7 @@ const {
   validateComplete: vi.fn(),
   insertReport: vi.fn(),
   buildReportResponse: vi.fn(),
+  getSessionUser: vi.fn(),
 }));
 
 vi.mock("../../../lib/validation/birth", () => ({ validateBirth }));
@@ -44,6 +46,7 @@ vi.mock("../../../lib/schemas/loader", () => ({
 }));
 // mock store 只鎖 HTTP 分支；真 insert 成功列由 US-018 驗收
 vi.mock("../../../lib/reports/store", () => ({ insertReport }));
+vi.mock("../../../lib/supabase/session", () => ({ getSessionUser }));
 vi.mock("../../../lib/masking/buildReportResponse", () => ({
   buildReportResponse,
 }));
@@ -71,6 +74,7 @@ const validatedBirth = {
 };
 
 const PERSIST_ID = "11111111-1111-4111-8111-111111111111";
+const USER_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
 const specHttp200 = {
   persist_id: PERSIST_ID,
@@ -116,6 +120,7 @@ describe("POST /api/reports", () => {
       ok: true,
       data: { ...basicValid, ...advancedValid },
     });
+    getSessionUser.mockResolvedValue(null);
     insertReport.mockResolvedValue({
       id: PERSIST_ID,
       status: "basic",
@@ -139,6 +144,38 @@ describe("POST /api/reports", () => {
       expect.objectContaining({ persist_id: PERSIST_ID }),
     );
     expect(json.persist_id).toBe(PERSIST_ID);
+  });
+
+  it("writes the session user id on a successful report", async () => {
+    getSessionUser.mockResolvedValue({
+      id: USER_ID,
+      email: "yuan@example.com",
+    });
+
+    const res = await postReports(validBody);
+
+    expect(res.status).toBe(200);
+    expect(insertReport).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user_id: USER_ID,
+        status: undefined,
+      }),
+    );
+    const payload = insertReport.mock.calls[0]?.[0] as {
+      status?: string;
+      user_id?: string;
+    };
+    expect(payload.status).toBeUndefined();
+    expect(payload.user_id).toBe(USER_ID);
+  });
+
+  it("writes a null user id when there is no session", async () => {
+    const res = await postReports(validBody);
+
+    expect(res.status).toBe(200);
+    expect(insertReport).toHaveBeenCalledWith(
+      expect.objectContaining({ user_id: null }),
+    );
   });
 
   it("returns a different persist_id for two successful mock valid POSTs", async () => {

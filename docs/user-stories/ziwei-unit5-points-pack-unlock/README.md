@@ -47,7 +47,7 @@
 
 ### Phase 4 — reports.user_id
 
-- [ ] US-010 POST reports.user_id 測試
+- [x] US-010 POST reports.user_id 測試（預期紅燈；待實作轉綠）
 - [ ] US-011 POST reports.user_id 實作
 
 ### Phase 5 — 單點解鎖 RPC
