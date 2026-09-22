@@ -10,7 +10,10 @@ import {
 } from "../../../../lib/errors";
 import { generateMerchantTradeNo } from "../../../../lib/payments/merchant-trade-no";
 import { readEcpayCheckoutEnv } from "../../../../lib/payments/checkout-env";
-import { resolveCheckoutPlan } from "../../../../lib/payments/plans";
+import {
+  UNLOCK_REPORT_LIFETIME_PLAN_ID,
+  resolveCheckoutPlan,
+} from "../../../../lib/payments/plans";
 import { createServiceRoleClient } from "../../../../lib/supabase/server";
 import { getSessionUser } from "../../../../lib/supabase/session";
 
@@ -59,7 +62,10 @@ export async function POST(request: Request): Promise<Response> {
     profile && typeof profile === "object"
       ? (profile as { access_status?: string }).access_status
       : undefined;
-  if (accessStatus === "unlocked") {
+  if (
+    accessStatus === "unlocked" &&
+    plan.planId === UNLOCK_REPORT_LIFETIME_PLAN_ID
+  ) {
     return jsonError(alreadyUnlockedError());
   }
 
