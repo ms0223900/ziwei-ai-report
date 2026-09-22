@@ -11,6 +11,7 @@ import { buildReportResponse } from "../../../lib/masking/buildReportResponse";
 import { scanHighRisk } from "../../../lib/policy/high-risk";
 import { PROMPT_VERSION } from "../../../lib/prompts/zwds-v1";
 import { insertReport } from "../../../lib/reports/store";
+import { getSessionUser } from "../../../lib/supabase/session";
 import {
   SCHEMA_VERSION,
   validateAdvanced,
@@ -108,6 +109,7 @@ async function persistMaskedReport(args: {
 
   let row;
   try {
+    const user = await getSessionUser();
     row = await insertReport({
       nickname: args.birth.nickname,
       birth_date: args.birth.birth_date,
@@ -122,6 +124,7 @@ async function persistMaskedReport(args: {
       schema_version: String(SCHEMA_VERSION),
       request_id: crypto.randomUUID(),
       generated_at: new Date().toISOString(),
+      user_id: user?.id ?? null,
     });
   } catch (error) {
     if (error instanceof AppError) {

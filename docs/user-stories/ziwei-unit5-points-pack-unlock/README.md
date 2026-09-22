@@ -48,7 +48,7 @@
 ### Phase 4 — reports.user_id
 
 - [x] US-010 POST reports.user_id 測試（預期紅燈；待實作轉綠）
-- [ ] US-011 POST reports.user_id 實作
+- [x] US-011 POST reports.user_id 實作
 
 ### Phase 5 — 單點解鎖 RPC
 
@@ -137,6 +137,6 @@ Phase 8 完成條件：回跳頁不教「再送同一生辰即見進階」；how
 
 ## 重構掃描記錄
 
-- 已掃描至：US-009（2026-09-22）
-- 已知待觀察熱點：無
-- 備註：US-008 只加 webhook 測試；US-009 只改履約分派。沒有兩個任務改同一產品檔。低風險，暫不重構。
+- 已掃描至：US-011（2026-09-22）
+- 已知待觀察熱點：`app/api/reports/route.test.ts`（US-010 加案例、US-011 只修正 `status: undefined` 比對；測試檔，未達反模式）
+- 備註：`store.ts` 與 `route.ts` 只被 US-011 改。中風險觀察，不建議重構。

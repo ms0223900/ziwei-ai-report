@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppError } from "../errors";
 import advancedValid from "../generation/fixtures/advanced.valid.json";
 import basicValid from "../generation/fixtures/basic.valid.json";
-import { buildSuccessReportInsert, insertReport, type InsertReportInput } from "./store";
+import { buildSuccessReportInsert, insertReport } from "./store";
 
 const { createServiceRoleClient } = vi.hoisted(() => ({
   createServiceRoleClient: vi.fn(),
@@ -61,7 +61,7 @@ describe("buildSuccessReportInsert", () => {
     const row = buildSuccessReportInsert({
       ...input,
       user_id: USER_ID,
-    } as InsertReportInput);
+    });
 
     expect(row).toEqual(
       expect.objectContaining({
@@ -76,7 +76,7 @@ describe("buildSuccessReportInsert", () => {
     const row = buildSuccessReportInsert({
       ...input,
       user_id: null,
-    } as InsertReportInput);
+    });
 
     expect(row).toEqual(
       expect.objectContaining({
@@ -121,7 +121,7 @@ describe("insertReport", () => {
         ...buildSuccessReportInsert({
           ...input,
           user_id: USER_ID,
-        } as InsertReportInput),
+        }),
         id: "11111111-1111-4111-8111-111111111111",
         created_at: "2026-09-08T02:00:01.000Z",
         user_id: USER_ID,
@@ -132,7 +132,7 @@ describe("insertReport", () => {
     await insertReport({
       ...input,
       user_id: USER_ID,
-    } as InsertReportInput);
+    });
 
     expect(insert).toHaveBeenCalledWith(
       expect.objectContaining({

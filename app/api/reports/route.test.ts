@@ -156,17 +156,14 @@ describe("POST /api/reports", () => {
 
     expect(res.status).toBe(200);
     expect(insertReport).toHaveBeenCalledWith(
-      expect.objectContaining({
-        user_id: USER_ID,
-        status: undefined,
-      }),
+      expect.objectContaining({ user_id: USER_ID }),
     );
     const payload = insertReport.mock.calls[0]?.[0] as {
       status?: string;
       user_id?: string;
     };
-    expect(payload.status).toBeUndefined();
     expect(payload.user_id).toBe(USER_ID);
+    expect(payload.status).toBeUndefined();
   });
 
   it("writes a null user id when there is no session", async () => {
