@@ -2,6 +2,10 @@ import {
   readEcpayHashFromEnv,
   verifyCheckMacValue,
 } from "../../../../../lib/ecpay/check-mac";
+import {
+  POINTS_PACK_5_PLAN_ID,
+  UNLOCK_REPORT_LIFETIME_PLAN_ID,
+} from "../../../../../lib/payments/plans";
 import { createServiceRoleClient } from "../../../../../lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +13,7 @@ export const dynamic = "force-dynamic";
 type OrderRow = {
   id: string;
   user_id: string;
+  plan_id: string;
   amount: number;
   status: string;
   trade_no: string | null;
@@ -145,6 +150,28 @@ async function markOrderPaid(
   return !error;
 }
 
+async function fulfillPointsPack(
+  client: Awaited<ReturnType<typeof createServiceRoleClient>>,
+  orderId: string,
+): Promise<boolean> {
+  const { data, error } = await client.rpc("fulfill_points_pack_order", {
+    order_id: orderId,
+  });
+  if (error) {
+    return false;
+  }
+  const row = Array.isArray(data) ? data[0] : data;
+  if (
+    row &&
+    typeof row === "object" &&
+    "ok" in row &&
+    (row as { ok?: unknown }).ok === false
+  ) {
+    return false;
+  }
+  return true;
+}
+
 async function unlockIfLocked(
   client: Awaited<ReturnType<typeof createServiceRoleClient>>,
   profile: ProfileRow | null,
@@ -180,40 +207,46 @@ export async function POST(request: Request): Promise<Response> {
     return reject("order or amount mismatch");
   }
 
-  // Later (unit 5/6): branch on DB orders.plan_id here — not ECPay CustomField.
-  // This unit only fulfills unlock_report_lifetime → unlocked; no points / PeriodReturnURL.
-
   const simulatePaid = trimField(fields, "SimulatePaid");
   if (simulatePaid === "1") {
     return ok();
   }
 
-  const profile = await loadProfile(client, order.user_id);
   const rtnCode = trimField(fields, "RtnCode");
   const tradeNo = trimField(fields, "TradeNo");
   const paymentDate = parseEcpayPaymentDate(fields.PaymentDate ?? "");
 
-  if (order.status === "paid") {
-    const unlocked = await unlockIfLocked(client, profile, order.user_id);
-    if (!unlocked) {
-      return reject("unlock compensation failed");
+  if (order.status !== "paid") {
+    if (rtnCode !== "1") {
+      await markOrderFailed(client, order.id);
+      return ok();
+    }
+
+    const paid = await markOrderPaid(client, order, tradeNo, paymentDate);
+    if (!paid) {
+      return reject("order paid write failed");
+    }
+  }
+
+  if (order.plan_id === POINTS_PACK_5_PLAN_ID) {
+    const credited = await fulfillPointsPack(client, order.id);
+    if (!credited) {
+      return reject("points credit failed");
     }
     return ok();
   }
 
-  if (rtnCode !== "1") {
-    await markOrderFailed(client, order.id);
+  if (order.plan_id === UNLOCK_REPORT_LIFETIME_PLAN_ID) {
+    const profile = await loadProfile(client, order.user_id);
+    const unlocked = await unlockIfLocked(client, profile, order.user_id);
+    if (!unlocked) {
+      return reject(
+        order.status === "paid"
+          ? "unlock compensation failed"
+          : "entitlement write failed",
+      );
+    }
     return ok();
-  }
-
-  const paid = await markOrderPaid(client, order, tradeNo, paymentDate);
-  if (!paid) {
-    return reject("order paid write failed");
-  }
-
-  const unlocked = await unlockIfLocked(client, profile, order.user_id);
-  if (!unlocked) {
-    return reject("entitlement write failed");
   }
 
   return ok();
