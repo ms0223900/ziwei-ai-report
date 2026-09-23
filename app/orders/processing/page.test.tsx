@@ -25,7 +25,9 @@ describe("OrdersProcessingPage", () => {
       "href",
       expect.stringMatching(/\/$/),
     );
-    expect(screen.getByText(/persist_id/)).toBeTruthy();
+    expect(screen.getByText(/以伺服器通知為準/)).toBeTruthy();
+    expect(screen.getByText(/查看點數餘額與解鎖狀態/)).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/再送出同一生辰|同一生辰|persist_id/);
     expect(fetchSpy).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
   });
@@ -39,5 +41,6 @@ describe("OrdersProcessingPage", () => {
     expect(source).not.toContain("access_status");
     expect(source).not.toContain("from(\"orders\")");
     expect(source).not.toContain("user_id");
+    expect(source).not.toMatch(/setInterval|setTimeout|useEffect/);
   });
 });
