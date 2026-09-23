@@ -36,6 +36,7 @@ export type FakeReportUnlock = {
   user_id: string;
   report_id: string;
   transaction_id: string;
+  created_at?: string;
 };
 
 export type FakeRpcResult = { data: unknown; error: unknown };
@@ -214,6 +215,7 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
   let upsertIgnoreDuplicates = false;
   let isUpsert = false;
   let includeRepresentation = false;
+  let orderBy: { column: string; ascending: boolean } | null = null;
 
   const api = {
     select() {
@@ -241,6 +243,25 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
     eq(column: string, value: unknown) {
       filters.push({ column, value });
       return api;
+    },
+    order(column: string, options?: { ascending?: boolean }) {
+      orderBy = { column, ascending: options?.ascending !== false };
+      return api;
+    },
+    // Awaiting a plain select (no single/maybeSingle) returns every match, like PostgREST.
+    async list() {
+      const rows = [...store.values()].filter((row) =>
+        matches(row as unknown as Record<string, unknown>, filters),
+      ) as Record<string, unknown>[];
+      if (orderBy) {
+        const { column, ascending } = orderBy;
+        rows.sort((a, b) => {
+          const left = String(a[column] ?? "");
+          const right = String(b[column] ?? "");
+          return ascending ? left.localeCompare(right) : right.localeCompare(left);
+        });
+      }
+      return { data: rows, error: null };
     },
     async maybeSingle() {
       if (pendingInsert) {
@@ -321,7 +342,9 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
         | null,
       onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null,
     ) {
-      return api.maybeSingle().then(onfulfilled, onrejected);
+      const result =
+        pendingInsert || pendingUpdate ? api.maybeSingle() : api.list();
+      return result.then(onfulfilled, onrejected);
     },
   };
 

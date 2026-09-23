@@ -65,9 +65,9 @@
 - [x] US-016 會員視圖第三態 測試（預期紅燈；待實作轉綠）
 - [x] US-017 會員視圖第三態 實作
 - [x] US-018 買點入口與單點解鎖畫面
-- [ ] US-019 已單次解鎖選單 API 測試
-- [ ] US-020 已單次解鎖選單 API 實作
-- [ ] US-021 已單次解鎖選單畫面
+- [x] US-019 已單次解鎖選單 API 測試（預期紅燈；待實作轉綠）
+- [x] US-020 已單次解鎖選單 API 實作
+- [x] US-021 已單次解鎖選單畫面
 
 ### Phase 8 — 回跳文案與交棒
 
@@ -137,6 +137,6 @@ Phase 8 完成條件：回跳頁不教「再送同一生辰即見進階」；how
 
 ## 重構掃描記錄
 
-- 已掃描至：US-018（2026-09-23）
-- 已知待觀察熱點：`app/api/reports/unlock-with-point/route.ts`（US-012 先放 501 空殼、US-013 才接 RPC；新檔，未達反模式）；`app/api/reports/[persistId]/route.ts`（US-015 加擁有者＋單點分支，單一 handler 約 130 行，未達反模式）；`components/report/UnlockCheckoutCta.tsx` 改成可帶 `planId`／`slot`／`variant`，終身與點數包共用（第 2 個使用點，未抽 hook）；`UnlockWithPointCta` 與 `UnlockCheckoutCta` 各有一份「請先登入」彈窗，第 3 處出現再抽共用元件
+- 已掃描至：US-021（2026-09-23）
+- 已知待觀察熱點：`app/api/reports/unlock-with-point/route.ts`（US-012 先放 501 空殼、US-013 才接 RPC；新檔，未達反模式）；`app/api/reports/[persistId]/route.ts`（US-015 加擁有者＋單點分支，單一 handler 約 130 行，未達反模式）；`components/report/UnlockCheckoutCta.tsx` 改成可帶 `planId`／`slot`／`variant`，終身與點數包共用（第 2 個使用點，未抽 hook）；`UnlockWithPointCta` 與 `UnlockCheckoutCta` 各有一份「請先登入」彈窗，第 3 處出現再抽共用元件；`components/home/HomeClient.tsx` 累積報告生成、單點解鎖、選單開啟三條資料流（約 350 行），下個動到它的任務建議先評估抽 hook；`app/api/report-unlocks/route.ts` 逐筆查 `reports`（N+1），課堂規模可接受
 - 備註：沒有改既有產品熱點。中風險觀察，不建議重構。

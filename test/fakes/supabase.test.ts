@@ -336,4 +336,41 @@ describe("fake supabase memory", () => {
       "do not prove Story 4 / 5 / 8 migrations were applied",
     );
   });
+
+  it("returns every matching row, ordered, when a plain select is awaited", async () => {
+    const memory = createFakeSupabaseMemory();
+    const client = createFakeServiceRoleClient(memory);
+    memory.reportUnlocks.set("a", {
+      id: "a",
+      user_id: USER_ID,
+      report_id: "r1",
+      transaction_id: "t1",
+      created_at: "2026-09-20T00:00:00Z",
+    });
+    memory.reportUnlocks.set("b", {
+      id: "b",
+      user_id: USER_ID,
+      report_id: "r2",
+      transaction_id: "t2",
+      created_at: "2026-09-22T00:00:00Z",
+    });
+    memory.reportUnlocks.set("c", {
+      id: "c",
+      user_id: "someone-else",
+      report_id: "r3",
+      transaction_id: "t3",
+      created_at: "2026-09-23T00:00:00Z",
+    });
+
+    const { data } = await client
+      .from("report_unlocks")
+      .select()
+      .eq("user_id", USER_ID)
+      .order("created_at", { ascending: false });
+
+    expect((data as { report_id: string }[]).map((row) => row.report_id)).toEqual([
+      "r2",
+      "r1",
+    ]);
+  });
 });
