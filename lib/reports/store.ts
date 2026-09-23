@@ -21,6 +21,7 @@ export type InsertReportInput = {
   schema_version: string | null;
   request_id: string | null;
   generated_at: string | null;
+  user_id?: string | null;
 };
 
 export type ReportRow = {
@@ -60,6 +61,7 @@ export function buildSuccessReportInsert(input: InsertReportInput) {
     schema_version: input.schema_version,
     request_id: input.request_id,
     generated_at: input.generated_at,
+    user_id: input.user_id ?? null,
   };
 }
 
