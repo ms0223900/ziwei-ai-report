@@ -39,6 +39,8 @@ function mockInsertResult(
   return { from, insert, select, single };
 }
 
+const USER_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+
 describe("buildSuccessReportInsert", () => {
   it("writes both json blobs and hard-codes status=basic", () => {
     const row = buildSuccessReportInsert({
@@ -53,6 +55,35 @@ describe("buildSuccessReportInsert", () => {
     expect(row.status).toBe("basic");
     expect(row.generation_status).toBe("success");
     expect(row.basic_json.report_id).toBe("rpt_demo_001");
+  });
+
+  it("stores the signed-in user id and keeps status basic", () => {
+    const row = buildSuccessReportInsert({
+      ...input,
+      user_id: USER_ID,
+    });
+
+    expect(row).toEqual(
+      expect.objectContaining({
+        user_id: USER_ID,
+        status: "basic",
+        generation_status: "success",
+      }),
+    );
+  });
+
+  it("stores a null user id for a guest row", () => {
+    const row = buildSuccessReportInsert({
+      ...input,
+      user_id: null,
+    });
+
+    expect(row).toEqual(
+      expect.objectContaining({
+        user_id: null,
+        status: "basic",
+      }),
+    );
   });
 });
 
@@ -82,6 +113,33 @@ describe("insertReport", () => {
     expect(row.generation_status).toBe("success");
     expect(row.basic_json).toEqual(basicValid);
     expect(row.advanced_json).toEqual(advancedValid);
+  });
+
+  it("inserts the session user id without an unlock status", async () => {
+    const { insert } = mockInsertResult({
+      data: {
+        ...buildSuccessReportInsert({
+          ...input,
+          user_id: USER_ID,
+        }),
+        id: "11111111-1111-4111-8111-111111111111",
+        created_at: "2026-09-08T02:00:01.000Z",
+        user_id: USER_ID,
+      },
+      error: null,
+    });
+
+    await insertReport({
+      ...input,
+      user_id: USER_ID,
+    });
+
+    expect(insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user_id: USER_ID,
+        status: "basic",
+      }),
+    );
   });
 
   it("throws persistFailedError when insert fails", async () => {
