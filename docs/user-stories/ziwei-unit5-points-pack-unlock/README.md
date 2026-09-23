@@ -53,7 +53,7 @@
 ### Phase 5 — 單點解鎖 RPC
 
 - [x] US-012 單點解鎖 Route 測試（預期紅燈；待實作轉綠）
-- [ ] US-013 單點解鎖 Route 實作
+- [x] US-013 單點解鎖 Route 實作
 
 ### Phase 6 — 進階 GET
 
@@ -137,6 +137,6 @@ Phase 8 完成條件：回跳頁不教「再送同一生辰即見進階」；how
 
 ## 重構掃描記錄
 
-- 已掃描至：US-011（2026-09-22）
-- 已知待觀察熱點：`app/api/reports/route.test.ts`（US-010 加案例、US-011 只修正 `status: undefined` 比對；測試檔，未達反模式）
-- 備註：`store.ts` 與 `route.ts` 只被 US-011 改。中風險觀察，不建議重構。
+- 已掃描至：US-013（2026-09-23）
+- 已知待觀察熱點：`app/api/reports/unlock-with-point/route.ts`（US-012 先放 501 空殼、US-013 才接 RPC；新檔，未達反模式）
+- 備註：沒有改既有產品熱點。中風險觀察，不建議重構。

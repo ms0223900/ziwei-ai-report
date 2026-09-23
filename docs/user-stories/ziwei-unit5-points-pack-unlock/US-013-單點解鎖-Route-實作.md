@@ -15,10 +15,49 @@
 - service role 執行 RPC；`p_user_id` 來自 session
 
 **驗收條件**：
-- [ ] US-012 測試轉綠
-- [ ] 不寫 `access_status` 或 `reports.status` 代表單點解鎖
-- [ ] 未套用 US-003／US-004 遷移前，不得勾 Story 8 扣點 AC；fake `.rpc()` 轉綠不算扣點履約
-- [ ] grant-access 不算本任務履約
+- [x] US-012 測試轉綠
+- [x] 不寫 `access_status` 或 `reports.status` 代表單點解鎖
+- [x] 未套用 US-003／US-004 遷移前，不得勾 Story 8 扣點 AC；fake `.rpc()` 轉綠不算扣點履約
+- [x] grant-access 不算本任務履約
+
+#### 驗收說明
+
+**整體結論**：PASS ✅
+
+> 未登入回 401。已登入只把 body 的 `report_id` 與 session `p_user_id` 交給 `unlock_report_with_point`。unique 衝突回 `already_unlocked`，不是 500。
+
+---
+
+**AC-1：US-012 測試轉綠**
+
+狀態：✅ 通過
+
+- `npx vitest run app/api/reports/unlock-with-point/route.test.ts`：10 passed
+
+---
+
+**AC-2：不寫 access_status 或 reports.status**
+
+狀態：✅ 通過
+
+- `app/api/reports/unlock-with-point/route.ts` 的 `POST()` 只呼叫 RPC，衝突時只讀 `points_balance`
+- 成功案例斷言 `access_status` 仍是 locked
+
+---
+
+**AC-3：fake rpc 轉綠不算 Story 8 扣點履約**
+
+狀態：✅ 通過
+
+- 測試注入的 `.rpc()` 只證明 Route 有呼叫；未把 Story 8 的真實扣點勾成完成
+
+---
+
+**AC-4：grant-access 不算本任務履約**
+
+狀態：✅ 通過
+
+- 未改 `POST /api/dev/grant-access`，也沒有用它代替扣點
 
 **測試策略**：Test-First  
 > 理由：對 US-012 紅燈實作至綠。
