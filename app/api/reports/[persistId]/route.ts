@@ -44,23 +44,12 @@ export async function GET(
     return jsonError(loginRequiredError());
   }
 
-  const client = await createServiceRoleClient();
-  const { data: profile } = await client
-    .from("profiles")
-    .select()
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  const accessStatus = (profile as ProfileRow | null)?.access_status;
-  if (accessStatus !== "unlocked") {
-    return jsonError(forbiddenLockedError());
-  }
-
   const { persistId } = await context.params;
   if (!UUID_RE.test(persistId)) {
     return jsonError(reportNotFoundError());
   }
 
+  const client = await createServiceRoleClient();
   const { data: row } = await client
     .from("reports")
     .select()
@@ -68,13 +57,42 @@ export async function GET(
     .maybeSingle();
 
   const report = row as {
+    user_id?: string | null;
     generation_status?: string;
     basic_json?: unknown;
     advanced_json?: unknown;
   } | null;
 
+  // Lifetime access and grants are not owner passes: legacy rows without
+  // user_id and other members' reports stay unreadable.
+  if (!report || report.user_id == null || report.user_id !== user.id) {
+    return jsonError(reportNotFoundError());
+  }
+
+  const { data: profile } = await client
+    .from("profiles")
+    .select()
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const isLifetime =
+    (profile as ProfileRow | null)?.access_status === "unlocked";
+  let isPointUnlocked = false;
+  if (!isLifetime) {
+    const { data: unlock } = await client
+      .from("report_unlocks")
+      .select()
+      .eq("user_id", user.id)
+      .eq("report_id", persistId)
+      .maybeSingle();
+    isPointUnlocked = unlock != null;
+  }
+
+  if (!isLifetime && !isPointUnlocked) {
+    return jsonError(forbiddenLockedError());
+  }
+
   if (
-    !report ||
     report.generation_status !== "success" ||
     isEmptyAdvanced(report.advanced_json)
   ) {
@@ -102,6 +120,8 @@ export async function GET(
     action_plan: advanced.action_plan,
     disclaimer: readString(basic.disclaimer) || DISCLAIMER,
     locked_fields: [],
-    access_status: "unlocked",
+    ...(isLifetime
+      ? { access_status: "unlocked" as const }
+      : { access_status: "locked" as const, unlock_mode: "points" as const }),
   });
 }
