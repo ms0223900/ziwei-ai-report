@@ -58,7 +58,7 @@
 ### Phase 6 — 進階 GET
 
 - [x] US-014 進階 GET 擁有者檢查 測試（預期紅燈；待實作轉綠）
-- [ ] US-015 進階 GET 擁有者檢查 實作
+- [x] US-015 進階 GET 擁有者檢查 實作
 
 ### Phase 7 — 視圖與畫面
 
@@ -137,6 +137,6 @@ Phase 8 完成條件：回跳頁不教「再送同一生辰即見進階」；how
 
 ## 重構掃描記錄
 
-- 已掃描至：US-013（2026-09-23）
-- 已知待觀察熱點：`app/api/reports/unlock-with-point/route.ts`（US-012 先放 501 空殼、US-013 才接 RPC；新檔，未達反模式）
+- 已掃描至：US-015（2026-09-23）
+- 已知待觀察熱點：`app/api/reports/unlock-with-point/route.ts`（US-012 先放 501 空殼、US-013 才接 RPC；新檔，未達反模式）；`app/api/reports/[persistId]/route.ts`（US-015 加擁有者＋單點分支，單一 handler 約 130 行，未達反模式）
 - 備註：沒有改既有產品熱點。中風險觀察，不建議重構。
