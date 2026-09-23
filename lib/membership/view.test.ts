@@ -123,4 +123,115 @@ describe("resolveMembershipView", () => {
     expect(view.authSlot).toBe(REPORT_SLOTS.authEntry);
     expect(JSON.stringify(view)).not.toContain(REAL_ADVANCED.rationale);
   });
+
+  describe("points unlock third state (US-016)", () => {
+    type UnlockMode = "lifetime" | "points" | "none";
+    type ThirdStateInput = Parameters<typeof resolveMembershipView>[0] & {
+      pointsBalance?: number;
+      unlockMode?: UnlockMode;
+      isOwnReport?: boolean;
+    };
+    type ThirdStateView = ReturnType<typeof resolveMembershipView> & {
+      unlockMode: UnlockMode;
+      showPointsPackCta: boolean;
+      purchaseRequiresLogin: boolean;
+      showUnlockWithPoint: boolean;
+      pointsInsufficient: boolean;
+    };
+
+    function view(overrides: Partial<ThirdStateInput> = {}): ThirdStateView {
+      const input = {
+        ...baseInput(),
+        hasSession: true,
+        accessStatus: "locked",
+        pointsBalance: 0,
+        unlockMode: "none",
+        isOwnReport: true,
+        ...overrides,
+      } as ThirdStateInput;
+      return resolveMembershipView(input) as ThirdStateView;
+    }
+
+    it("shows advanced for a point-unlocked own report without lifetime CTA copy", () => {
+      const result = view({ unlockMode: "points", pointsBalance: 4 });
+
+      expect(result.title).toBe("小圓的進階報告");
+      expect(result.advancedLocked).toBe(false);
+      expect(result.advanced?.rationale).toBe(REAL_ADVANCED.rationale);
+      expect(result.unlockMode).toBe("points");
+      expect(result.ctaLabel).not.toBe("已開通");
+      expect(result.showUnlockWithPoint).toBe(false);
+    });
+
+    it("hides the lifetime unlock button for lifetime members but keeps buying points", () => {
+      const result = view({ accessStatus: "unlocked", unlockMode: "lifetime" });
+
+      expect(result.advancedLocked).toBe(false);
+      expect(result.showCta).toBe(false);
+      expect(result.ctaLabel).toBe("已開通");
+      expect(result.unlockMode).toBe("lifetime");
+      expect(result.showPointsPackCta).toBe(true);
+      expect(result.purchaseRequiresLogin).toBe(false);
+      expect(result.showUnlockWithPoint).toBe(false);
+    });
+
+    it("treats an unlocked account as lifetime even without an explicit unlock mode", () => {
+      const result = view({ accessStatus: "unlocked", unlockMode: undefined });
+
+      expect(result.unlockMode).toBe("lifetime");
+      expect(result.showPointsPackCta).toBe(true);
+    });
+
+    it("keeps buy points visible next to the lifetime CTA for a locked member", () => {
+      const result = view({ pointsBalance: 0 });
+
+      expect(result.showCta).toBe(true);
+      expect(result.ctaLabel).toBe("解鎖完整報告");
+      expect(result.showPointsPackCta).toBe(true);
+      expect(result.purchaseRequiresLogin).toBe(false);
+    });
+
+    it("offers unlocking with a point when the own report is locked and balance is at least 1", () => {
+      const result = view({ pointsBalance: 1 });
+
+      expect(result.advancedLocked).toBe(true);
+      expect(result.advanced).toBeNull();
+      expect(result.unlockMode).toBe("none");
+      expect(result.showUnlockWithPoint).toBe(true);
+      expect(result.pointsInsufficient).toBe(false);
+    });
+
+    it("flags insufficient points instead of offering the unlock when balance is below 1", () => {
+      const result = view({ pointsBalance: 0 });
+
+      expect(result.advancedLocked).toBe(true);
+      expect(result.advanced).toBeNull();
+      expect(result.showUnlockWithPoint).toBe(false);
+      expect(result.pointsInsufficient).toBe(true);
+    });
+
+    it("does not offer a point unlock on a report the member does not own", () => {
+      const result = view({ pointsBalance: 3, isOwnReport: false });
+
+      expect(result.advancedLocked).toBe(true);
+      expect(result.showUnlockWithPoint).toBe(false);
+      expect(result.pointsInsufficient).toBe(false);
+    });
+
+    it("sends guests to login for buying points and never offers a point unlock", () => {
+      const result = view({
+        hasSession: false,
+        accessStatus: null,
+        pointsBalance: 5,
+        unlockMode: "points",
+      });
+
+      expect(result.advancedLocked).toBe(true);
+      expect(result.advanced).toBeNull();
+      expect(JSON.stringify(result)).not.toContain(REAL_ADVANCED.rationale);
+      expect(result.showUnlockWithPoint).toBe(false);
+      expect(result.showPointsPackCta).toBe(true);
+      expect(result.purchaseRequiresLogin).toBe(true);
+    });
+  });
 });
