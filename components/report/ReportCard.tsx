@@ -23,10 +23,12 @@ export function ReportCard({
   report,
   commercialPreviewEnabled,
   membership,
+  onPointUnlocked,
 }: {
   report: MaskedReportView;
   commercialPreviewEnabled?: boolean;
   membership?: MembershipView;
+  onPointUnlocked?: (pointsBalance: number) => void | Promise<void>;
 }) {
   const [localState, setLocalState] = useState<PreviewState>("A");
   const policy = resolveCommercialPreviewPolicy({
@@ -118,7 +120,12 @@ export function ReportCard({
           {`【 行動指引・破局之著 】  ${report.action}`}
         </p>
 
-        <AdvancedLockedPanel membership={membership} view={view} />
+        <AdvancedLockedPanel
+          membership={membership}
+          onPointUnlocked={onPointUnlocked}
+          persistId={report.persist_id}
+          view={view}
+        />
 
         <Disclaimer text={report.disclaimer} />
       </div>

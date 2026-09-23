@@ -372,3 +372,62 @@ describe("HomeClient 會員三態", () => {
     expect(screen.queryByText("即將開放")).toBeNull();
   });
 });
+
+describe("HomeClient 單點解鎖（US-018）", () => {
+  it("GETs advanced after a point unlock even though the account stays locked", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.includes("/api/reports/unlock-with-point")) {
+        return jsonResponse(200, { ok: true, reason: "unlocked", points_balance: 0 });
+      }
+      if (url.includes(`/api/reports/${PERSIST_ID}`)) {
+        return jsonResponse(200, {
+          ...GET_ADVANCED_BODY,
+          access_status: "locked",
+          unlock_mode: "points",
+        });
+      }
+      return jsonResponse(200, MASKED_POST_BODY);
+    });
+
+    render(
+      <HomeClient
+        initialAccessStatus="locked"
+        initialHasSession
+        initialPointsBalance={1}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
+    expect(fetch).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole("button", { name: "用 1 點解鎖此報告" }));
+
+    expect(await screen.findByRole("heading", { name: "小圓的進階報告" })).toBeTruthy();
+    expect(screen.getByText(advancedValid.rationale)).toBeTruthy();
+    expect(screen.getByText("已用 1 點解鎖此報告")).toBeTruthy();
+    expect(screen.queryByText("已開通")).toBeNull();
+    expect(screen.getByRole("button", { name: "購買點數包" })).toBeTruthy();
+    const urls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]));
+    expect(urls).toEqual([
+      "/api/reports",
+      "/api/reports/unlock-with-point",
+      `/api/reports/${PERSIST_ID}`,
+    ]);
+  });
+
+  it("does not offer a point unlock to a guest", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async () =>
+      jsonResponse(200, MASKED_POST_BODY),
+    );
+
+    render(<HomeClient initialPointsBalance={5} />);
+    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+
+    expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "用 1 點解鎖此報告" })).toBeNull();
+    expect(screen.getByRole("button", { name: "購買點數包" })).toBeTruthy();
+  });
+});
