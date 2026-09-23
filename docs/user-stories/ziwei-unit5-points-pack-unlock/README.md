@@ -52,7 +52,7 @@
 
 ### Phase 5 — 單點解鎖 RPC
 
-- [ ] US-012 單點解鎖 Route 測試
+- [x] US-012 單點解鎖 Route 測試（預期紅燈；待實作轉綠）
 - [ ] US-013 單點解鎖 Route 實作
 
 ### Phase 6 — 進階 GET
