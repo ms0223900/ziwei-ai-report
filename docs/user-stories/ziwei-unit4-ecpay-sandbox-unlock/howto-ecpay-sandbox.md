@@ -18,6 +18,8 @@ How to run ECPay sandbox unlock in Unit 4 (classroom / self-test).
 | Client SDK 改 `profiles.access_status` | 失敗（既有 trigger） | 不可以 |
 | 開發預覽條切 B／C／D | 假文，不算已付款 | 不可以 |
 
+> 單元 5 起作廢本段「再 POST 同一生辰」捷徑（進階 GET 改查 `reports.user_id`），改看 [`howto-points-pack.md`](../ziwei-unit5-points-pack-unlock/howto-points-pack.md) §1。
+
 頂層導轉到綠界會丟掉 `HomeClient` 記憶體裡的 `persist_id`。本版**不加** `reports.user_id`。處理中頁「返回解讀」連到 `/`；畫面若清空，解鎖後再 `POST` **同一生辰**一次即可 `GET` 進階三欄。回跳**不得**把 `access_status` 改回 `locked`。
 
 ---
