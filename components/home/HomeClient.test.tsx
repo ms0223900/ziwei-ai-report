@@ -52,6 +52,14 @@ beforeEach(() => {
   vi.stubGlobal("fetch", vi.fn());
 });
 
+// The unlocks menu loads on its own; count only report traffic.
+function reportFetchUrls() {
+  return vi
+    .mocked(fetch)
+    .mock.calls.map((call) => String(call[0]))
+    .filter((url) => url !== "/api/report-unlocks");
+}
+
 function jsonResponse(status: number, body: unknown) {
   return Promise.resolve(
     new Response(JSON.stringify(body), {
@@ -215,7 +223,7 @@ describe("HomeClient 高風險與失敗分流", () => {
     await user.click(screen.getByRole("button", { name: "再試一次" }));
 
     expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
-    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(reportFetchUrls()).toHaveLength(2);
     expect(screen.queryByText("解鎖即將開放，本版不收費。")).toBeNull();
   });
 
@@ -316,7 +324,7 @@ describe("HomeClient 會員三態", () => {
     expect(screen.getByText(advancedValid.rationale)).toBeTruthy();
     expect(screen.getByText(/第 1 天/)).toBeTruthy();
     expect(screen.queryByText(PREVIEW_EXAMPLE_MARK)).toBeNull();
-    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(reportFetchUrls()).toHaveLength(2);
   });
 
   it("keeps locked GET failures off the card and does not open access", async () => {
@@ -343,7 +351,7 @@ describe("HomeClient 會員三態", () => {
     ).toBeTruthy();
     expect(screen.queryByText("即將開放")).toBeNull();
     expect(screen.queryByText("開通由講師受控流程處理，本版不收費")).toBeNull();
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(reportFetchUrls()).toHaveLength(1);
   });
 
   it("drops GET text when session props become guest", async () => {
@@ -400,7 +408,7 @@ describe("HomeClient 單點解鎖（US-018）", () => {
     );
     await user.click(screen.getByRole("button", { name: "看基本分析" }));
     expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(reportFetchUrls()).toHaveLength(1);
 
     await user.click(screen.getByRole("button", { name: "用 1 點解鎖此報告" }));
 
@@ -409,8 +417,7 @@ describe("HomeClient 單點解鎖（US-018）", () => {
     expect(screen.getByText("已用 1 點解鎖此報告")).toBeTruthy();
     expect(screen.queryByText("已開通")).toBeNull();
     expect(screen.getByRole("button", { name: "購買點數包" })).toBeTruthy();
-    const urls = vi.mocked(fetch).mock.calls.map((call) => String(call[0]));
-    expect(urls).toEqual([
+    expect(reportFetchUrls()).toEqual([
       "/api/reports",
       "/api/reports/unlock-with-point",
       `/api/reports/${PERSIST_ID}`,
@@ -431,3 +438,121 @@ describe("HomeClient 單點解鎖（US-018）", () => {
     expect(screen.getByRole("button", { name: "購買點數包" })).toBeTruthy();
   });
 });
+
+describe("HomeClient 已單次解鎖選單（US-021）", () => {
+  const OTHER_PERSIST_ID = "22222222-2222-4222-8222-222222222222";
+  const MENU_ITEMS = [
+    {
+      report_id: OTHER_PERSIST_ID,
+      nickname: "阿星",
+      created_at: "2026-09-22T08:00:00.000Z",
+    },
+  ];
+
+  it("lists point-unlocked reports on load and reopens one's advanced text", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === "/api/report-unlocks") {
+        return jsonResponse(200, MENU_ITEMS);
+      }
+      if (url.includes(`/api/reports/${OTHER_PERSIST_ID}`)) {
+        return jsonResponse(200, {
+          ...GET_ADVANCED_BODY,
+          persist_id: OTHER_PERSIST_ID,
+          nickname: "阿星",
+          birth_date: "1990-01-01",
+          access_status: "locked",
+          unlock_mode: "points",
+        });
+      }
+      return jsonResponse(404, { error_code: "NOT_FOUND" });
+    });
+
+    render(<HomeClient initialAccessStatus="locked" initialHasSession />);
+
+    const menu = await screen.findByRole("navigation", {
+      name: "已用點數解鎖的報告",
+    });
+    expect(menu.getAttribute("data-report-slot")).toBe("slot-report-unlocks");
+    await user.click(screen.getByRole("button", { name: "阿星・2026-09-22" }));
+
+    expect(await screen.findByRole("heading", { name: "阿星的進階報告" })).toBeTruthy();
+    expect(screen.getByText(advancedValid.rationale)).toBeTruthy();
+    expect(screen.getByText("已用 1 點解鎖此報告")).toBeTruthy();
+    expect(reportFetchUrls()).toEqual([`/api/reports/${OTHER_PERSIST_ID}`]);
+  });
+
+  it("does not load or show the menu for a guest", async () => {
+    vi.mocked(fetch).mockImplementation(async () => jsonResponse(200, MENU_ITEMS));
+
+    render(<HomeClient />);
+
+    expect(screen.getByRole("button", { name: "看基本分析" })).toBeTruthy();
+    expect(screen.queryByRole("navigation", { name: "已用點數解鎖的報告" })).toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("shows only what the API returns, even for a lifetime account", async () => {
+    vi.mocked(fetch).mockImplementation(async (input) =>
+      String(input) === "/api/report-unlocks"
+        ? jsonResponse(200, MENU_ITEMS)
+        : jsonResponse(200, MASKED_POST_BODY),
+    );
+
+    render(<HomeClient initialAccessStatus="unlocked" initialHasSession />);
+
+    const menu = await screen.findByRole("navigation", {
+      name: "已用點數解鎖的報告",
+    });
+    expect(menu.querySelectorAll("button")).toHaveLength(1);
+  });
+
+  it("adds the report to the menu right after a point unlock", async () => {
+    const user = userEvent.setup();
+    let unlocked = false;
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === "/api/report-unlocks") {
+        return jsonResponse(
+          200,
+          unlocked
+            ? [{ report_id: PERSIST_ID, nickname: "小圓", created_at: "2026-09-23T01:00:00.000Z" }]
+            : [],
+        );
+      }
+      if (url.includes("/api/reports/unlock-with-point")) {
+        unlocked = true;
+        return jsonResponse(200, { ok: true, reason: "unlocked", points_balance: 0 });
+      }
+      if (url.includes(`/api/reports/${PERSIST_ID}`)) {
+        return jsonResponse(200, { ...GET_ADVANCED_BODY, access_status: "locked", unlock_mode: "points" });
+      }
+      return jsonResponse(200, MASKED_POST_BODY);
+    });
+
+    render(
+      <HomeClient initialAccessStatus="locked" initialHasSession initialPointsBalance={1} />,
+    );
+    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    await user.click(await screen.findByRole("button", { name: "用 1 點解鎖此報告" }));
+
+    expect(await screen.findByRole("button", { name: "小圓・2026-09-23" })).toBeTruthy();
+  });
+
+  it("stays put and explains when a menu report cannot be opened", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) =>
+      String(input) === "/api/report-unlocks"
+        ? jsonResponse(200, MENU_ITEMS)
+        : jsonResponse(404, { error_code: "NOT_FOUND", message: "找不到這份報告。" }),
+    );
+
+    render(<HomeClient initialAccessStatus="locked" initialHasSession />);
+    await user.click(await screen.findByRole("button", { name: "阿星・2026-09-22" }));
+
+    expect(await screen.findByText("無法開啟這份報告，請稍後再試。")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "看基本分析" })).toBeTruthy();
+  });
+});
+
