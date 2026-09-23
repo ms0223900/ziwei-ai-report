@@ -52,6 +52,14 @@ beforeEach(() => {
   vi.stubGlobal("fetch", vi.fn());
 });
 
+async function submitAs(
+  user: ReturnType<typeof userEvent.setup>,
+  nickname = "小圓",
+) {
+  await user.type(screen.getByLabelText("命主暱稱"), nickname);
+  await user.click(screen.getByRole("button", { name: "看基本分析" }));
+}
+
 // The unlocks menu loads on its own; count only report traffic.
 function reportFetchUrls() {
   return vi
@@ -76,6 +84,26 @@ const HIGH_RISK_NICKNAMES = [
   { nickname: "懷孕安不安全", category: "pregnancy" as const },
   { nickname: "有自傷念頭", category: "self_harm" as const },
 ] as const;
+
+describe("HomeClient 生辰表單暱稱預設", () => {
+  it("starts with an empty nickname and shows 小圓 only as a placeholder", () => {
+    render(<HomeClient />);
+
+    const nickname = screen.getByLabelText("命主暱稱") as HTMLInputElement;
+    expect(nickname.value).toBe("");
+    expect(nickname.placeholder).toBe("小圓");
+  });
+
+  it("does not submit the placeholder as a nickname", async () => {
+    const user = userEvent.setup();
+    render(<HomeClient />);
+
+    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+
+    expect(screen.getByText("請填寫暱稱。")).toBeTruthy();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+});
 
 describe("HomeClient 高風險與失敗分流", () => {
   it("keeps field validation on the form and does not show the generation-fail H1", async () => {
@@ -105,7 +133,7 @@ describe("HomeClient 高風險與失敗分流", () => {
     );
 
     render(<HomeClient />);
-    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    await submitAs(user);
 
     expect(
       screen.getByText("正在依生辰起紫微命盤，定局排星中…"),
@@ -192,7 +220,7 @@ describe("HomeClient 高風險與失敗分流", () => {
     );
 
     render(<HomeClient />);
-    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    await submitAs(user);
 
     expect(
       await screen.findByRole("heading", {
@@ -218,7 +246,7 @@ describe("HomeClient 高風險與失敗分流", () => {
       );
 
     render(<HomeClient />);
-    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    await submitAs(user);
     await screen.findByRole("button", { name: "再試一次" });
     await user.click(screen.getByRole("button", { name: "再試一次" }));
 
@@ -272,7 +300,7 @@ describe("HomeClient 單頁 wizard（US-022）", () => {
     );
 
     render(<HomeClient />);
-    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    await submitAs(user);
 
     expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
     expect(screen.getByText("API 原局總覽句")).toBeTruthy();
@@ -292,7 +320,7 @@ describe("HomeClient 單頁 wizard（US-022）", () => {
     );
 
     render(<HomeClient />);
-    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    await submitAs(user);
 
     expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
     expect(screen.getByText("【 紫微原局・排盤總目 】")).toBeTruthy();
@@ -318,7 +346,7 @@ describe("HomeClient 會員三態", () => {
     render(
       <HomeClient initialAccessStatus="unlocked" initialHasSession />,
     );
-    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    await submitAs(user);
 
     expect(await screen.findByRole("heading", { name: "小圓的進階報告" })).toBeTruthy();
     expect(screen.getByText(advancedValid.rationale)).toBeTruthy();
@@ -342,7 +370,7 @@ describe("HomeClient 會員三態", () => {
     });
 
     render(<HomeClient initialAccessStatus="locked" initialHasSession />);
-    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    await submitAs(user);
 
     expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
     expect(screen.queryByText(advancedValid.rationale)).toBeNull();
@@ -367,7 +395,7 @@ describe("HomeClient 會員三態", () => {
     const { rerender } = render(
       <HomeClient initialAccessStatus="unlocked" initialHasSession />,
     );
-    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    await submitAs(user);
     expect(await screen.findByText(advancedValid.rationale)).toBeTruthy();
 
     rerender(<HomeClient initialAccessStatus={null} initialHasSession={false} />);
@@ -406,7 +434,7 @@ describe("HomeClient 單點解鎖（US-018）", () => {
         initialPointsBalance={1}
       />,
     );
-    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    await submitAs(user);
     expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
     expect(reportFetchUrls()).toHaveLength(1);
 
@@ -431,7 +459,7 @@ describe("HomeClient 單點解鎖（US-018）", () => {
     );
 
     render(<HomeClient initialPointsBalance={5} />);
-    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    await submitAs(user);
 
     expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "用 1 點解鎖此報告" })).toBeNull();
@@ -534,7 +562,7 @@ describe("HomeClient 已單次解鎖選單（US-021）", () => {
     render(
       <HomeClient initialAccessStatus="locked" initialHasSession initialPointsBalance={1} />,
     );
-    await user.click(screen.getByRole("button", { name: "看基本分析" }));
+    await submitAs(user);
     await user.click(await screen.findByRole("button", { name: "用 1 點解鎖此報告" }));
 
     expect(await screen.findByRole("button", { name: "小圓・2026-09-23" })).toBeTruthy();
