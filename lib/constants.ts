@@ -15,6 +15,7 @@ export const MEMBERSHIP_GRANT_NOTE = "開通由講師受控流程處理，本版
 export const MEMBERSHIP_CTA_UPGRADE = "升級／開通";
 export const MEMBERSHIP_CTA_UNLOCK_REPORT = "解鎖完整報告";
 export const MEMBERSHIP_CTA_UNLOCKED = "已開通";
+export const MEMBERSHIP_CTA_POINT_UNLOCKED = "已用 1 點解鎖此報告";
 
 export const REPORT_SLOTS = {
   lockActionPlan: "slot-lock-action-plan",

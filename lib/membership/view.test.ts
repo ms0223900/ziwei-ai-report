@@ -125,22 +125,10 @@ describe("resolveMembershipView", () => {
   });
 
   describe("points unlock third state (US-016)", () => {
-    type UnlockMode = "lifetime" | "points" | "none";
-    type ThirdStateInput = Parameters<typeof resolveMembershipView>[0] & {
-      pointsBalance?: number;
-      unlockMode?: UnlockMode;
-      isOwnReport?: boolean;
-    };
-    type ThirdStateView = ReturnType<typeof resolveMembershipView> & {
-      unlockMode: UnlockMode;
-      showPointsPackCta: boolean;
-      purchaseRequiresLogin: boolean;
-      showUnlockWithPoint: boolean;
-      pointsInsufficient: boolean;
-    };
+    type ThirdStateInput = Parameters<typeof resolveMembershipView>[0];
 
-    function view(overrides: Partial<ThirdStateInput> = {}): ThirdStateView {
-      const input = {
+    function view(overrides: Partial<ThirdStateInput> = {}) {
+      const input: ThirdStateInput = {
         ...baseInput(),
         hasSession: true,
         accessStatus: "locked",
@@ -148,8 +136,8 @@ describe("resolveMembershipView", () => {
         unlockMode: "none",
         isOwnReport: true,
         ...overrides,
-      } as ThirdStateInput;
-      return resolveMembershipView(input) as ThirdStateView;
+      };
+      return resolveMembershipView(input);
     }
 
     it("shows advanced for a point-unlocked own report without lifetime CTA copy", () => {

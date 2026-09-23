@@ -1,16 +1,20 @@
 import type { PreviewState } from "../commercial/preview";
 import {
+  MEMBERSHIP_CTA_POINT_UNLOCKED,
   MEMBERSHIP_CTA_UNLOCK_REPORT,
   MEMBERSHIP_CTA_UNLOCKED,
   REPORT_SLOTS,
 } from "../constants";
 
 export {
+  MEMBERSHIP_CTA_POINT_UNLOCKED,
   MEMBERSHIP_CTA_UNLOCK_REPORT,
   MEMBERSHIP_CTA_UNLOCKED,
 };
 
 export type MembershipAccessStatus = "locked" | "unlocked";
+
+export type MembershipUnlockMode = "lifetime" | "points" | "none";
 
 export type MembershipAdvanced = {
   rationale: string;
@@ -29,6 +33,9 @@ export type ResolveMembershipViewInput = {
   previewEnabled: boolean;
   nickname: string;
   advanced?: MembershipAdvanced | null;
+  pointsBalance?: number;
+  unlockMode?: MembershipUnlockMode;
+  isOwnReport?: boolean;
 };
 
 export type MembershipView = {
@@ -40,6 +47,11 @@ export type MembershipView = {
   followupLocked: boolean;
   authSlot: string;
   advanced: MembershipAdvanced | null;
+  unlockMode: MembershipUnlockMode;
+  showPointsPackCta: boolean;
+  purchaseRequiresLogin: boolean;
+  showUnlockWithPoint: boolean;
+  pointsInsufficient: boolean;
 };
 
 export function resolveMembershipView(
@@ -48,9 +60,12 @@ export function resolveMembershipView(
   void input.previewEnabled;
   void input.previewState;
 
+  const basicTitle = `${input.nickname}的基本分析`;
+  const advancedTitle = `${input.nickname}的進階報告`;
+
   if (!input.hasSession) {
     return {
-      title: `${input.nickname}的基本分析`,
+      title: basicTitle,
       advancedLocked: true,
       showCta: true,
       ctaLabel: MEMBERSHIP_CTA_UNLOCK_REPORT,
@@ -58,30 +73,63 @@ export function resolveMembershipView(
       followupLocked: true,
       authSlot: REPORT_SLOTS.authEntry,
       advanced: null,
+      unlockMode: "none",
+      showPointsPackCta: true,
+      purchaseRequiresLogin: true,
+      showUnlockWithPoint: false,
+      pointsInsufficient: false,
     };
   }
 
-  if (input.accessStatus !== "unlocked") {
+  const memberFlags = {
+    followupLocked: true,
+    ctaNote: null,
+    authSlot: REPORT_SLOTS.authSession,
+    showPointsPackCta: true,
+    purchaseRequiresLogin: false,
+  };
+
+  if (input.accessStatus === "unlocked") {
     return {
-      title: `${input.nickname}的基本分析`,
-      advancedLocked: true,
-      showCta: true,
-      ctaLabel: MEMBERSHIP_CTA_UNLOCK_REPORT,
-      ctaNote: null,
-      followupLocked: true,
-      authSlot: REPORT_SLOTS.authSession,
-      advanced: null,
+      ...memberFlags,
+      title: advancedTitle,
+      advancedLocked: false,
+      showCta: false,
+      ctaLabel: MEMBERSHIP_CTA_UNLOCKED,
+      advanced: input.advanced ?? null,
+      unlockMode: "lifetime",
+      showUnlockWithPoint: false,
+      pointsInsufficient: false,
     };
   }
+
+  const isOwnReport = input.isOwnReport === true;
+
+  if (isOwnReport && input.unlockMode === "points") {
+    return {
+      ...memberFlags,
+      title: advancedTitle,
+      advancedLocked: false,
+      showCta: false,
+      ctaLabel: MEMBERSHIP_CTA_POINT_UNLOCKED,
+      advanced: input.advanced ?? null,
+      unlockMode: "points",
+      showUnlockWithPoint: false,
+      pointsInsufficient: false,
+    };
+  }
+
+  const hasPoint = (input.pointsBalance ?? 0) >= 1;
 
   return {
-    title: `${input.nickname}的進階報告`,
-    advancedLocked: false,
-    showCta: false,
-    ctaLabel: MEMBERSHIP_CTA_UNLOCKED,
-    ctaNote: null,
-    followupLocked: true,
-    authSlot: REPORT_SLOTS.authSession,
-    advanced: input.advanced ?? null,
+    ...memberFlags,
+    title: basicTitle,
+    advancedLocked: true,
+    showCta: true,
+    ctaLabel: MEMBERSHIP_CTA_UNLOCK_REPORT,
+    advanced: null,
+    unlockMode: "none",
+    showUnlockWithPoint: isOwnReport && hasPoint,
+    pointsInsufficient: isOwnReport && !hasPoint,
   };
 }
