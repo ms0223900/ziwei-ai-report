@@ -3,13 +3,15 @@
 import {
   LOCK_CAPTION,
   MEMBERSHIP_CTA_UNLOCK_REPORT,
-  MEMBERSHIP_CTA_UNLOCKED,
+  POINTS_PACK_CLIENT_PLAN_ID,
+  POINTS_PACK_CTA,
   REPORT_SLOTS,
 } from "../../lib/constants";
 import type { PreviewView } from "../../lib/commercial/preview";
 import type { MembershipAdvanced, MembershipView } from "../../lib/membership/view";
 import { CommercialSecondaryZone } from "./CommercialSecondaryZone";
 import { UnlockCheckoutCta } from "./UnlockCheckoutCta";
+import { UnlockWithPointCta } from "./UnlockWithPointCta";
 
 const LOCKED_BLOCKS = [
   {
@@ -79,9 +81,13 @@ function RealAdvancedBody({
 export function AdvancedLockedPanel({
   membership,
   view,
+  persistId,
+  onPointUnlocked,
 }: {
   membership?: MembershipView;
   view: PreviewView;
+  persistId?: string;
+  onPointUnlocked?: (pointsBalance: number) => void | Promise<void>;
 }) {
   const realAdvanced =
     membership && !membership.advancedLocked ? membership.advanced : null;
@@ -90,6 +96,10 @@ export function AdvancedLockedPanel({
   const hasSession = membership?.authSlot === REPORT_SLOTS.authSession;
   const showUnlockedLabel =
     membership && !membership.advancedLocked && !membership.showCta;
+  const showUnlockWithPoint =
+    membership !== undefined &&
+    Boolean(persistId) &&
+    (membership.showUnlockWithPoint || membership.pointsInsufficient);
 
   return (
     <div className="flex flex-col gap-5">
@@ -134,12 +144,31 @@ export function AdvancedLockedPanel({
 
       {showUnlockedLabel ? (
         <p className="text-[13px] font-medium text-ink-soft">
-          {MEMBERSHIP_CTA_UNLOCKED}
+          {membership.ctaLabel}
         </p>
       ) : null}
 
       {showCta ? (
         <UnlockCheckoutCta ctaLabel={ctaLabel} hasSession={hasSession} />
+      ) : null}
+
+      {showUnlockWithPoint && persistId ? (
+        <UnlockWithPointCta
+          key={`${persistId}:${membership.pointsInsufficient}`}
+          onUnlocked={onPointUnlocked}
+          persistId={persistId}
+          pointsInsufficient={membership.pointsInsufficient}
+        />
+      ) : null}
+
+      {membership?.showPointsPackCta ? (
+        <UnlockCheckoutCta
+          ctaLabel={POINTS_PACK_CTA}
+          hasSession={!membership.purchaseRequiresLogin}
+          planId={POINTS_PACK_CLIENT_PLAN_ID}
+          slot={REPORT_SLOTS.pointsPackCta}
+          variant="secondary"
+        />
       ) : null}
 
       <CommercialSecondaryZone view={view} />

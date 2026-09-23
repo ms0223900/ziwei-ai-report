@@ -33,6 +33,7 @@ const MIN_GENERATING_MS = 500;
 export type HomeClientProps = {
   initialAccessStatus?: MembershipAccessStatus | null;
   initialHasSession?: boolean;
+  initialPointsBalance?: number;
 };
 
 async function holdGenerating(startedAt: number) {
@@ -47,6 +48,7 @@ async function holdGenerating(startedAt: number) {
 export function HomeClient({
   initialAccessStatus = null,
   initialHasSession = false,
+  initialPointsBalance = 0,
 }: HomeClientProps = {}) {
   const [view, setView] = useState<HomeView>("form");
   const [formKey, setFormKey] = useState(0);
@@ -55,6 +57,8 @@ export function HomeClient({
   const [loadedAdvanced, setLoadedAdvanced] = useState<MembershipAdvanced | null>(
     null,
   );
+  const [pointsBalance, setPointsBalance] = useState(initialPointsBalance);
+  const [pointUnlocked, setPointUnlocked] = useState(false);
   const hasSession = initialHasSession;
   const accessStatus = initialAccessStatus;
   const advanced = hasSession ? loadedAdvanced : null;
@@ -63,10 +67,18 @@ export function HomeClient({
   );
   const [highRisk, setHighRisk] = useState<HighRiskView | null>(null);
 
-  async function loadAdvanced(persistId: string | undefined) {
-    if (!persistId || !hasSession || accessStatus !== "unlocked") {
+  async function loadAdvanced(
+    persistId: string | undefined,
+    { afterPointUnlock = false }: { afterPointUnlock?: boolean } = {},
+  ): Promise<boolean> {
+    // A point unlock grants this one report while the account stays locked.
+    if (
+      !persistId ||
+      !hasSession ||
+      (accessStatus !== "unlocked" && !afterPointUnlock)
+    ) {
       setLoadedAdvanced(null);
-      return;
+      return false;
     }
 
     const response = await fetch(`/api/reports/${persistId}`);
@@ -79,10 +91,19 @@ export function HomeClient({
 
     if (!response.ok) {
       setLoadedAdvanced(null);
-      return;
+      return false;
     }
 
     setLoadedAdvanced(advancedFromGetApi(json));
+    return true;
+  }
+
+  async function handlePointUnlocked(nextBalance: number) {
+    setPointsBalance(nextBalance);
+    const loaded = await loadAdvanced(report?.persist_id, {
+      afterPointUnlock: true,
+    });
+    setPointUnlocked(loaded);
   }
 
   async function requestReport(body: BirthRequestBody) {
@@ -90,6 +111,7 @@ export function HomeClient({
     setView("generating");
     setReport(null);
     setLoadedAdvanced(null);
+    setPointUnlocked(false);
     setHighRisk(null);
     const startedAt = Date.now();
 
@@ -152,6 +174,7 @@ export function HomeClient({
     setFormKey((current) => current + 1);
     setReport(null);
     setLoadedAdvanced(null);
+    setPointUnlocked(false);
     setHighRisk(null);
   }
 
@@ -191,8 +214,17 @@ export function HomeClient({
       previewEnabled: false,
       nickname: report.nickname,
       advanced,
+      pointsBalance,
+      unlockMode: pointUnlocked ? "points" : "none",
+      isOwnReport: hasSession && Boolean(report.persist_id),
     });
-    return <ReportCard membership={membership} report={report} />;
+    return (
+      <ReportCard
+        membership={membership}
+        onPointUnlocked={handlePointUnlocked}
+        report={report}
+      />
+    );
   }
 
   return (

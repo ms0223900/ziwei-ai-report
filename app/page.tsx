@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const user = await getSessionUser();
   let initialAccessStatus: "locked" | "unlocked" | null = null;
+  let initialPointsBalance = 0;
 
   if (user) {
     try {
@@ -15,6 +16,7 @@ export default async function HomePage() {
         email: user.email ?? "",
       });
       initialAccessStatus = profile?.access_status ?? "locked";
+      initialPointsBalance = profile?.points_balance ?? 0;
     } catch {
       initialAccessStatus = "locked";
     }
@@ -25,6 +27,7 @@ export default async function HomePage() {
       <HomeClient
         initialAccessStatus={initialAccessStatus}
         initialHasSession={Boolean(user)}
+        initialPointsBalance={initialPointsBalance}
       />
     </main>
   );
