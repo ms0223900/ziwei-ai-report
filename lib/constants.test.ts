@@ -51,6 +51,8 @@ describe("shared copy and error codes", () => {
       subscribe: "slot-subscribe",
       authEntry: "slot-auth-entry",
       authSession: "slot-auth-session",
+      pointsPackCta: "slot-points-pack-cta",
+      unlockWithPoint: "slot-unlock-with-point",
     });
     expect(AUTH_MESSAGES.INVALID_EMAIL).toBe("請輸入有效的電子信箱。");
     expect(AUTH_MESSAGES.INVALID_CREDENTIALS).toBe("帳號或密碼不正確。");
