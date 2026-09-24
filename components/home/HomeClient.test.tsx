@@ -584,3 +584,66 @@ describe("HomeClient 已單次解鎖選單（US-021）", () => {
   });
 });
 
+describe("HomeClient 首頁買點入口（US-024）", () => {
+  it("shows the balance and a buy-points button on the form when logged in", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) =>
+      String(input) === "/api/report-unlocks"
+        ? jsonResponse(200, [])
+        : jsonResponse(503, { error_code: "PAYMENT_UNAVAILABLE", message: "x" }),
+    );
+
+    render(
+      <HomeClient initialAccessStatus="locked" initialHasSession initialPointsBalance={3} />,
+    );
+
+    const bar = screen.getByRole("region", { name: "點數" });
+    expect(bar.getAttribute("data-report-slot")).toBe("slot-home-points-pack");
+    expect(screen.getByText("目前點數：3 點")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "購買點數包" }));
+
+    const checkout = vi
+      .mocked(fetch)
+      .mock.calls.find((call) => String(call[0]) === "/api/payments/checkout");
+    expect(JSON.parse(String(checkout?.[1]?.body))).toEqual({
+      plan_id: "points_pack_5",
+    });
+  });
+
+  it("shows the bar for lifetime members too", () => {
+    vi.mocked(fetch).mockImplementation(async () => jsonResponse(200, []));
+
+    render(
+      <HomeClient initialAccessStatus="unlocked" initialHasSession initialPointsBalance={0} />,
+    );
+
+    expect(screen.getByText("目前點數：0 點")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "購買點數包" })).toBeTruthy();
+  });
+
+  it("does not show the bar to a guest", () => {
+    render(<HomeClient initialPointsBalance={5} />);
+
+    expect(screen.queryByRole("region", { name: "點數" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "購買點數包" })).toBeNull();
+  });
+
+  it("hides the bar on the report view, leaving only the report-area buy button", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) =>
+      String(input) === "/api/report-unlocks"
+        ? jsonResponse(200, [])
+        : jsonResponse(200, MASKED_POST_BODY),
+    );
+
+    render(
+      <HomeClient initialAccessStatus="locked" initialHasSession initialPointsBalance={2} />,
+    );
+    await submitAs(user);
+
+    expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
+    expect(screen.queryByRole("region", { name: "點數" })).toBeNull();
+    expect(screen.getAllByRole("button", { name: "購買點數包" })).toHaveLength(1);
+  });
+});
+
