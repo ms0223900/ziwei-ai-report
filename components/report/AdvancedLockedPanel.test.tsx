@@ -272,3 +272,31 @@ describe("AdvancedLockedPanel points pack and point unlock (US-018)", () => {
     expect(document.body.textContent).not.toContain("不解鎖報告");
   });
 });
+
+describe("AdvancedLockedPanel point unlock copy", () => {
+  it("shows the current balance next to the point unlock button", () => {
+    render(
+      <AdvancedLockedPanel
+        membership={memberView({ pointsBalance: 3 })}
+        persistId={PERSIST_ID}
+        view={preview}
+      />,
+    );
+
+    const button = screen.getByRole("button", { name: UNLOCK_WITH_POINT_CTA });
+    expect(button.parentElement?.textContent).toContain("目前點數：3 點");
+  });
+
+  it("labels the lifetime CTA as 永久解鎖完整報告", () => {
+    render(
+      <AdvancedLockedPanel
+        membership={memberView()}
+        persistId={PERSIST_ID}
+        view={preview}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "永久解鎖完整報告" })).toBeTruthy();
+  });
+});
+

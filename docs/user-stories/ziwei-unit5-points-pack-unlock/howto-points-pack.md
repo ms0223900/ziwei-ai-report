@@ -101,8 +101,8 @@ where user_id = '<A uuid>' and report_id = '<A 的 persist_id>';
 ## 4. 帳號 A：Story 8 Happy（有餘額、自己的報告）
 
 1. 以 A 登入，送出生辰（或從選單外的新報告開始），報告區應看到：
-   - 「解鎖完整報告」（終身）與「購買點數包」並存
-   - 「用 1 點解鎖此報告」
+   - 「永久解鎖完整報告」（終身）與「購買點數包」並存
+   - 「用 1 點解鎖此報告」，旁邊顯示「目前點數：5 點」
 2. 點「用 1 點解鎖此報告」
 3. 預期：
    - `POST /api/reports/unlock-with-point` 回 `{ ok: true, reason: "unlocked", points_balance: 4 }`

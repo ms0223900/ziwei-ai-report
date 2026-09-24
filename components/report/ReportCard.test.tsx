@@ -136,7 +136,7 @@ describe("ReportCard", () => {
 
     expect(screen.getByRole("heading", { name: "小圓的進階報告" })).toBeTruthy();
     expect(screen.getAllByText(new RegExp(PREVIEW_EXAMPLE_MARK)).length).toBeGreaterThan(0);
-    expect(screen.queryByRole("button", { name: "解鎖完整報告" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "永久解鎖完整報告" })).toBeNull();
     expect(screen.getByPlaceholderText(FOLLOWUP_PLACEHOLDER)).toHaveProperty(
       "readOnly",
       true,
@@ -215,7 +215,7 @@ describe("ReportCard", () => {
     expect(screen.getByText(/第 1 天/)).toBeTruthy();
     expect(container.textContent).not.toContain(PREVIEW_EXAMPLE_MARK);
     expect(screen.getByText("已開通")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "解鎖完整報告" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "永久解鎖完整報告" })).toBeNull();
     expect(screen.getByPlaceholderText(FOLLOWUP_PLACEHOLDER)).toHaveProperty(
       "readOnly",
       true,

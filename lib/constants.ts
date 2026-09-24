@@ -13,7 +13,7 @@ export const LOCKED_FIELDS = [
 export const UPCOMING_UNLOCK_NOTE = "解鎖即將開放，本版不收費。";
 export const MEMBERSHIP_GRANT_NOTE = "開通由講師受控流程處理，本版不收費";
 export const MEMBERSHIP_CTA_UPGRADE = "升級／開通";
-export const MEMBERSHIP_CTA_UNLOCK_REPORT = "解鎖完整報告";
+export const MEMBERSHIP_CTA_UNLOCK_REPORT = "永久解鎖完整報告";
 export const MEMBERSHIP_CTA_UNLOCKED = "已開通";
 export const MEMBERSHIP_CTA_POINT_UNLOCKED = "已用 1 點解鎖此報告";
 
@@ -36,6 +36,7 @@ export const REPORT_SLOTS = {
 export const POINTS_PACK_CLIENT_PLAN_ID = "points_pack_5";
 export const POINTS_PACK_CTA = "購買點數包";
 export const UNLOCK_WITH_POINT_CTA = "用 1 點解鎖此報告";
+export const POINTS_BALANCE_INLINE = "目前點數";
 export const POINTS_INSUFFICIENT_NOTE = "點數不足，無法用點數解鎖此報告。";
 export const POINTS_BACK_TO_REPORT = "返回報告";
 export const POINTS_UNLOCK_FAILED = "解鎖失敗，請稍後再試。";
