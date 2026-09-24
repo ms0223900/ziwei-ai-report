@@ -30,6 +30,7 @@ export const REPORT_SLOTS = {
   pointsPackCta: "slot-points-pack-cta",
   unlockWithPoint: "slot-unlock-with-point",
   reportUnlocks: "slot-report-unlocks",
+  homePointsPack: "slot-home-points-pack",
 } as const;
 
 export const POINTS_PACK_CLIENT_PLAN_ID = "points_pack_5";
@@ -38,6 +39,7 @@ export const UNLOCK_WITH_POINT_CTA = "用 1 點解鎖此報告";
 export const POINTS_INSUFFICIENT_NOTE = "點數不足，無法用點數解鎖此報告。";
 export const POINTS_BACK_TO_REPORT = "返回報告";
 export const POINTS_UNLOCK_FAILED = "解鎖失敗，請稍後再試。";
+export const HOME_POINTS_BALANCE_LABEL = "目前點數";
 export const REPORT_UNLOCKS_TITLE = "已用點數解鎖的報告";
 export const REPORT_UNLOCKS_OPEN_FAILED = "無法開啟這份報告，請稍後再試。";
 

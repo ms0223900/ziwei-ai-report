@@ -22,6 +22,7 @@ import {
 import { ReportCard } from "../report/ReportCard";
 import { FailSheet } from "./FailSheet";
 import { HighRiskSheet } from "./HighRiskSheet";
+import { HomePointsBar } from "./HomePointsBar";
 import { interpretReportsResponse } from "./interpret-reports-response";
 import {
   ReportUnlocksMenu,
@@ -289,6 +290,9 @@ export function HomeClient({
 
   return (
     <div className="flex w-full flex-col items-center gap-5">
+      {hasSession && (view === "form" || view === "generating") ? (
+        <HomePointsBar pointsBalance={pointsBalance} />
+      ) : null}
       {renderView()}
       {menu}
     </div>
