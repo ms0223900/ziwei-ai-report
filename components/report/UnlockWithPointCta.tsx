@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import {
   POINTS_BACK_TO_REPORT,
+  POINTS_BALANCE_INLINE,
   POINTS_INSUFFICIENT_NOTE,
   POINTS_PACK_CLIENT_PLAN_ID,
   POINTS_PACK_CTA,
@@ -34,10 +35,12 @@ function readUnlockResult(json: unknown): UnlockResult {
 export function UnlockWithPointCta({
   persistId,
   pointsInsufficient,
+  pointsBalance,
   onUnlocked,
 }: {
   persistId: string;
   pointsInsufficient: boolean;
+  pointsBalance: number;
   onUnlocked?: (pointsBalance: number) => void | Promise<void>;
 }) {
   const [busy, setBusy] = useState(false);
@@ -111,16 +114,21 @@ export function UnlockWithPointCta({
           )}
         </div>
       ) : (
-        <button
-          className="min-h-11 self-start rounded-control border border-seal px-5 py-3 text-button text-seal transition-colors duration-[var(--primitive-duration-hover)] hover:bg-paper disabled:opacity-60"
-          disabled={busy}
-          onClick={() => {
-            void handleClick();
-          }}
-          type="button"
-        >
-          {UNLOCK_WITH_POINT_CTA}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            className="min-h-11 rounded-control border border-seal px-5 py-3 text-button text-seal transition-colors duration-[var(--primitive-duration-hover)] hover:bg-paper disabled:opacity-60"
+            disabled={busy}
+            onClick={() => {
+              void handleClick();
+            }}
+            type="button"
+          >
+            {UNLOCK_WITH_POINT_CTA}
+          </button>
+          <span className="text-[13px] font-medium text-ink-soft">
+            {`${POINTS_BALANCE_INLINE}：${pointsBalance} 點`}
+          </span>
+        </div>
       )}
 
       {error ? (

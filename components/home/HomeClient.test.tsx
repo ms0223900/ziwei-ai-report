@@ -177,7 +177,7 @@ describe("HomeClient 高風險與失敗分流", () => {
     expect(screen.getByText(DISCLAIMER)).toBeTruthy();
     expect(screen.getByRole("button", { name: "回表單" })).toBeTruthy();
     expect(screen.queryByRole("heading", { name: /的基本分析/ })).toBeNull();
-    expect(screen.queryByText("解鎖完整報告")).toBeNull();
+    expect(screen.queryByText("永久解鎖完整報告")).toBeNull();
     expect(screen.queryByText("【 紫微原局・排盤總目 】")).toBeNull();
   });
 
@@ -203,7 +203,7 @@ describe("HomeClient 高風險與失敗分流", () => {
         await screen.findByRole("heading", { name: "這題我不能用命盤作答" }),
       ).toBeTruthy();
       expect(screen.getByText(HIGH_RISK_MESSAGES[category])).toBeTruthy();
-      expect(screen.queryByRole("button", { name: "解鎖完整報告" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "永久解鎖完整報告" })).toBeNull();
     },
   );
 
@@ -306,7 +306,7 @@ describe("HomeClient 單頁 wizard（US-022）", () => {
     expect(screen.getByText("API 原局總覽句")).toBeTruthy();
     expect(screen.getByText("API 官祿句")).toBeTruthy();
     expect(screen.getByText("【 紫微原局・排盤總目 】")).toBeTruthy();
-    expect(screen.getByText("解鎖完整報告")).toBeTruthy();
+    expect(screen.getByText("永久解鎖完整報告")).toBeTruthy();
     expect(window.localStorage.length).toBe(0);
   });
 
@@ -644,6 +644,46 @@ describe("HomeClient 首頁買點入口（US-024）", () => {
     expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
     expect(screen.queryByRole("region", { name: "點數" })).toBeNull();
     expect(screen.getAllByRole("button", { name: "購買點數包" })).toHaveLength(1);
+  });
+});
+
+describe("HomeClient 最後 1 點解鎖", () => {
+  it("never shows 點數不足 while loading advanced after spending the last point", async () => {
+    const user = userEvent.setup();
+    let releaseGet: (() => void) | undefined;
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === "/api/report-unlocks") {
+        return jsonResponse(200, []);
+      }
+      if (url.includes("/api/reports/unlock-with-point")) {
+        return jsonResponse(200, { ok: true, reason: "unlocked", points_balance: 0 });
+      }
+      if (url.includes(`/api/reports/${PERSIST_ID}`)) {
+        await new Promise<void>((resolve) => {
+          releaseGet = resolve;
+        });
+        return jsonResponse(200, {
+          ...GET_ADVANCED_BODY,
+          access_status: "locked",
+          unlock_mode: "points",
+        });
+      }
+      return jsonResponse(200, MASKED_POST_BODY);
+    });
+
+    render(
+      <HomeClient initialAccessStatus="locked" initialHasSession initialPointsBalance={1} />,
+    );
+    await submitAs(user);
+    await user.click(await screen.findByRole("button", { name: "用 1 點解鎖此報告" }));
+
+    await vi.waitFor(() => expect(releaseGet).toBeDefined());
+    expect(screen.queryByText("點數不足，無法用點數解鎖此報告。")).toBeNull();
+
+    releaseGet?.();
+    expect(await screen.findByRole("heading", { name: "小圓的進階報告" })).toBeTruthy();
+    expect(screen.queryByText("點數不足，無法用點數解鎖此報告。")).toBeNull();
   });
 });
 
