@@ -12,7 +12,7 @@ import {
   type BirthRequestBody,
 } from "./payload";
 
-const DEMO_NICKNAME = "小圓";
+const NICKNAME_PLACEHOLDER = "小圓";
 const DEMO_BIRTH_DATE = "1993-07-12";
 const IDLE_LEAD = "依生辰起紫微原局，先批基本命理。進階詳批封存。";
 const GENERATING_LEAD = "正在依生辰起紫微命盤，定局排星中…";
@@ -26,7 +26,7 @@ export type BirthFormProps = {
 };
 
 function initialNickname(values?: BirthRequestBody) {
-  return values?.nickname ?? DEMO_NICKNAME;
+  return values?.nickname ?? "";
 }
 
 function initialBirthDate(values?: BirthRequestBody) {
@@ -131,6 +131,7 @@ export function BirthForm({
                 setErrors((current) => ({ ...current, nickname: undefined }));
               }
             }}
+            placeholder={NICKNAME_PLACEHOLDER}
             type="text"
             value={nickname}
           />
