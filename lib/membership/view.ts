@@ -52,6 +52,7 @@ export type MembershipView = {
   purchaseRequiresLogin: boolean;
   showUnlockWithPoint: boolean;
   pointsInsufficient: boolean;
+  pointsBalance: number;
 };
 
 export function resolveMembershipView(
@@ -61,6 +62,7 @@ export function resolveMembershipView(
   void input.previewState;
 
   const basicTitle = `${input.nickname}的基本分析`;
+  const pointsBalance = input.hasSession ? (input.pointsBalance ?? 0) : 0;
   const advancedTitle = `${input.nickname}的進階報告`;
 
   if (!input.hasSession) {
@@ -78,6 +80,7 @@ export function resolveMembershipView(
       purchaseRequiresLogin: true,
       showUnlockWithPoint: false,
       pointsInsufficient: false,
+      pointsBalance,
     };
   }
 
@@ -87,6 +90,7 @@ export function resolveMembershipView(
     authSlot: REPORT_SLOTS.authSession,
     showPointsPackCta: true,
     purchaseRequiresLogin: false,
+    pointsBalance,
   };
 
   if (input.accessStatus === "unlocked") {
@@ -119,7 +123,7 @@ export function resolveMembershipView(
     };
   }
 
-  const hasPoint = (input.pointsBalance ?? 0) >= 1;
+  const hasPoint = pointsBalance >= 1;
 
   return {
     ...memberFlags,

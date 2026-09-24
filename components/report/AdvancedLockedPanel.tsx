@@ -157,6 +157,7 @@ export function AdvancedLockedPanel({
           key={`${persistId}:${membership.pointsInsufficient}`}
           onUnlocked={onPointUnlocked}
           persistId={persistId}
+          pointsBalance={membership.pointsBalance}
           pointsInsufficient={membership.pointsInsufficient}
         />
       ) : null}

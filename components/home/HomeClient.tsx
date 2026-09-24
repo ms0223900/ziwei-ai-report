@@ -186,10 +186,12 @@ export function HomeClient({
   }
 
   async function handlePointUnlocked(nextBalance: number) {
-    setPointsBalance(nextBalance);
+    // Update the balance only together with the unlock state; a lone drop to 0
+    // would briefly render this report as "insufficient points".
     const loaded = await loadAdvanced(report?.persist_id, {
       afterPointUnlock: true,
     });
+    setPointsBalance(nextBalance);
     setPointUnlocked(loaded);
     if (loaded) {
       await refreshUnlockItems();

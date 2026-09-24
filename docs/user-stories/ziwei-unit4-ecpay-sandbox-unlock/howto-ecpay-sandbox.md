@@ -102,7 +102,7 @@ ECPAY_ENV=stage
 - OTP `1234`
 - 有效月年 **大於當下**
 
-每次從報告頁點「解鎖完整報告」→ 頂層 form POST 到 Stage（禁止 iframe）。金額以後端 99 TWD 為準。
+每次從報告頁點「永久解鎖完整報告」→ 頂層 form POST 到 Stage（禁止 iframe）。金額以後端 99 TWD 為準。
 
 ### A. 成功（Story 5／7）
 
@@ -159,7 +159,7 @@ ECPAY_ENV=stage
 - `Authorization: Bearer $MEMBERSHIP_GRANT_SECRET`（server-only）
 - 成功 200、`access_status=unlocked`
 - **不** insert `orders`、**不**導轉綠界
-- 報告頁「解鎖完整報告」走 checkout 或登入彈窗，**不**打 grant
+- 報告頁「永久解鎖完整報告」走 checkout 或登入彈窗，**不**打 grant
 - 已 unlocked 再 checkout → 409「此帳號已開通，無需再次付款。」
 - 付款後再 grant → 200、訂單列不變、不加點
 
