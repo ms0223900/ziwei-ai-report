@@ -21,11 +21,14 @@
 - [x] 非法 email、過短密碼、重複信箱顯示規格繁中句
 - [x] 錯密碼不透露「信箱不存在」
 - [x] 註冊成功不把 `access_status` 設成 `unlocked`
+- [x] 送出後按鈕 disabled 並顯示「建立中…」／「登入中…」，成功導向期間維持 disabled；失敗才恢復可按
 
 #### 驗收說明
 
 **整體結論**：PASS ✅
 
+> 2026-09-24 調整：送出 loading 期間按鈕 disabled＋文字「建立中…」／「登入中…」＋`aria-busy`；成功導向時不再在 `finally` 提前解鎖。`components/auth/AuthForm.test.tsx`「submit loading state」4 則（Test-First，先紅後綠）；全套 324 passed／1 skipped。
+>
 > `npx vitest run lib/auth/credentials.test.ts components/auth/AuthForm.test.tsx` 通過。真實驗收需教學專案關閉 Confirm email。
 
 ---
@@ -54,6 +57,15 @@
 狀態：✅ 通過
 
 - signUp payload 不含 `access_status`；權益預設由 trigger／ensure 寫 `locked`
+
+**AC-6：送出 loading 時按鈕 disabled**
+
+狀態：✅ 通過
+
+- `components/auth/AuthForm.tsx` 的 `handleSubmit()`：送出即 `busy=true`，按鈕 `disabled`、`aria-busy`、文字改「建立中…」／「登入中…」
+- 成功（導向 `/` 或需確認信箱時導向 `/login`）不重設 `busy`，避免跳轉期間可重複送出；錯誤與例外經 `fail()` 才恢復可按
+
+---
 
 **測試策略**：Test-After
 > 理由：表單頁與 Auth 錯誤文案屬 UI／整合，適合實作後再用元件測試補斷言。
