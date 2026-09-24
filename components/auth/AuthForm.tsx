@@ -28,6 +28,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const title = mode === "register" ? "註冊" : "登入";
   const submitLabel = mode === "register" ? "建立帳號" : "登入";
+  const busyLabel = mode === "register" ? "建立中…" : "登入中…";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,6 +44,13 @@ export function AuthForm({ mode }: AuthFormProps) {
 
     setBusy(true);
     setError(null);
+
+    function fail(message: string) {
+      setError(message);
+      setBusy(false);
+    }
+
+    // On success the button stays disabled until navigation replaces the page.
     try {
       const supabase = createBrowserSupabaseClient();
       if (mode === "register") {
@@ -51,7 +59,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           password: parsed.password,
         });
         if (signUpError) {
-          setError(mapRegisterAuthError(signUpError.message));
+          fail(mapRegisterAuthError(signUpError.message));
           return;
         }
         if (!data.session) {
@@ -65,16 +73,14 @@ export function AuthForm({ mode }: AuthFormProps) {
           password: parsed.password,
         });
         if (signInError) {
-          setError(mapLoginAuthError());
+          fail(mapLoginAuthError());
           return;
         }
       }
       router.push("/");
       router.refresh();
     } catch (error) {
-      setError(mapAuthClientStartError(mode, error));
-    } finally {
-      setBusy(false);
+      fail(mapAuthClientStartError(mode, error));
     }
   }
 
@@ -140,11 +146,12 @@ export function AuthForm({ mode }: AuthFormProps) {
           </p>
         ) : null}
         <button
+          aria-busy={busy}
           className="min-h-11 w-full rounded-control bg-seal px-5 py-3 text-button text-sheet transition-colors duration-[var(--primitive-duration-hover)] hover:bg-seal-deep disabled:pointer-events-none disabled:opacity-[0.45]"
           disabled={busy}
           type="submit"
         >
-          {submitLabel}
+          {busy ? busyLabel : submitLabel}
         </button>
       </form>
     </article>

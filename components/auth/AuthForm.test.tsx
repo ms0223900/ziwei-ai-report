@@ -127,4 +127,66 @@ describe("AuthForm", () => {
     expect(signUp).not.toHaveBeenCalled();
     expect(push).not.toHaveBeenCalled();
   });
+
+  describe("submit loading state", () => {
+    async function fillAndSubmit(user: ReturnType<typeof userEvent.setup>) {
+      await user.type(screen.getByLabelText("電子信箱"), "yuan@example.com");
+      await user.type(screen.getByLabelText("密碼"), "abcdef");
+      await user.click(screen.getByRole("button", { name: "建立帳號" }));
+    }
+
+    it("disables the button and shows a loading label while signing up", async () => {
+      const user = userEvent.setup();
+      signUp.mockReturnValue(new Promise(() => {}));
+      render(<AuthForm mode="register" />);
+
+      await fillAndSubmit(user);
+
+      const button = screen.getByRole("button", { name: "建立中…" }) as HTMLButtonElement;
+      expect(button.disabled).toBe(true);
+      expect(button.getAttribute("aria-busy")).toBe("true");
+    });
+
+    it("keeps the button disabled after a successful sign-up while navigating home", async () => {
+      const user = userEvent.setup();
+      render(<AuthForm mode="register" />);
+
+      await fillAndSubmit(user);
+
+      expect(push).toHaveBeenCalledWith("/");
+      expect(
+        (screen.getByRole("button", { name: "建立中…" }) as HTMLButtonElement).disabled,
+      ).toBe(true);
+    });
+
+    it("re-enables the button when sign-up fails", async () => {
+      const user = userEvent.setup();
+      signUp.mockResolvedValue({
+        data: { session: null, user: null },
+        error: { message: "User already registered" },
+      });
+      render(<AuthForm mode="register" />);
+
+      await fillAndSubmit(user);
+
+      expect(
+        (screen.getByRole("button", { name: "建立帳號" }) as HTMLButtonElement).disabled,
+      ).toBe(false);
+    });
+
+    it("uses 登入中… while logging in", async () => {
+      const user = userEvent.setup();
+      signInWithPassword.mockReturnValue(new Promise(() => {}));
+      render(<AuthForm mode="login" />);
+
+      await user.type(screen.getByLabelText("電子信箱"), "yuan@example.com");
+      await user.type(screen.getByLabelText("密碼"), "abcdef");
+      await user.click(screen.getByRole("button", { name: "登入" }));
+
+      expect(
+        (screen.getByRole("button", { name: "登入中…" }) as HTMLButtonElement).disabled,
+      ).toBe(true);
+    });
+  });
 });
+
