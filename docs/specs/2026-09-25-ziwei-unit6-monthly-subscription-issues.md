@@ -43,3 +43,17 @@
 - **問題描述**：閘門失效，或 pending 訂單超過 5 分鐘後才付款時，綠界端會出現第二個定期定額合約。本版 RPC 只回 `conflict` 並記 log，舊合約仍會繼續扣款。
 - **證據**：spec §2 Story 3 步驟 3、§6 I11
 - **建議後續**：單元 8 驗測矩陣加入這個情境；正式上線前需要自動呼叫 `CreditCardPeriodAction` Cancel，或加上人工退款流程。
+
+## 問題 7：重新訂閱後，舊合約的週期通知會被 400 丟棄
+
+- **來源視角**：US 審查 C
+- **問題描述**：重新訂閱時 `activate_subscription_from_order` 會把訂閱列的 `merchant_trade_no` 覆寫成新值。MVP 的取消不會停止綠界合約，所以舊 MTN 之後的週期通知在 `subscriptions` 裡找不到對應列，一律回 400。權益不會因此復活，但「cancelled 只寫事件」的稽核紀錄會中斷。
+- **證據**：spec §2 Story 3 步驟 3～4、§2 Story 4 步驟 2
+- **建議後續**：與問題 6 一併處理（呼叫 `CreditCardPeriodAction` Cancel），或另建 MTN 歷史表。
+
+## 問題 8：建單閘門「先查後寫」不具原子性
+
+- **來源視角**：US 審查 C
+- **問題描述**：雙分頁在毫秒內同時送出時，兩個請求可能都通過閘門而各建一張單。spec I11 已接受這個殘餘風險。
+- **證據**：spec §2 Story 2
+- **建議後續**：正式上線前改用 advisory lock，或在 `orders` 加部分 unique index（`user_id`、plan、status=pending）。

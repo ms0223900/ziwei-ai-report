@@ -12,6 +12,11 @@
 - 點數解鎖的報告在訂閱取消或到期後仍可見。
 - 月繳 pending 訂單的建單閘門為 **5 分鐘**（演示用）。
 
+## 獨立審查（2026-09-25，3 視角）
+
+- 已回填：依賴補齊、只作回歸的斷言不要求紅燈、fake 時間欄位、RPC 先寫事件並加鎖、取消冪等鍵含 MTN、`unlock_report_with_point` 簽名不變、真機實跑集中到 US-022、新檔先放空殼、腳本 CLI 守衛。
+- 未能查證：Next 16 官方文件（repo 未安裝 `node_modules`，且 nextjs.org 被網路代理擋下）；實作前請先讀 `node_modules/next/dist/docs/`。
+
 ## 不做（本版）
 
 - 追問、年繳、升降級、退款、換卡、催收、暫停／恢復
@@ -65,21 +70,32 @@
 
 ## 依賴鏈摘要
 
-本圖是 `/next-task` 的**唯一**依賴來源；各 US 的「依賴關係」欄必須與此圖一致。
+本清單是 `/next-task` 的**唯一**依賴來源；各 US 的「依賴關係」欄必須與此圖一致。所有依賴都指向編號較小的 US，照編號順序執行不會被卡住。
 
 ```
-US-001 ─► US-002 ─► US-008 ─► US-009 ─────────────────────► US-018 ─► US-019 ─► US-023
-US-003 ─┬─► US-004 ─┬─► US-011                               ▲
-        │           ├─► US-013                               │
-        │           ├─► US-015                               │
-        │           └─► US-022                               │
-        └─► US-005 ─┬─► US-008                               │
-                    ├─► US-010 ─► US-011 ─► US-022           │
-                    ├─► US-012 ─► US-013 ─► US-022           │
-                    └─► US-014 ─► US-015 ────────────────────┤
-US-016 ─► US-017 ────────────────────────────────────────────┘
-US-006 ─► US-007 ─► US-013
-US-020 ─► US-021 ─► US-022 ─► US-023
+US-001 ← 無
+US-002 ← US-001
+US-003 ← 無
+US-004 ← US-003
+US-005 ← US-004
+US-006 ← 無
+US-007 ← US-006
+US-008 ← US-002、US-005
+US-009 ← US-008
+US-010 ← US-002、US-005
+US-011 ← US-004、US-010
+US-012 ← US-002、US-005
+US-013 ← US-004、US-007、US-012
+US-014 ← US-005
+US-015 ← US-004、US-014
+US-016 ← 無
+US-017 ← US-016
+US-018 ← US-009、US-015、US-017
+US-019 ← US-018
+US-020 ← 無
+US-021 ← US-020
+US-022 ← US-004、US-009、US-011、US-013、US-015、US-021
+US-023 ← US-019、US-022
 ```
 
 - Phase 0 完成條件：方案表有 `subscribe_report_monthly`（19／M／1／12）；`periodReturnUrl` 可組出，且不影響既有方案。
@@ -100,13 +116,13 @@ US-020 ─► US-021 ─► US-022 ─► US-023
 | 2 建單閘門 | US-008／US-009 |
 | 3 ReturnURL 首次 | US-004、US-010／US-011 |
 | 4 PeriodReturnURL 續訂 | US-004、US-012／US-013 |
-| 5 扣款失敗 | US-004、US-012／US-013 |
+| 5 扣款失敗 | US-004、US-012／US-013；S5-4 由 US-022 承接 |
 | 6 取消與到期 | US-004、US-014（S6-2／S6-4）、US-022 |
 | 7 權限判斷 | US-014／US-015、US-016／US-017、US-018 |
-| 8 單點解鎖 RPC | US-004、US-005、US-014、US-018（畫面） |
+| 8 單點解鎖 RPC | US-004（SQL＋套用後實跑）、US-005、US-014（回歸）／US-015、US-018（畫面） |
 | 9 移除追問 | US-019 |
 | 10 固定素材與三位會員 | US-020／US-021、US-022 |
-| 11 Client 不可寫 | US-003、US-004 |
+| 11 Client 不可寫 | US-003（S11-1 套用後實測）、US-004（S11-3 套用後實測）；S11-2 已由既有 guard 擋下 |
 | 12 交棒單元 7／8 | US-023 |
 
 ## spec 第 7 節阻塞對照
@@ -114,6 +130,6 @@ US-020 ─► US-021 ─► US-022 ─► US-023
 | 阻塞 | 處理方式 | 承接 US |
 | --- | --- | --- |
 | 1：proxy matcher 攔截 period-webhook | matcher 排除 `api/payments/ecpay/`，並擴充 session-guards 測試 | US-006／US-007 |
-| 2：Checkpoint 被 `profiles_guard_entitlements` 擋下 | 改走 `cancel_subscription` RPC 或 service role 腳本；純 SQL 則先 `set_config` | US-004、US-022 |
+| 2：Checkpoint 被 `profiles_guard_entitlements` 擋下 | `security definer` 繞不過（guard 看的是 JWT 的角色）；一律用 service role client 呼叫，或在同一個 transaction 內先 `set_config` 兩個 claim | US-022 |
 | 3：重整後無法重開舊報告 | PM 已定案不做；S7-3 只驗新報告 | US-018 |
 | 4：`scripts/` 無法 import `server-only` 的 check-mac | 腳本自行實作，並以 vitest 對照 | US-020／US-021 |
