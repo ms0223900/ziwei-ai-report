@@ -50,7 +50,7 @@
 
 ### Phase 5 — PeriodReturnURL
 - [x] US-012 PeriodReturnURL 測試（預期紅燈；待實作轉綠）
-- [ ] US-013 PeriodReturnURL 實作
+- [x] US-013 PeriodReturnURL 實作
 
 ### Phase 6 — 權限判斷
 - [ ] US-014 權益判斷與進階 GET 測試（預期紅燈；待實作轉綠）
