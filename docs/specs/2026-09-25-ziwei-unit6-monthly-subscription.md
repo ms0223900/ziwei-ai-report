@@ -80,7 +80,7 @@
 - 未登入：401（`loginRequiredError`）。
 - 月繳方案以 service role 查詢，符合任一條件就回 409（新錯誤碼，繁中訊息，例如「已有訂閱或訂單處理中」）：
   1. `subscriptions where user_id=?` 存在，且 `current_period_end >= now()`，**不論 status**。這樣 `past_due` 但期末未過的會員也會被擋。
-  2. `orders where user_id=? and plan_id='subscribe_report_monthly' and status='pending' and created_at > now() - interval '30 minutes'` 存在。這是為了防止雙分頁同時建單；30 分鐘後放行，避免放棄付款的人被永久卡住。
+  2. `orders where user_id=? and plan_id='subscribe_report_monthly' and status='pending' and created_at > now() - interval '5 minutes'` 存在。這是為了防止雙分頁同時建單；5 分鐘後放行（demo 用短時限），避免放棄付款的人被永久卡住。
 - `access_status=unlocked` **不**擋月繳。
 - 建單時**不**插入 `subscriptions`（見 §6 G1），pending 狀態只存在 `orders`。
 
@@ -221,7 +221,7 @@
 - S1-4: Given `access_status=unlocked` When 建立月繳單 Then 回 200。
 - S1-5: Given 設了 `ECPAY_RETURN_URL`，但沒有 `APP_BASE_URL` 也沒有 `ECPAY_PERIOD_RETURN_URL` When 建立月繳單 Then 回 `PAYMENT_UNAVAILABLE`；同樣環境建立 `points_pack_5` 仍回 200。
 - S2-1: Given 已有訂閱且 `current_period_end` 在未來（`active` 或 `past_due`）When 再建月繳單 Then 回 409 並帶繁中訊息，`orders` 沒有新增列。
-- S2-2: Given 30 分鐘內已有一筆 pending 月繳訂單 When 再建單 Then 回 409；該訂單超過 30 分鐘後 When 再建單 Then 回 200。
+- S2-2: Given 5 分鐘內已有一筆 pending 月繳訂單 When 再建單 Then 回 409；該訂單超過 5 分鐘後 When 再建單 Then 回 200。
 - S2-3: Given 訂閱已取消或到期 When 建單 Then 回 200。
 - S2-4: Given 未知的 `plan_id` When 建單 Then 回 400 `UNSUPPORTED_PLAN`。
 
@@ -351,7 +351,7 @@
 | Story | MVP | 說明 |
 | --- | --- | --- |
 | 1 方案表與定期定額建單 | true | |
-| 2 建單閘門（有效期間 + 30 分鐘 pending） | true | |
+| 2 建單閘門（有效期間 + 5 分鐘 pending） | true | |
 | 3 ReturnURL 首次 | true | |
 | 4 PeriodReturnURL 續訂（含 cancelled 不復活） | true | |
 | 5 扣款失敗 | true | |
@@ -384,11 +384,11 @@
 - **I8** Supabase JS 沒有多語句 transaction，所有狀態變更都必須包在 plpgsql RPC 裡。
 - **I9** `test/fakes/supabase.ts` 遇到不支援的資料表會 throw，也沒有 `gte`。新增表時，既有的 checkout 和 `[persistId]` 測試要一併更新。
 - **I10** HashKey 不入庫。`secrets-not-leaked.test.ts` **不掃** `scripts/` 和 payload 檔，只能靠人工確認加 `.gitignore`。
-- **I11** `activate_subscription_from_order` 的 `conflict` 分支（同一人已有有效訂閱、但 MTN 不同）只記 log，不自動退款或取消。這種情況理論上已被閘門擋下，只有在閘門失效或 30 分鐘後又付款時才會發生。
+- **I11** `activate_subscription_from_order` 的 `conflict` 分支（同一人已有有效訂閱、但 MTN 不同）只記 log，不自動退款或取消。這種情況理論上已被閘門擋下，只有在閘門失效或 5 分鐘後又付款時才會發生。
 
 ### 二、規格與需求灰區 (Spec-level Gaps / Pre-dev Questions)
 
-- **G1 pending 的處理**：Ticket 寫「已有 pending／active 就拒絕」。本規格採用的做法是建單時**不**插入 subscriptions（Ticket §8.1 允許二選一），閘門改擋「有效期間內的訂閱」加「30 分鐘內的 pending 月繳訂單」。30 分鐘這個數字需要 PM 確認。
+- **G1 pending 的處理**：Ticket 寫「已有 pending／active 就拒絕」。本規格採用的做法是建單時**不**插入 subscriptions（Ticket §8.1 允許二選一），閘門改擋「有效期間內的訂閱」加「5 分鐘內的 pending 月繳訂單」。5 分鐘由 PM 於 2026-09-25 定案（演示用）；使用者在綠界付款頁停留超過 5 分鐘才付款，可能落入 I11 的 conflict。
 - **G2 取消時機**：採 Ticket 假設的「立即截斷」。若改成期末才收回，S6-1、S4-8 和會員 C 都要改寫。
 - **G3 `ItemName`**：沿用「紫微斗數月繳訂閱」。
 - **G4 `ExecTimes`**：沿用 12。
