@@ -33,7 +33,7 @@
 
 ### Phase 1 — schema 與 fake
 - [⚠️] US-003 建立訂閱表遷移（待 Supabase 套用實測）
-- [ ] US-004 訂閱 RPC 遷移
+- [⚠️] US-004 訂閱 RPC 遷移（待 Supabase 套用實測）
 - [ ] US-005 記憶體 fake 訂閱表與 RPC
 
 ### Phase 2 — proxy
