@@ -16,6 +16,14 @@ function matcherStringLiterals(source: string): string[] {
   return [...withoutComments.matchAll(/"((?:\\.|[^"\\])*)"/g)].map((m) => m[1]);
 }
 
+// Matcher literals are plain regex sources (no path-to-regexp params), so
+// JSON-unescaping the TS string literal gives the pattern Next.js compiles.
+function proxyMatches(pathname: string): boolean {
+  return matcherStringLiterals(readSource("proxy.ts")).some((literal) =>
+    new RegExp(`^${JSON.parse(`"${literal}"`)}$`).test(pathname),
+  );
+}
+
 describe("SSR session wiring", () => {
   it("writes cookies with getAll/setAll and authorizes with getUser", () => {
     const session = readSource("lib/supabase/session.ts");
@@ -47,10 +55,17 @@ describe("SSR session wiring", () => {
     expect(proxy).not.toMatch(/redirect\(/);
   });
 
-  it("excludes the live ECPay webhook path from matcher literals", () => {
-    const literals = matcherStringLiterals(readSource("proxy.ts"));
-    expect(literals.some((pattern) => pattern.includes("api/payments/ecpay/webhook"))).toBe(
-      true,
-    );
+  it.each([
+    "/api/payments/ecpay/webhook",
+    "/api/payments/ecpay/period-webhook",
+  ])("does not run the session proxy on ECPay webhook %s", (pathname) => {
+    expect(proxyMatches(pathname)).toBe(false);
   });
+
+  it.each(["/", "/api/reports", "/orders/processing"])(
+    "still refreshes the session on %s",
+    (pathname) => {
+      expect(proxyMatches(pathname)).toBe(true);
+    },
+  );
 });
