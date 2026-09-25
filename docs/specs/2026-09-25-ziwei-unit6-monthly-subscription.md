@@ -93,7 +93,7 @@
   3. 若該 `user_id` 已有訂閱列：
      - `current_period_end >= now()` 且 `merchant_trade_no` 不同：回 `conflict`，不覆寫。webhook 記 log 並回 `1|OK`；此情況交人工處理，見 issues 檔。
      - 其他情況（沒有有效期間）：更新該列。
-  4. 沒有訂閱列時才 insert。寫入欄位：`status='active'`、`order_id`、`merchant_trade_no`、`current_period_start = coalesce(orders.payment_date, now())`、`current_period_end` 依 §6 I4 的公式，以 Asia/Taipei 加一個月。
+  4. 沒有訂閱列時才 insert。寫入欄位：`user_id`、`plan_id`、`status='active'`、`order_id`、`merchant_trade_no`、`current_period_start = coalesce(orders.payment_date, now())`、`current_period_end` 依 §6 I4 的公式，以 Asia/Taipei 加一個月。
   5. 插入 `subscription_events(event_type='first_success', idempotency_key='return:{mtn}', subscription_id=…)`。
   6. `profiles.subscription_status = 'active'`。
   7. **不**改 `access_status`、`points_balance`，也**不**寫 `report_unlocks`。
@@ -119,15 +119,15 @@
 
 ### Story 5 — 扣款失敗
 
-- 前述檢查都通過但 `RtnCode != 1` 時，寫入 `payment_failed` 事件，冪等鍵用 `failed:{mtn}:{gwsr}`，沒有 gwsr 時用 `failed:{mtn}:{ProcessDate}`（見 §6 I2）。
+- 前述檢查都通過但 `RtnCode != 1` 時，寫入 `payment_failed` 事件，冪等鍵用 `failed:{mtn}:{gwsr}`，沒有 gwsr 時用 `failed:{mtn}:{ProcessDate 原字串}`（見 §6 I2）。
 - 訂閱不是 cancelled／expired 時才改成 `status='past_due'`，並同步快取欄；`current_period_end` **不動**。回 `1|OK`。
 - 進階是否可見，仍只看 `now() <= current_period_end`。
 
 ### Story 6 — 取消與到期
 
 - **取消（MVP）**：service role RPC `cancel_subscription(p_user_id uuid)`，由 `scripts/` 或 SQL Checkpoint 呼叫，同一事務內：
-  1. 插入 `cancelled` 事件，`idempotency_key='cancel:{subscription_id}'`。遇到 unique 衝突 → 回 `already_cancelled`，不動任何列，所以重跑時 `current_period_end` 不會被重設。
-  2. `status='cancelled'`、`current_period_end = now()`、快取欄改為 `cancelled`。
+  1. 插入 `cancelled` 事件，`idempotency_key='cancel:{subscription_id}:{merchant_trade_no}'`。遇到 unique 衝突 → 回 `already_cancelled`，不動任何列，所以重跑時 `current_period_end` 不會被重設。
+  2. `status='cancelled'`、`current_period_end = now() - interval '1 second'`、快取欄改為 `cancelled`。
   3. 不刪任何 `orders`、`subscriptions`、`subscription_events` 列。
 - **取消（Should Have）**：受控後端呼叫綠界 `/Cashier/CreditCardPeriodAction`，`Action=Cancel`（官方只有 `ReAuth`／`Cancel`，沒有 `Stop`；取消後無法重新啟用），成功後同樣呼叫 `cancel_subscription`。MVP 階段綠界端的合約仍會繼續扣款，靠 Story 4 的 cancelled 分支保證權益不復活。
 - **到期**：綠界沒有對應事件。所有權限讀取一律以 `now() > current_period_end` 判定為無權益。`status='expired'` 只由 Checkpoint 寫入；讀取路徑**不得**依賴這個欄位。
@@ -182,7 +182,7 @@
   - 加一支 vitest，確認腳本算出的值與 `computeCheckMacValue` 一致。
   - HashKey／HashIV 只從 `.env.local` 讀取；產出的 payload 寫到 stdout 或 `.gitignore` 內的路徑，**不入庫**。
 - 腳本參數：`--mtn`（必填）、`--total-success-times`、`--rtn-code`、`--gwsr`、`--simulate`。MTN 由 checkout 的隨機值決定，無法事先寫死。
-- 三位測試會員 Checkpoint：一支以 service role 執行的 `scripts/` 腳本，或 SQL 開頭先 `select set_config('request.jwt.claims', '{"role":"service_role"}', true)`（見第 7 節阻塞 2）。內容：
+- 三位測試會員 Checkpoint：一支以 service role 執行的 `scripts/` 腳本，或在同一 transaction（`begin;`）內先 `set_config('request.jwt.claim.role','service_role',true)` 與 `set_config('request.jwt.claims','{"role":"service_role"}',true)`（沿用單元 5 howto）（見第 7 節阻塞 2）。內容：
   - 每人先有一筆 `orders`（`plan_id=subscribe_report_monthly`、`status=paid`、固定 MTN，例如 `TESTSUBA0001`），以及對應的 `subscriptions.merchant_trade_no`。
   - 每人至少一份 `reports`：`user_id=本人`、`generation_status='success'`、`advanced_json` 非空。
   - A：`active`，`current_period_end = now() + 20 days`。
@@ -328,7 +328,7 @@
   - `orders`、`profiles`：結構不變。`orders.plan_id`、`profiles.subscription_status` 都沒有 check constraint，已查證。
   - RPC 全部 `security definer set search_path = public`，並 `revoke … from public, anon, authenticated` + `grant execute … to service_role`：
     - `activate_subscription_from_order(p_order_id uuid)`
-    - `apply_subscription_period_event(p_merchant_trade_no text, p_rtn_code text, p_total_success_times int, p_gwsr text, p_processed_at timestamptz)`
+    - `apply_subscription_period_event(p_merchant_trade_no text, p_idempotency_key text, p_event_type text, p_rtn_code text, p_total_success_times int, p_gwsr text, p_processed_at timestamptz)`（先 `for update` 鎖訂閱列，再先 insert 事件、後改期間）
     - `cancel_subscription(p_user_id uuid)`
     - `create or replace unlock_report_with_point`
 - **API & Permissions**：
@@ -411,7 +411,7 @@
 - **阻塞 2：SQL Editor 執行的 Checkpoint 會被 `profiles_guard_entitlements` 擋下**
   - 證據：`supabase/migrations/20260913000000_create_profiles.sql:68-76`，只要 `auth.role()` 不是 `service_role` 就 raise。單元 5 的 `docs/user-stories/ziwei-unit5-points-pack-unlock/howto-points-pack.md:64-69` 記錄了 `set_config` 繞法。
   - 影響：S6-1、S6-3、S10-2。
-  - 處理：Checkpoint 走 service role 腳本或 `cancel_subscription` RPC；純 SQL 則在開頭 `set_config('request.jwt.claims', …)`。**S6／S10 的 AC 需先處理本項。**
+  - 處理：`security definer` 的 RPC（含 `cancel_subscription`）**也繞不過** guard，因為 guard 看的是 JWT 的角色，不是函式擁有者。Checkpoint 與取消一律以 service role client 呼叫，或在同一 transaction 內先 `set_config` 兩個 claim。**S6／S10 的 AC 需先處理本項。**
 - **阻塞 3：重整後沒有 UI 可以重新開啟既有報告**
   - 證據：`components/home/HomeClient.tsx` 的報告只存在 client state。唯一的重開入口 `ReportUnlocksMenu` 讀的是 `app/api/report-unlocks/route.ts:28-33`，只列 `report_unlocks`，而訂閱依設計不寫這張表。
   - 影響：Ticket 寫的「返回或重整解讀頁即可看進階」以及原 S7-3 字面上做不到。
