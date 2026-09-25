@@ -59,6 +59,39 @@ export type FakeOrder = {
   status: FakeOrderStatus;
   trade_no: string | null;
   payment_date: string | null;
+  created_at?: string;
+};
+
+export type FakeSubscriptionStatus = "active" | "past_due" | "cancelled" | "expired";
+
+export type FakeSubscription = {
+  id: string;
+  user_id: string;
+  plan_id: string;
+  order_id: string | null;
+  merchant_trade_no: string;
+  status: FakeSubscriptionStatus;
+  current_period_start: string;
+  current_period_end: string;
+  created_at?: string;
+};
+
+export type FakeSubscriptionEvent = {
+  id: string;
+  subscription_id: string;
+  user_id: string;
+  event_type:
+    | "first_success"
+    | "first_duplicate"
+    | "renewal_success"
+    | "payment_failed"
+    | "cancelled"
+    | "expired";
+  idempotency_key: string;
+  gwsr: string | null;
+  total_success_times: number | null;
+  rtn_code: string | null;
+  processed_at: string;
 };
 
 export type FakeSupabaseMemory = {
@@ -68,6 +101,8 @@ export type FakeSupabaseMemory = {
   orders: Map<string, FakeOrder>;
   pointTransactions: Map<string, FakePointTransaction>;
   reportUnlocks: Map<string, FakeReportUnlock>;
+  subscriptions: Map<string, FakeSubscription>;
+  subscriptionEvents: Map<string, FakeSubscriptionEvent>;
   rpc: Map<string, FakeRpcHandler>;
 };
 
@@ -81,6 +116,8 @@ export function createFakeSupabaseMemory(): FakeSupabaseMemory {
     orders: new Map(),
     pointTransactions: new Map(),
     reportUnlocks: new Map(),
+    subscriptions: new Map(),
+    subscriptionEvents: new Map(),
     rpc: new Map(),
   };
 }
@@ -121,7 +158,22 @@ type FakeTable =
   | "reports"
   | "orders"
   | "point_transactions"
-  | "report_unlocks";
+  | "report_unlocks"
+  | "subscriptions"
+  | "subscription_events";
+
+const FAKE_TABLES: readonly FakeTable[] = [
+  "profiles",
+  "reports",
+  "orders",
+  "point_transactions",
+  "report_unlocks",
+  "subscriptions",
+  "subscription_events",
+];
+
+// Tables whose inserts get a default created_at, mirroring `default now()`.
+const CREATED_AT_DEFAULT: readonly FakeTable[] = ["orders", "subscriptions"];
 
 function tableConfig(memory: FakeSupabaseMemory, table: FakeTable) {
   if (table === "profiles") {
@@ -156,6 +208,22 @@ function tableConfig(memory: FakeSupabaseMemory, table: FakeTable) {
       uniqueComposites: [["user_id", "report_id"]],
     };
   }
+  if (table === "subscriptions") {
+    return {
+      store: memory.subscriptions,
+      idKey: "id",
+      uniqueKeys: ["user_id", "merchant_trade_no"],
+      uniqueComposites: [] as string[][],
+    };
+  }
+  if (table === "subscription_events") {
+    return {
+      store: memory.subscriptionEvents,
+      idKey: "id",
+      uniqueKeys: ["idempotency_key"],
+      uniqueComposites: [] as string[][],
+    };
+  }
   return {
     store: memory.orders,
     idKey: "id",
@@ -183,7 +251,7 @@ function uniqueConflict(
         continue;
       }
       if (record[key] === value) {
-        return { message: `duplicate ${key}` };
+        return { code: "23505", message: `duplicate ${key}` };
       }
     }
   }
@@ -197,7 +265,7 @@ function uniqueConflict(
         continue;
       }
       if (columns.every((column) => record[column] === row[column])) {
-        return { message: `duplicate ${columns.join(",")}` };
+        return { code: "23505", message: `duplicate ${columns.join(",")}` };
       }
     }
   }
@@ -275,6 +343,9 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
           pendingInsert[idKey] ?? derivedUnlockId ?? crypto.randomUUID(),
         );
         pendingInsert[idKey] = id;
+        if (CREATED_AT_DEFAULT.includes(table) && pendingInsert.created_at == null) {
+          pendingInsert.created_at = new Date().toISOString();
+        }
         const existing = store.get(id);
         if (existing && upsertIgnoreDuplicates) {
           return { data: existing, error: null };
@@ -354,18 +425,13 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
 export function createFakeServiceRoleClient(memory: FakeSupabaseMemory) {
   return {
     from(table: string) {
-      if (
-        table === "profiles" ||
-        table === "reports" ||
-        table === "orders" ||
-        table === "point_transactions" ||
-        table === "report_unlocks"
-      ) {
-        return createTableApi(memory, table);
+      if ((FAKE_TABLES as readonly string[]).includes(table)) {
+        return createTableApi(memory, table as FakeTable);
       }
       throw new Error(`fake supabase: unsupported table ${table}`);
     },
-    // Fake .rpc() stubs do not prove Story 4 / 5 / 8 migrations were applied.
+    // Fake .rpc() stubs do not prove Story 4 / 5 / 8 migrations were applied,
+    // nor do the built-in subscription RPCs prove the unit 6 migrations were.
     async rpc(fn: string, args?: Record<string, unknown>) {
       const handler = memory.rpc.get(fn);
       if (typeof handler === "function") {
@@ -373,6 +439,10 @@ export function createFakeServiceRoleClient(memory: FakeSupabaseMemory) {
       }
       if (handler) {
         return handler;
+      }
+      const builtin = BUILTIN_RPCS[fn];
+      if (builtin) {
+        return { data: [builtin(memory, args ?? {})], error: null };
       }
       return { data: null, error: null };
     },
@@ -394,4 +464,248 @@ export function createFakeServiceRoleClient(memory: FakeSupabaseMemory) {
       },
     },
   };
+}
+
+const TAIPEI_OFFSET_MS = 8 * 60 * 60 * 1000;
+
+// Mirrors `((ts at time zone 'Asia/Taipei') + interval '1 month') at time zone 'Asia/Taipei'`,
+// including clamping 1/31 to the last day of February.
+export function addOneMonthTaipei(iso: string): string {
+  const local = new Date(new Date(iso).getTime() + TAIPEI_OFFSET_MS);
+  const day = local.getUTCDate();
+  local.setUTCDate(1);
+  local.setUTCMonth(local.getUTCMonth() + 1);
+  const lastDay = new Date(
+    Date.UTC(local.getUTCFullYear(), local.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  local.setUTCDate(Math.min(day, lastDay));
+  return new Date(local.getTime() - TAIPEI_OFFSET_MS).toISOString();
+}
+
+type RpcRow = Record<string, unknown>;
+type BuiltinRpc = (memory: FakeSupabaseMemory, args: Record<string, unknown>) => RpcRow;
+
+function findSubscription(
+  memory: FakeSupabaseMemory,
+  predicate: (sub: FakeSubscription) => boolean,
+) {
+  return [...memory.subscriptions.values()].find(predicate) ?? null;
+}
+
+function hasEventKey(memory: FakeSupabaseMemory, key: string) {
+  return [...memory.subscriptionEvents.values()].some(
+    (event) => event.idempotency_key === key,
+  );
+}
+
+
+function addEvent(
+  memory: FakeSupabaseMemory,
+  event: Omit<FakeSubscriptionEvent, "id">,
+) {
+  const id = crypto.randomUUID();
+  memory.subscriptionEvents.set(id, { id, ...event });
+}
+
+function setProfileSubscriptionStatus(
+  memory: FakeSupabaseMemory,
+  userId: string,
+  status: string,
+) {
+  const profile = memory.profiles.get(userId);
+  if (profile) {
+    memory.profiles.set(userId, { ...profile, subscription_status: status });
+  }
+}
+
+function isActiveNow(sub: FakeSubscription | null) {
+  return sub !== null && new Date(sub.current_period_end).getTime() >= Date.now();
+}
+
+const BUILTIN_RPCS: Record<string, BuiltinRpc> = {
+  activate_subscription_from_order(memory, args) {
+    const order = memory.orders.get(String(args.p_order_id ?? ""));
+    if (!order) {
+      return { ok: false, reason: "not_found" };
+    }
+    if (order.plan_id !== "subscribe_report_monthly") {
+      return { ok: false, reason: "wrong_plan" };
+    }
+    const key = `return:${order.merchant_trade_no}`;
+    if (hasEventKey(memory, key)) {
+      return { ok: true, reason: "already_fulfilled" };
+    }
+    const existing = findSubscription(memory, (sub) => sub.user_id === order.user_id);
+    if (
+      existing &&
+      isActiveNow(existing) &&
+      existing.merchant_trade_no !== order.merchant_trade_no
+    ) {
+      return { ok: false, reason: "conflict" };
+    }
+    const start = order.payment_date ?? new Date().toISOString();
+    const sub: FakeSubscription = {
+      id: existing?.id ?? crypto.randomUUID(),
+      user_id: order.user_id,
+      plan_id: order.plan_id,
+      order_id: order.id,
+      merchant_trade_no: order.merchant_trade_no,
+      status: "active",
+      current_period_start: start,
+      current_period_end: addOneMonthTaipei(start),
+      created_at: existing?.created_at ?? new Date().toISOString(),
+    };
+    memory.subscriptions.set(sub.id, sub);
+    addEvent(memory, {
+      subscription_id: sub.id,
+      user_id: sub.user_id,
+      event_type: "first_success",
+      idempotency_key: key,
+      gwsr: null,
+      total_success_times: null,
+      rtn_code: null,
+      processed_at: start,
+    });
+    setProfileSubscriptionStatus(memory, sub.user_id, "active");
+    return { ok: true, reason: "activated" };
+  },
+
+  apply_subscription_period_event(memory, args) {
+    const eventType = String(args.p_event_type ?? "");
+    if (!["first_duplicate", "renewal_success", "payment_failed"].includes(eventType)) {
+      return { ok: false, reason: "invalid_event" };
+    }
+    const sub = findSubscription(
+      memory,
+      (row) => row.merchant_trade_no === args.p_merchant_trade_no,
+    );
+    if (!sub) {
+      return { ok: false, reason: "not_found" };
+    }
+    const key = String(args.p_idempotency_key ?? "");
+    if (hasEventKey(memory, key)) {
+      return { ok: true, reason: "already_processed" };
+    }
+    addEvent(memory, {
+      subscription_id: sub.id,
+      user_id: sub.user_id,
+      event_type: eventType as FakeSubscriptionEvent["event_type"],
+      idempotency_key: key,
+      gwsr: (args.p_gwsr as string | null | undefined) ?? null,
+      total_success_times:
+        (args.p_total_success_times as number | null | undefined) ?? null,
+      rtn_code: (args.p_rtn_code as string | null | undefined) ?? null,
+      processed_at:
+        (args.p_processed_at as string | null | undefined) ?? new Date().toISOString(),
+    });
+    if (sub.status === "cancelled" || sub.status === "expired") {
+      return { ok: true, reason: "recorded_inactive" };
+    }
+    if (eventType === "first_duplicate") {
+      return { ok: true, reason: "duplicate_first" };
+    }
+    if (eventType === "renewal_success") {
+      memory.subscriptions.set(sub.id, {
+        ...sub,
+        status: "active",
+        current_period_end: addOneMonthTaipei(sub.current_period_end),
+      });
+      setProfileSubscriptionStatus(memory, sub.user_id, "active");
+      return { ok: true, reason: "renewed" };
+    }
+    memory.subscriptions.set(sub.id, { ...sub, status: "past_due" });
+    setProfileSubscriptionStatus(memory, sub.user_id, "past_due");
+    return { ok: true, reason: "past_due" };
+  },
+
+  cancel_subscription(memory, args) {
+    const sub = findSubscription(memory, (row) => row.user_id === args.p_user_id);
+    if (!sub) {
+      return { ok: false, reason: "not_found" };
+    }
+    const key = `cancel:${sub.id}:${sub.merchant_trade_no}`;
+    if (hasEventKey(memory, key)) {
+      return { ok: true, reason: "already_cancelled" };
+    }
+    const now = Date.now();
+    addEvent(memory, {
+      subscription_id: sub.id,
+      user_id: sub.user_id,
+      event_type: "cancelled",
+      idempotency_key: key,
+      gwsr: null,
+      total_success_times: null,
+      rtn_code: null,
+      processed_at: new Date(now).toISOString(),
+    });
+    memory.subscriptions.set(sub.id, {
+      ...sub,
+      status: "cancelled",
+      current_period_end: new Date(now - 1000).toISOString(),
+    });
+    setProfileSubscriptionStatus(memory, sub.user_id, "cancelled");
+    return { ok: true, reason: "cancelled" };
+  },
+
+  unlock_report_with_point(memory, args) {
+    const userId = args.p_user_id as string | null | undefined;
+    const reportId = String(args.report_id ?? "");
+    const profile = userId ? memory.profiles.get(userId) : undefined;
+    const balance = profile?.points_balance ?? 0;
+    const report = memory.reports.get(reportId);
+    if (!userId || !profile || !report || report.user_id !== userId) {
+      return { ok: false, reason: "forbidden", points_balance: balance };
+    }
+    if (profile.access_status === "unlocked") {
+      return { ok: true, reason: "lifetime", points_balance: balance };
+    }
+    const unlocked = [...memory.reportUnlocks.values()].some(
+      (row) => row.user_id === userId && row.report_id === reportId,
+    );
+    if (unlocked) {
+      return { ok: true, reason: "already_unlocked", points_balance: balance };
+    }
+    if (isActiveNow(findSubscription(memory, (sub) => sub.user_id === userId))) {
+      return { ok: true, reason: "subscription", points_balance: balance };
+    }
+    if (balance < 1) {
+      return { ok: false, reason: "insufficient", points_balance: balance };
+    }
+    const txId = crypto.randomUUID();
+    memory.pointTransactions.set(txId, {
+      id: txId,
+      user_id: userId,
+      delta: -1,
+      type: "debit_unlock",
+      source_order_id: null,
+      report_id: reportId,
+    });
+    memory.reportUnlocks.set(`${userId}:${reportId}`, {
+      id: `${userId}:${reportId}`,
+      user_id: userId,
+      report_id: reportId,
+      transaction_id: txId,
+      created_at: new Date().toISOString(),
+    });
+    memory.profiles.set(userId, { ...profile, points_balance: balance - 1 });
+    return { ok: true, reason: "unlocked", points_balance: balance - 1 };
+  },
+};
+
+export function seedFakeSubscription(
+  memory: FakeSupabaseMemory,
+  subscription: Partial<FakeSubscription> &
+    Pick<FakeSubscription, "user_id" | "merchant_trade_no" | "current_period_end">,
+) {
+  const row: FakeSubscription = {
+    id: subscription.id ?? crypto.randomUUID(),
+    plan_id: "subscribe_report_monthly",
+    order_id: null,
+    status: "active",
+    current_period_start: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    ...subscription,
+  };
+  memory.subscriptions.set(row.id, row);
+  return row;
 }
