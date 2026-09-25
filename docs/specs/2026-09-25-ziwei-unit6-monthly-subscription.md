@@ -152,7 +152,7 @@
   - `ResolveMembershipViewInput` 新增 `hasActiveSubscription?: boolean`；`MembershipUnlockMode` 新增 `"subscription"`。
   - 判斷順序：lifetime → points（`isOwnReport && unlockMode==="points"`）→ subscription（`isOwnReport && hasActiveSubscription`）→ 鎖定。
   - subscription 分支：`advancedLocked=false`、`showCta=false`、`showUnlockWithPoint=false`、`pointsInsufficient=false`、`ctaLabel="訂閱有效至 {date}"`、`showPointsPackCta=true`（demo 用）。
-- **範圍說明**：重整後「開啟既有報告」沒有 UI 路徑（見第 7 節阻塞 3）。本版 S7-3 驗的是「重整或重登後**新產生**的報告顯示進階」，以及「以既有 persistId 呼叫 GET 回 200」。
+- **範圍（PM 2026-09-25 定案）**：訂閱只要求**新產生**的報告能看到進階；重整後重新開啟舊報告不在範圍內。用點數單點解鎖的報告不受訂閱狀態影響：訂閱取消或到期後仍然可見（權限順序 points 在 subscription 之前，且取消不動 `report_unlocks`）。
 
 ### Story 8 — 單點解鎖 RPC
 
@@ -266,6 +266,7 @@
   - 進階 GET 回 403（沒有永久或單點權益時）；
   - 三張表的列數都沒有減少。
 - S6-2: Given 期末已過但 `status` 仍是 `active` When 讀取進階 Then 回 403。
+- S6-4: Given A 曾在訂閱前用 1 點解鎖報告 R When 執行 `cancel_subscription(A)` 後讀 R Then 回 200、`unlock_mode="points"`；`report_unlocks` 不變；R 仍出現在「已單次解鎖」選單中。
 - S6-3: Given 已取消 When 再執行一次 `cancel_subscription` Then 回 `already_cancelled`，事件數與 `current_period_end` 都不變。
 
 ### Story 7 — 權限判斷
@@ -357,7 +358,7 @@
 | 6 取消（RPC／Checkpoint）、到期（時間判斷） | true | |
 | 6 取消（呼叫綠界 `CreditCardPeriodAction` Cancel） | false | Should Have；課堂用 Checkpoint 取代 |
 | 7 權限判斷（含 403 退回鎖定） | true | |
-| 7 重整後「我的報告清單」 | false | 本版不做，見第 7 節阻塞 3 |
+| 7 重整後重開舊報告／「我的報告清單」 | false | PM 定案：不做，只要求新報告可看進階 |
 | 8 RPC `reason=subscription` | true | |
 | 9 移除追問 | true | |
 | 10 固定素材與三位會員 | true | |
@@ -414,7 +415,7 @@
 - **阻塞 3：重整後沒有 UI 可以重新開啟既有報告**
   - 證據：`components/home/HomeClient.tsx` 的報告只存在 client state。唯一的重開入口 `ReportUnlocksMenu` 讀的是 `app/api/report-unlocks/route.ts:28-33`，只列 `report_unlocks`，而訂閱依設計不寫這張表。
   - 影響：Ticket 寫的「返回或重整解讀頁即可看進階」以及原 S7-3 字面上做不到。
-  - 處理：本版 S7-3 改驗「重整後新產生的報告」，S10-2 以 GET 既有 persistId 驗證；「我的報告清單」列為 Later（`MVP: false`）。**需 PM 確認這個範圍縮減。**
+  - 處理（**已由 PM 於 2026-09-25 定案，不再阻塞**）：S7-3 只驗「新產生的報告」，S10-2 以 GET 既有 persistId 驗證，舊報告重開不做。點數解鎖的報告在訂閱取消後仍可見（S6-4）。
 - **阻塞 4：`scripts/` 無法直接 import `computeCheckMacValue`**
   - 證據：`lib/ecpay/check-mac.ts:4` 有 `import "server-only"`。vitest 靠 alias 換成 stub（`test/stubs/server-only.ts`），node 直接執行會 throw；repo 也沒有 tsx。
   - 影響：S10-1。
