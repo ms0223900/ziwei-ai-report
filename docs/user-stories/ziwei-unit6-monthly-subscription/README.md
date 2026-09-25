@@ -38,7 +38,7 @@
 
 ### Phase 2 — proxy
 - [x] US-006 proxy 排除週期 Webhook 測試（預期紅燈；待實作轉綠）
-- [ ] US-007 proxy 排除週期 Webhook 實作
+- [x] US-007 proxy 排除週期 Webhook 實作
 
 ### Phase 3 — 建單閘門
 - [ ] US-008 月繳建單與閘門 測試（預期紅燈；待實作轉綠）
