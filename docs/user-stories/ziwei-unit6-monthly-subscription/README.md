@@ -41,12 +41,12 @@
 - [x] US-007 proxy 排除週期 Webhook 實作
 
 ### Phase 3 — 建單閘門
-- [ ] US-008 月繳建單與閘門 測試（預期紅燈；待實作轉綠）
-- [ ] US-009 月繳建單與閘門 實作
+- [x] US-008 月繳建單與閘門 測試（預期紅燈；待實作轉綠）
+- [x] US-009 月繳建單與閘門 實作
 
 ### Phase 4 — ReturnURL 首次
-- [ ] US-010 ReturnURL 訂閱分派 測試（預期紅燈；待實作轉綠）
-- [ ] US-011 ReturnURL 訂閱分派 實作
+- [x] US-010 ReturnURL 訂閱分派 測試（預期紅燈；待實作轉綠）
+- [x] US-011 ReturnURL 訂閱分派 實作
 
 ### Phase 5 — PeriodReturnURL
 - [ ] US-012 PeriodReturnURL 測試（預期紅燈；待實作轉綠）

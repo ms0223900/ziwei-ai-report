@@ -68,6 +68,10 @@ export function alreadyUnlockedError(): AppError {
   return new AppError("CONFLICT", ERROR_MESSAGES.ALREADY_UNLOCKED, 409);
 }
 
+export function subscriptionInProgressError(): AppError {
+  return new AppError("CONFLICT", ERROR_MESSAGES.SUBSCRIPTION_IN_PROGRESS, 409);
+}
+
 export function paymentUnavailableError(): AppError {
   return new AppError(
     "PAYMENT_UNAVAILABLE",
