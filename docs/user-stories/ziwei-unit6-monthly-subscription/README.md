@@ -49,7 +49,7 @@
 - [x] US-011 ReturnURL 訂閱分派 實作
 
 ### Phase 5 — PeriodReturnURL
-- [ ] US-012 PeriodReturnURL 測試（預期紅燈；待實作轉綠）
+- [x] US-012 PeriodReturnURL 測試（預期紅燈；待實作轉綠）
 - [ ] US-013 PeriodReturnURL 實作
 
 ### Phase 6 — 權限判斷
