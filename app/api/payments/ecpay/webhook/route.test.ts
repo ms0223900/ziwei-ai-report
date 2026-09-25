@@ -3,6 +3,7 @@ import { computeCheckMacValue } from "../../../../../lib/ecpay/check-mac";
 import {
   createFakeServiceRoleClient,
   createFakeSupabaseMemory,
+  seedFakeSubscription,
   seedFakeUser,
   setFakeRpc,
   type FakeOrder,
@@ -573,5 +574,169 @@ describe("POST /api/payments/ecpay/webhook", () => {
     expect(profileRow()?.points_balance).toBe(5);
     expect(profileRow()?.access_status).toBe("locked");
     expect(creditsFor(ORDER_ID)).toHaveLength(1);
+  });
+});
+
+describe("POST /api/payments/ecpay/webhook — subscribe_report_monthly", () => {
+  const originalPaymentEnv = Object.fromEntries(
+    PAYMENT_ENV_KEYS.map((key) => [key, process.env[key]]),
+  ) as Record<(typeof PAYMENT_ENV_KEYS)[number], string | undefined>;
+  // PaymentDate 2026/09/18 12:00:00 is Asia/Taipei.
+  const PERIOD_START = "2026-09-18T04:00:00.000Z";
+  const PERIOD_END = "2026-10-18T04:00:00.000Z";
+
+  beforeEach(() => {
+    state.memory = createFakeSupabaseMemory();
+    state.failProfileUpdate = false;
+    seedFakeUser(state.memory, { id: USER_ID, email: "yuan@example.com" }, { points_balance: 2 });
+    seedPendingOrder({ plan_id: "subscribe_report_monthly", amount: 19 });
+    setPaymentEnv();
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    for (const key of PAYMENT_ENV_KEYS) {
+      const value = originalPaymentEnv[key];
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  });
+
+  function monthlySuccess(overrides: Record<string, string | undefined> = {}) {
+    return successFields({ TradeAmt: "19", ...overrides });
+  }
+
+  function subscriptionRow() {
+    return [...state.memory.subscriptions.values()].find((row) => row.user_id === USER_ID);
+  }
+
+  function firstSuccessEvents() {
+    return [...state.memory.subscriptionEvents.values()].filter(
+      (row) => row.event_type === "first_success",
+    );
+  }
+
+  it("marks the order paid and activates the subscription for one Taipei month", async () => {
+    const response = await postWebhook(monthlySuccess());
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(orderRow()?.status).toBe("paid");
+    expect(subscriptionRow()).toMatchObject({
+      status: "active",
+      merchant_trade_no: MERCHANT_TRADE_NO,
+      current_period_start: PERIOD_START,
+      current_period_end: PERIOD_END,
+    });
+    expect(firstSuccessEvents()).toHaveLength(1);
+    expect(profileRow()?.subscription_status).toBe("active");
+  });
+
+  it("keeps the renewed period when the first notification is resent", async () => {
+    await postWebhook(monthlySuccess());
+    await createFakeServiceRoleClient(state.memory).rpc("apply_subscription_period_event", {
+      p_merchant_trade_no: MERCHANT_TRADE_NO,
+      p_idempotency_key: `period:${MERCHANT_TRADE_NO}:2`,
+      p_event_type: "renewal_success",
+      p_rtn_code: "1",
+      p_total_success_times: 2,
+      p_gwsr: "g2",
+      p_processed_at: null,
+    });
+    const renewedEnd = subscriptionRow()?.current_period_end;
+
+    const response = await postWebhook(monthlySuccess());
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(renewedEnd).toBe("2026-11-18T04:00:00.000Z");
+    expect(subscriptionRow()?.current_period_end).toBe(renewedEnd);
+    expect(state.memory.subscriptions.size).toBe(1);
+    expect(firstSuccessEvents()).toHaveLength(1);
+  });
+
+  it("leaves lifetime access, points and unlock rows untouched", async () => {
+    await postWebhook(monthlySuccess());
+
+    expect(profileRow()).toMatchObject({ access_status: "locked", points_balance: 2 });
+    expect(state.memory.reportUnlocks.size).toBe(0);
+    expect(state.memory.pointTransactions.size).toBe(0);
+  });
+
+  it("acks SimulatePaid=1 without paying or creating a subscription", async () => {
+    const response = await postWebhook(monthlySuccess({ SimulatePaid: "1" }));
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(orderRow()?.status).toBe("pending");
+    expect(state.memory.subscriptions.size).toBe(0);
+  });
+
+  it("rejects a bad CheckMacValue without creating a subscription", async () => {
+    const response = await postWebhook({ ...monthlySuccess(), CheckMacValue: "BAD" });
+
+    expect(response.status).toBe(400);
+    expect(await readBody(response)).toBe("0|Error");
+    expect(state.memory.subscriptions.size).toBe(0);
+  });
+
+  it("marks the order failed without a subscription when RtnCode is not 1", async () => {
+    const response = await postWebhook(monthlySuccess({ RtnCode: "10100058" }));
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(orderRow()?.status).toBe("failed");
+    expect(state.memory.subscriptions.size).toBe(0);
+  });
+
+  it("returns 0|Error when activation fails and compensates on the resend", async () => {
+    setFakeRpc(state.memory, "activate_subscription_from_order", {
+      data: null,
+      error: { message: "rpc down" },
+    });
+    const failed = await postWebhook(monthlySuccess());
+    state.memory.rpc.delete("activate_subscription_from_order");
+
+    const resent = await postWebhook(monthlySuccess());
+
+    expect(failed.status).toBe(400);
+    expect(await readBody(failed)).toBe("0|Error");
+    expect(await readBody(resent)).toBe("1|OK");
+    expect(orderRow()?.status).toBe("paid");
+    expect(state.memory.subscriptions.size).toBe(1);
+    expect(firstSuccessEvents()).toHaveLength(1);
+  });
+
+  it("does not revive a cancelled subscription when the first notification is replayed", async () => {
+    await postWebhook(monthlySuccess());
+    await createFakeServiceRoleClient(state.memory).rpc("cancel_subscription", {
+      p_user_id: USER_ID,
+    });
+    const cancelledEnd = subscriptionRow()?.current_period_end;
+
+    const response = await postWebhook(monthlySuccess());
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(subscriptionRow()).toMatchObject({
+      status: "cancelled",
+      current_period_end: cancelledEnd,
+    });
+  });
+
+  it("acks and logs a conflict without overwriting an active subscription", async () => {
+    seedFakeSubscription(state.memory, {
+      user_id: USER_ID,
+      merchant_trade_no: "ZW_OTHER_CONTRACT",
+      current_period_end: "2999-01-01T00:00:00.000Z",
+    });
+    const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const response = await postWebhook(monthlySuccess());
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(subscriptionRow()?.merchant_trade_no).toBe("ZW_OTHER_CONTRACT");
+    expect(errorLog).toHaveBeenCalledWith(
+      "[ecpay webhook]",
+      expect.stringContaining("conflict"),
+    );
   });
 });

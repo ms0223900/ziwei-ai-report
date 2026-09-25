@@ -82,6 +82,7 @@ export const ERROR_MESSAGES = {
   LOGIN_REQUIRED: "請先登入。",
   UNSUPPORTED_PLAN: "不支援的方案。",
   ALREADY_UNLOCKED: "此帳號已開通，無需再次付款。",
+  SUBSCRIPTION_IN_PROGRESS: "已有有效訂閱或訂單處理中，請稍後再試。",
   PAYMENT_UNAVAILABLE: "付款服務暫時無法使用，請稍後再試。",
   GRANT_IDENTITY_REQUIRED: "請提供 email 或 user_id。",
   MEMBER_NOT_FOUND: "找不到這位會員。",
