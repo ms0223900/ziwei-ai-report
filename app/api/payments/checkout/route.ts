@@ -6,11 +6,13 @@ import {
   loginRequiredError,
   paymentUnavailableError,
   persistFailedError,
+  subscriptionInProgressError,
   validationError,
 } from "../../../../lib/errors";
 import { generateMerchantTradeNo } from "../../../../lib/payments/merchant-trade-no";
 import { readEcpayCheckoutEnv } from "../../../../lib/payments/checkout-env";
 import {
+  SUBSCRIBE_REPORT_MONTHLY_PLAN_ID,
   UNLOCK_REPORT_LIFETIME_PLAN_ID,
   resolveCheckoutPlan,
 } from "../../../../lib/payments/plans";
@@ -25,6 +27,46 @@ function pad2(value: number): string {
 
 function formatMerchantTradeDate(now = new Date()): string {
   return `${now.getFullYear()}/${pad2(now.getMonth() + 1)}/${pad2(now.getDate())} ${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+}
+
+const PENDING_MONTHLY_WINDOW_MS = 5 * 60 * 1000;
+
+type ServiceClient = Awaited<ReturnType<typeof createServiceRoleClient>>;
+
+// Fail closed: a query error counts as blocked so we never open a second ECPay contract.
+async function monthlyCheckoutBlocked(
+  client: ServiceClient,
+  userId: string,
+  now: number,
+): Promise<boolean> {
+  const { data: subscription, error: subscriptionError } = await client
+    .from("subscriptions")
+    .select()
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (subscriptionError) {
+    return true;
+  }
+  const periodEnd = (subscription as { current_period_end?: string } | null)
+    ?.current_period_end;
+  if (periodEnd && new Date(periodEnd).getTime() >= now) {
+    return true;
+  }
+
+  const { data: pendingOrders, error: ordersError } = await client
+    .from("orders")
+    .select()
+    .eq("user_id", userId)
+    .eq("plan_id", SUBSCRIBE_REPORT_MONTHLY_PLAN_ID)
+    .eq("status", "pending");
+  if (ordersError) {
+    return true;
+  }
+  return ((pendingOrders ?? []) as { created_at?: string }[]).some(
+    (order) =>
+      order.created_at !== undefined &&
+      now - new Date(order.created_at).getTime() < PENDING_MONTHLY_WINDOW_MS,
+  );
 }
 
 async function parseBody(request: Request): Promise<Record<string, unknown>> {
@@ -70,8 +112,13 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const env = readEcpayCheckoutEnv();
-  if (!env) {
+  const isMonthly = plan.planId === SUBSCRIBE_REPORT_MONTHLY_PLAN_ID;
+  if (!env || (isMonthly && !env.periodReturnUrl)) {
     return jsonError(paymentUnavailableError());
+  }
+
+  if (isMonthly && (await monthlyCheckoutBlocked(client, user.id, Date.now()))) {
+    return jsonError(subscriptionInProgressError());
   }
 
   const merchantTradeNo = generateMerchantTradeNo();
@@ -102,6 +149,13 @@ export async function POST(request: Request): Promise<Response> {
     ChoosePayment: "Credit",
     EncryptType: "1",
   };
+  if ("period" in plan) {
+    fields.PeriodAmount = String(plan.amount);
+    fields.PeriodType = plan.period.periodType;
+    fields.Frequency = String(plan.period.frequency);
+    fields.ExecTimes = String(plan.period.execTimes);
+    fields.PeriodReturnURL = env.periodReturnUrl;
+  }
   fields.CheckMacValue = computeCheckMacValue(
     fields,
     env.hashKey,
