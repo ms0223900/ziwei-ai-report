@@ -4,6 +4,7 @@ import {
 } from "../../../../../lib/ecpay/check-mac";
 import {
   POINTS_PACK_5_PLAN_ID,
+  SUBSCRIBE_REPORT_MONTHLY_PLAN_ID,
   UNLOCK_REPORT_LIFETIME_PLAN_ID,
 } from "../../../../../lib/payments/plans";
 import { createServiceRoleClient } from "../../../../../lib/supabase/server";
@@ -172,6 +173,29 @@ async function fulfillPointsPack(
   return true;
 }
 
+// "conflict" means the member already holds another live contract; ack so
+// ECPay stops resending and leave it to manual follow-up.
+async function activateSubscription(
+  client: Awaited<ReturnType<typeof createServiceRoleClient>>,
+  orderId: string,
+): Promise<boolean> {
+  const { data, error } = await client.rpc("activate_subscription_from_order", {
+    p_order_id: orderId,
+  });
+  if (error) {
+    return false;
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { ok?: boolean; reason?: string }
+    | null
+    | undefined;
+  if (row?.reason === "conflict") {
+    console.error("[ecpay webhook]", `subscription conflict for order ${orderId}`);
+    return true;
+  }
+  return row?.ok === true;
+}
+
 async function unlockIfLocked(
   client: Awaited<ReturnType<typeof createServiceRoleClient>>,
   profile: ProfileRow | null,
@@ -232,6 +256,14 @@ export async function POST(request: Request): Promise<Response> {
     const credited = await fulfillPointsPack(client, order.id);
     if (!credited) {
       return reject("points credit failed");
+    }
+    return ok();
+  }
+
+  if (order.plan_id === SUBSCRIBE_REPORT_MONTHLY_PLAN_ID) {
+    const activated = await activateSubscription(client, order.id);
+    if (!activated) {
+      return reject("subscription activation failed");
     }
     return ok();
   }
