@@ -66,4 +66,23 @@ describe("ecpay-subscription-payload script", () => {
   it("requires a MerchantTradeNo", () => {
     expect(() => buildPeriodPayload({ mtn: "" }, HASH)).toThrow(/mtn/i);
   });
+
+  it("re-signs a custom amount so the server rejects it for the amount, not the signature", () => {
+    const period = buildPeriodPayload({ mtn: "M1", amount: 1 }, HASH);
+    const first = buildReturnPayload({ mtn: "M1", amount: "99" }, HASH);
+
+    expect(period.Amount).toBe("1");
+    expect(first.TradeAmt).toBe("99");
+    expect(verifyCheckMacValue(period, period.CheckMacValue, HASH.hashKey, HASH.hashIV)).toBe(true);
+    expect(verifyCheckMacValue(first, first.CheckMacValue, HASH.hashKey, HASH.hashIV)).toBe(true);
+  });
+
+  it("sends an invalid CheckMacValue when badMac is set", () => {
+    const period = buildPeriodPayload({ mtn: "M1", badMac: true }, HASH);
+    const first = buildReturnPayload({ mtn: "M1", badMac: true }, HASH);
+
+    expect(verifyCheckMacValue(period, period.CheckMacValue, HASH.hashKey, HASH.hashIV)).toBe(false);
+    expect(verifyCheckMacValue(first, first.CheckMacValue, HASH.hashKey, HASH.hashIV)).toBe(false);
+    expect(period.Amount).toBe("19");
+  });
 });

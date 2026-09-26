@@ -86,7 +86,46 @@ post() { curl -sS -X POST "$BASE$1" -H 'Content-Type: application/x-www-form-url
 
 > 取消之後，再對同一個 MTN 送續訂成功，會回 `1|OK` 並留下事件，但訂閱不會復活（S4-8）。這可以用來示範「MVP 取消不會停掉綠界合約」。
 
-## 3. 常見狀況
+## 3. 不同期數與失敗情境速查
+
+**連續跑多期**：`--total-success-times` 就是期數，每一期換一個 `--gwsr`。
+
+```bash
+for n in 2 3 4 5 6; do
+  post /api/payments/ecpay/period-webhook "$(payload --mtn $MTN --total-success-times $n --gwsr G$n)"
+done
+```
+
+**失敗情境**（對應 spec §5.6 邊界與 §13 風險）：
+
+| 情境 | 指令重點 | 預期 |
+|---|---|---|
+| 扣款失敗 | `--rtn-code 10100058 --gwsr F1`（期數維持上一期的 n） | `1|OK`，`past_due`，期末不動 |
+| 同一期重送 | 同一條指令送兩次 | 第二次 `1|OK`，期末與事件數不變 |
+| 失敗通知重送 | 同一條失敗指令送兩次 | 事件只記一筆 |
+| 第 1 期從 PeriodReturnURL 送來 | `--total-success-times 1` | `1|OK`，記為 `first_duplicate`，不延展 |
+| 首次通知重送 | `post /api/payments/ecpay/webhook "$(payload --kind return --mtn $MTN)"` 送兩次 | 期末不會被蓋回去 |
+| 模擬付款 | `--simulate` | `1|OK`，不寫事件、不延展 |
+| 簽章錯誤 | `--bad-mac` | 400 `0|Error`，資料不變 |
+| 金額不符 | `--amount 1`（簽章會重算，所以失敗原因是金額，不是簽章） | 400 `0|Error`，期末不變 |
+| 找不到訂閱 | `--mtn NOT_EXIST` | 400，不寫資料 |
+| 取消後綠界仍扣款 | 先跑 `cancel.sql`，再送一期成功 | `1|OK` 並留下事件，但不復活 |
+| 取消後收到失敗通知 | 取消後加 `--rtn-code 10100058` | 狀態仍是 `cancelled` |
+| 到期 | 跑 `expire.sql` | 進階 API 回 403，狀態仍是 active |
+
+首次通知（`--kind return`）也支援 `--amount`、`--bad-mac`、`--simulate`、`--rtn-code`。
+
+每送一次就查一下狀態：
+
+```sql
+select status, current_period_end from public.subscriptions where merchant_trade_no = '<MTN>';
+select event_type, idempotency_key, total_success_times, processed_at
+from public.subscription_events where idempotency_key like '%<MTN>%' order by processed_at;
+```
+
+不連 Supabase 也能先確認路由邏輯：`npx vitest run app/api/payments/ecpay/period-webhook app/api/payments/ecpay/webhook`。
+
+## 4. 常見狀況
 
 | 症狀 | 原因與處理 |
 |---|---|
