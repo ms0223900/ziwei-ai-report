@@ -2,6 +2,8 @@
 // 產生可直接 curl 的綠界固定 Payload（ReturnURL／PeriodReturnURL），供課堂重播。
 // 用法：node --env-file=.env.local scripts/ecpay-subscription-payload.mjs \
 //   --kind period --mtn ZW20260918001 [--total-success-times 2] [--rtn-code 1] [--gwsr G1] [--simulate]
+//   [--amount 19]   金額（簽章會跟著重算，用來測「金額不符」）
+//   [--bad-mac]     送出錯誤的 CheckMacValue（用來測「簽章錯誤」）
 // HashKey／HashIV 只從環境變數讀取；輸出只寫 stdout，不寫檔。
 import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
@@ -55,12 +57,27 @@ function requireMtn(mtn) {
   }
 }
 
-function sign(fields, hash) {
-  return { ...fields, CheckMacValue: computeCheckMacValue(fields, hash.hashKey, hash.hashIV) };
+const BAD_CHECK_MAC_VALUE = "0".repeat(64);
+
+function sign(fields, hash, badMac) {
+  return {
+    ...fields,
+    CheckMacValue: badMac
+      ? BAD_CHECK_MAC_VALUE
+      : computeCheckMacValue(fields, hash.hashKey, hash.hashIV),
+  };
 }
 
 export function buildReturnPayload(
-  { mtn, rtnCode = "1", simulate = false, paymentDate = taipeiNow(), tradeNo = "2609180000000001" },
+  {
+    mtn,
+    rtnCode = "1",
+    simulate = false,
+    paymentDate = taipeiNow(),
+    tradeNo = "2609180000000001",
+    amount = MONTHLY_AMOUNT,
+    badMac = false,
+  },
   hash,
 ) {
   requireMtn(mtn);
@@ -71,12 +88,13 @@ export function buildReturnPayload(
       RtnCode: String(rtnCode),
       RtnMsg: String(rtnCode) === "1" ? "交易成功" : "交易失敗",
       TradeNo: tradeNo,
-      TradeAmt: MONTHLY_AMOUNT,
+      TradeAmt: String(amount),
       PaymentDate: paymentDate,
       PaymentType: "Credit_CreditCard",
       SimulatePaid: simulate ? "1" : "0",
     },
     hash,
+    badMac,
   );
 }
 
@@ -88,6 +106,8 @@ export function buildPeriodPayload(
     gwsr = `G${Date.now()}`,
     simulate = false,
     processDate = taipeiNow(),
+    amount = MONTHLY_AMOUNT,
+    badMac = false,
   },
   hash,
 ) {
@@ -101,7 +121,7 @@ export function buildPeriodPayload(
       PeriodType: "M",
       Frequency: "1",
       ExecTimes: "12",
-      Amount: MONTHLY_AMOUNT,
+      Amount: String(amount),
       gwsr,
       ProcessDate: processDate,
       AuthCode: "777777",
@@ -110,16 +130,22 @@ export function buildPeriodPayload(
       SimulatePaid: simulate ? "1" : "0",
     },
     hash,
+    badMac,
   );
 }
 
 function parseArgs(argv) {
-  const args = { kind: "period", simulate: false };
+  const args = { kind: "period", simulate: false, badMac: false };
   for (let i = 0; i < argv.length; i += 1) {
     const key = argv[i];
     const next = argv[i + 1];
     if (key === "--simulate") {
       args.simulate = true;
+    } else if (key === "--bad-mac") {
+      args.badMac = true;
+    } else if (key === "--amount") {
+      args.amount = next;
+      i += 1;
     } else if (key === "--kind") {
       args.kind = next;
       i += 1;
