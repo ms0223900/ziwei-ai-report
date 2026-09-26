@@ -14,7 +14,7 @@ import {
 } from "../../lib/constants";
 import { UnlockCheckoutCta } from "./UnlockCheckoutCta";
 
-const OK_REASONS = new Set(["unlocked", "already_unlocked", "lifetime"]);
+const OK_REASONS = new Set(["unlocked", "already_unlocked", "lifetime", "subscription"]);
 
 type UnlockResult = {
   ok: boolean;
@@ -41,7 +41,7 @@ export function UnlockWithPointCta({
   persistId: string;
   pointsInsufficient: boolean;
   pointsBalance: number;
-  onUnlocked?: (pointsBalance: number) => void | Promise<void>;
+  onUnlocked?: (pointsBalance: number, reason?: string) => void | Promise<void>;
 }) {
   const [busy, setBusy] = useState(false);
   const [insufficient, setInsufficient] = useState(pointsInsufficient);
@@ -69,7 +69,7 @@ export function UnlockWithPointCta({
       }
       const result = readUnlockResult(json);
       if (result.ok && OK_REASONS.has(result.reason)) {
-        await onUnlocked?.(result.points_balance);
+        await onUnlocked?.(result.points_balance, result.reason);
         return;
       }
       if (result.reason === "insufficient") {

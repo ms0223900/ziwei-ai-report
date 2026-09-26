@@ -1,13 +1,6 @@
-import {
-  PREVIEW_EXAMPLE_MARK,
-  SUBSCRIBE_ACTIVE_PREVIEW,
-  SUBSCRIBE_LABEL,
-} from "../constants";
+import { PREVIEW_EXAMPLE_MARK } from "../constants";
 
 export type PreviewState = "A" | "B" | "C" | "D";
-
-// locked：鎖定的「用 1 點解鎖」；used：預覽已用 1 點解鎖；hidden：不顯示
-export type PointUnlockView = "locked" | "hidden" | "used";
 
 export type PreviewExampleBlocks = {
   rationale: string;
@@ -19,9 +12,6 @@ export type PreviewView = {
   title: string;
   advancedLocked: boolean;
   showCta: boolean;
-  pointUnlock: PointUnlockView;
-  subscribeLocked: boolean;
-  subscribeLabel: string;
   exampleBlocks: PreviewExampleBlocks | null;
 };
 
@@ -104,9 +94,6 @@ export function resolvePreviewView(args: {
     title: `${args.nickname}的基本分析`,
     advancedLocked: true,
     showCta: true,
-    pointUnlock: "locked",
-    subscribeLocked: true,
-    subscribeLabel: SUBSCRIBE_LABEL,
     exampleBlocks: null,
   };
 
@@ -119,25 +106,9 @@ export function resolvePreviewView(args: {
     title: `${args.nickname}的進階報告`,
     advancedLocked: false,
     showCta: false,
-    pointUnlock: "hidden",
     exampleBlocks: EXAMPLE_BLOCKS,
   };
 
-  if (args.state === "B") {
-    return unlocked;
-  }
-
-  if (args.state === "C") {
-    return {
-      ...unlocked,
-      pointUnlock: "used",
-      subscribeLocked: false,
-    };
-  }
-
-  return {
-    ...unlocked,
-    subscribeLocked: false,
-    subscribeLabel: SUBSCRIBE_ACTIVE_PREVIEW,
-  };
+  // B／C／D used to differ only by follow-up copy; follow-ups are gone.
+  return unlocked;
 }

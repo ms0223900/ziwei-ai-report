@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ERROR_MESSAGES,
   REPORT_UNLOCKS_OPEN_FAILED,
+  SUBSCRIPTION_EXPIRED_NOTE,
 } from "../../lib/constants";
 import {
   resolveMembershipView,
@@ -43,6 +44,7 @@ export type HomeClientProps = {
   initialAccessStatus?: MembershipAccessStatus | null;
   initialHasSession?: boolean;
   initialPointsBalance?: number;
+  initialSubscriptionActiveUntil?: string | null;
 };
 
 async function holdGenerating(startedAt: number) {
@@ -58,6 +60,7 @@ export function HomeClient({
   initialAccessStatus = null,
   initialHasSession = false,
   initialPointsBalance = 0,
+  initialSubscriptionActiveUntil = null,
 }: HomeClientProps = {}) {
   const [view, setView] = useState<HomeView>("form");
   const [formKey, setFormKey] = useState(0);
@@ -68,6 +71,10 @@ export function HomeClient({
   );
   const [pointsBalance, setPointsBalance] = useState(initialPointsBalance);
   const [pointUnlocked, setPointUnlocked] = useState(false);
+  const [subscriptionActive, setSubscriptionActive] = useState(
+    Boolean(initialSubscriptionActiveUntil),
+  );
+  const [subscriptionNotice, setSubscriptionNotice] = useState<string | null>(null);
   const hasSession = initialHasSession;
   const accessStatus = initialAccessStatus;
   const advanced = hasSession ? loadedAdvanced : null;
@@ -118,7 +125,9 @@ export function HomeClient({
     };
   }, [hasSession]);
 
-  async function fetchAdvancedBody(persistId: string): Promise<unknown | null> {
+  async function fetchAdvanced(
+    persistId: string,
+  ): Promise<{ status: number; json: unknown | null }> {
     const response = await fetch(`/api/reports/${persistId}`);
     let json: unknown = {};
     try {
@@ -126,25 +135,35 @@ export function HomeClient({
     } catch {
       json = {};
     }
-    return response.ok ? json : null;
+    return { status: response.status, json: response.ok ? json : null };
+  }
+
+  async function fetchAdvancedBody(persistId: string): Promise<unknown | null> {
+    return (await fetchAdvanced(persistId)).json;
   }
 
   async function loadAdvanced(
     persistId: string | undefined,
-    { afterPointUnlock = false }: { afterPointUnlock?: boolean } = {},
+    { afterUnlock = false }: { afterUnlock?: boolean } = {},
   ): Promise<boolean> {
-    // A point unlock grants this one report while the account stays locked.
+    // A point unlock or an active subscription opens this report while the
+    // account itself stays locked.
     if (
       !persistId ||
       !hasSession ||
-      (accessStatus !== "unlocked" && !afterPointUnlock)
+      (accessStatus !== "unlocked" && !afterUnlock && !subscriptionActive)
     ) {
       setLoadedAdvanced(null);
       return false;
     }
 
-    const json = await fetchAdvancedBody(persistId);
+    const { status, json } = await fetchAdvanced(persistId);
     if (json === null) {
+      // The subscription lapsed after the page was rendered (cancel/expiry).
+      if (status === 403 && subscriptionActive && accessStatus !== "unlocked") {
+        setSubscriptionActive(false);
+        setSubscriptionNotice(SUBSCRIPTION_EXPIRED_NOTE);
+      }
       setLoadedAdvanced(null);
       return false;
     }
@@ -185,13 +204,18 @@ export function HomeClient({
     }
   }
 
-  async function handlePointUnlocked(nextBalance: number) {
+  async function handlePointUnlocked(nextBalance: number, reason?: string) {
     // Update the balance only together with the unlock state; a lone drop to 0
     // would briefly render this report as "insufficient points".
     const loaded = await loadAdvanced(report?.persist_id, {
-      afterPointUnlock: true,
+      afterUnlock: true,
     });
     setPointsBalance(nextBalance);
+    if (reason === "subscription") {
+      // No point was spent, so this must not read as a point unlock.
+      setSubscriptionActive(loaded);
+      return;
+    }
     setPointUnlocked(loaded);
     if (loaded) {
       await refreshUnlockItems();
@@ -332,13 +356,22 @@ export function HomeClient({
         pointsBalance,
         unlockMode: pointUnlocked ? "points" : "none",
         isOwnReport: hasSession && Boolean(report.persist_id),
+        hasActiveSubscription: subscriptionActive,
+        subscriptionActiveUntil: initialSubscriptionActiveUntil,
       });
       return (
-        <ReportCard
+        <>
+          {subscriptionNotice ? (
+            <p className="w-full max-w-[350px] text-[13px] font-medium text-ink md:max-w-[576px]" role="status">
+              {subscriptionNotice}
+            </p>
+          ) : null}
+          <ReportCard
           membership={membership}
           onPointUnlocked={handlePointUnlocked}
           report={report}
-        />
+          />
+        </>
       );
     }
 

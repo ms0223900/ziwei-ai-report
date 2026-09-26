@@ -58,12 +58,10 @@ describe("resolvePreviewView", () => {
     expect(view.title).toBe("小圓的基本分析");
     expect(view.advancedLocked).toBe(true);
     expect(view.showCta).toBe(true);
-    expect(view.pointUnlock).toBe("locked");
-    expect(view.subscribeLocked).toBe(true);
     expect(view.exampleBlocks).toBeNull();
   });
 
-  it("unlocks example blocks for B and hides the point-unlock button", () => {
+  it("unlocks example blocks for B", () => {
     const view = resolvePreviewView({
       state: "B",
       nickname: "小圓",
@@ -77,22 +75,19 @@ describe("resolvePreviewView", () => {
     expect(view.title).toBe("小圓的進階報告");
     expect(view.advancedLocked).toBe(false);
     expect(view.showCta).toBe(false);
-    expect(view.pointUnlock).toBe("hidden");
-    expect(view.subscribeLocked).toBe(true);
     expect(view.exampleBlocks?.rationale).toContain(PREVIEW_EXAMPLE_MARK);
     expect(view.exampleBlocks?.pathCompare).toContain(PREVIEW_EXAMPLE_MARK);
     expect(view.exampleBlocks?.actionPlan).toContain(PREVIEW_EXAMPLE_MARK);
     expect(view.exampleBlocks?.rationale).not.toContain("真文 rationale");
   });
 
-  it("shows the used point unlock in C and the active subscription in D", () => {
-    const c = resolvePreviewView({ state: "C", nickname: "阿明" });
-    const d = resolvePreviewView({ state: "D", nickname: "阿明" });
-
-    expect(c.pointUnlock).toBe("used");
-    expect(c.subscribeLocked).toBe(false);
-    expect(d.pointUnlock).toBe("hidden");
-    expect(d.subscribeLocked).toBe(false);
-    expect(d.subscribeLabel).toBe("訂閱有效（預覽）");
+  it("renders C and D the same as B now that follow-ups are removed", () => {
+    const b = resolvePreviewView({ state: "B", nickname: "小圓" });
+    const c = resolvePreviewView({ state: "C", nickname: "小圓" });
+    const d = resolvePreviewView({ state: "D", nickname: "小圓" });
+    expect(c).toEqual(b);
+    expect(d).toEqual(b);
+    expect(JSON.stringify(d)).not.toContain("追問");
   });
+
 });
