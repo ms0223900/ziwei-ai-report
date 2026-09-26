@@ -9,7 +9,7 @@ import {
   computeCheckMacValue,
 } from "./ecpay-subscription-payload.mjs";
 
-const HASH = { hashKey: "pwFHCqoQZGmho4w6", hashIV: "EkRm7iFT261dpevs" };
+const HASH = { hashKey: "testHashKeyFixture", hashIV: "testHashIVFixture1" };
 
 describe("ecpay-subscription-payload script", () => {
   it("matches the app CheckMacValue for spaces, reserved symbols and Chinese", () => {
