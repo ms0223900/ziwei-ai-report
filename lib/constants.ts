@@ -30,6 +30,7 @@ export const REPORT_SLOTS = {
   authEntry: "slot-auth-entry",
   authSession: "slot-auth-session",
   pointsPackCta: "slot-points-pack-cta",
+  subscriptionCta: "slot-subscription-cta",
   unlockWithPoint: "slot-unlock-with-point",
   reportUnlocks: "slot-report-unlocks",
   homePointsPack: "slot-home-points-pack",
@@ -37,6 +38,9 @@ export const REPORT_SLOTS = {
 
 export const POINTS_PACK_CLIENT_PLAN_ID = "points_pack_5";
 export const POINTS_PACK_CTA = "購買點數包";
+export const SUBSCRIPTION_CLIENT_PLAN_ID = "subscribe_report_monthly";
+export const SUBSCRIPTION_CTA = "月繳訂閱（每月 TWD 19）";
+export const SUBSCRIPTION_EXPIRED_NOTE = "訂閱已失效，請重新整理";
 export const UNLOCK_WITH_POINT_CTA = "用 1 點解鎖此報告";
 export const POINTS_BALANCE_INLINE = "目前點數";
 export const POINTS_INSUFFICIENT_NOTE = "點數不足，無法用點數解鎖此報告。";

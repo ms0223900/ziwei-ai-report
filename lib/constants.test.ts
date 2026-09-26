@@ -52,6 +52,7 @@ describe("shared copy and error codes", () => {
       authEntry: "slot-auth-entry",
       authSession: "slot-auth-session",
       pointsPackCta: "slot-points-pack-cta",
+      subscriptionCta: "slot-subscription-cta",
       unlockWithPoint: "slot-unlock-with-point",
       reportUnlocks: "slot-report-unlocks",
       homePointsPack: "slot-home-points-pack",
