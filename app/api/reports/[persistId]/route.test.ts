@@ -5,6 +5,7 @@ import {
   createFakeServiceRoleClient,
   createFakeSupabaseMemory,
   seedFakeReport,
+  seedFakeSubscription,
   seedFakeUser,
   type FakeReport,
   type FakeSupabaseMemory,
@@ -221,6 +222,92 @@ describe("GET /api/reports/[persistId]", () => {
       expect(body.access_status).not.toBe("unlocked");
       expect(body.unlock_mode).toBe("points");
       expect(state.memory.profiles.get(USER_ID)?.access_status).toBe("locked");
+    });
+  });
+
+  describe("subscription entitlement (unit 6 US-014)", () => {
+    const REPORT_B = "22222222-2222-4222-8222-222222222222";
+
+    function seedSubscription(currentPeriodEnd: string, status: "active" | "cancelled" = "active") {
+      seedFakeSubscription(state.memory, {
+        user_id: USER_ID,
+        merchant_trade_no: "MTN1",
+        status,
+        current_period_end: currentPeriodEnd,
+      });
+    }
+
+    it("returns advanced fields with unlock_mode subscription while the period is active", async () => {
+      setAccess("locked");
+      seedSubscription("2999-01-01T00:00:00.000Z");
+
+      const response = await getReport(PERSIST_ID);
+
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.tier).toBe("advanced");
+      expect(body.rationale).toBe(advancedValid.rationale);
+      expect(body.unlock_mode).toBe("subscription");
+      expect(body.access_status).toBe("locked");
+      expect(body).not.toHaveProperty("advanced_json");
+    });
+
+    it("still returns 404 for another member's report while subscribed", async () => {
+      setAccess("locked");
+      seedSubscription("2999-01-01T00:00:00.000Z");
+      seedReport({ user_id: OTHER_ID });
+
+      const response = await getReport(PERSIST_ID);
+
+      expect(response.status).toBe(404);
+    });
+
+    it("returns 403 after cancellation cut the period end", async () => {
+      setAccess("locked");
+      seedSubscription(new Date(Date.now() - 1000).toISOString(), "cancelled");
+
+      const response = await getReport(PERSIST_ID);
+
+      await expectAdvancedRejected(response);
+      expect(response.status).toBe(403);
+    });
+
+    it("returns 403 when the period end passed even if status still says active", async () => {
+      setAccess("locked");
+      seedSubscription("2020-01-01T00:00:00.000Z");
+
+      const response = await getReport(PERSIST_ID);
+
+      expect(response.status).toBe(403);
+    });
+
+    it("keeps lifetime ahead of an expired subscription", async () => {
+      seedSubscription("2020-01-01T00:00:00.000Z");
+
+      const response = await getReport(PERSIST_ID);
+
+      expect(response.status).toBe(200);
+      expect((await response.json()).access_status).toBe("unlocked");
+    });
+
+    it("keeps point-unlocked reports readable after the subscription lapses, but not others", async () => {
+      setAccess("locked");
+      seedSubscription("2020-01-01T00:00:00.000Z", "cancelled");
+      seedUnlock(USER_ID, PERSIST_ID);
+      seedFakeReport(state.memory, {
+        id: REPORT_B,
+        generation_status: "success",
+        basic_json: basicValid,
+        advanced_json: advancedValid,
+        user_id: USER_ID,
+      });
+
+      const unlocked = await getReport(PERSIST_ID);
+      const other = await getReport(REPORT_B);
+
+      expect(unlocked.status).toBe(200);
+      expect((await unlocked.json()).unlock_mode).toBe("points");
+      expect(other.status).toBe(403);
     });
   });
 });

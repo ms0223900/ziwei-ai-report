@@ -3,6 +3,7 @@ import {
   createFakeServiceRoleClient,
   createFakeSupabaseMemory,
   seedFakeReport,
+  seedFakeSubscription,
   seedFakeUser,
   setFakeRpc,
   type FakeSupabaseMemory,
@@ -328,5 +329,83 @@ describe("POST /api/reports/unlock-with-point", () => {
       reason: "already_unlocked",
     });
     expect(state.memory.profiles.get(USER_ID)?.points_balance).toBeGreaterThanOrEqual(0);
+  });
+});
+
+// Regression only: the route forwards the RPC reason; the SQL branch is
+// verified by the unit 6 migration and the fake's built-in RPC.
+describe("POST /api/reports/unlock-with-point — subscription (unit 6 US-014)", () => {
+  beforeEach(() => {
+    state.memory = createFakeSupabaseMemory();
+    state.userId = USER_ID;
+    seedFakeUser(
+      state.memory,
+      { id: USER_ID, email: "yuan@example.com" },
+      { access_status: "locked", points_balance: 3 },
+    );
+    seedOwnedReport();
+    vi.resetModules();
+  });
+
+  it("returns subscription without debiting while the period is active", async () => {
+    seedFakeSubscription(state.memory, {
+      user_id: USER_ID,
+      merchant_trade_no: "MTN1",
+      current_period_end: "2999-01-01T00:00:00.000Z",
+    });
+
+    const body = await readJson(await postUnlock({ report_id: REPORT_ID }));
+
+    expect(body).toEqual({ ok: true, reason: "subscription", points_balance: 3 });
+    expect(debitsFor(REPORT_ID)).toHaveLength(0);
+    expect(unlocksFor(REPORT_ID)).toHaveLength(0);
+  });
+
+  it("keeps lifetime ahead of an active subscription", async () => {
+    seedFakeUser(
+      state.memory,
+      { id: USER_ID, email: "yuan@example.com" },
+      { access_status: "unlocked", points_balance: 3 },
+    );
+    seedFakeSubscription(state.memory, {
+      user_id: USER_ID,
+      merchant_trade_no: "MTN1",
+      current_period_end: "2999-01-01T00:00:00.000Z",
+    });
+
+    const body = await readJson(await postUnlock({ report_id: REPORT_ID }));
+
+    expect(body.reason).toBe("lifetime");
+  });
+
+  it("debits a point again once the subscription has expired", async () => {
+    seedFakeSubscription(state.memory, {
+      user_id: USER_ID,
+      merchant_trade_no: "MTN1",
+      current_period_end: "2020-01-01T00:00:00.000Z",
+    });
+
+    const body = await readJson(await postUnlock({ report_id: REPORT_ID }));
+
+    expect(body).toEqual({ ok: true, reason: "unlocked", points_balance: 2 });
+  });
+
+  it("stays forbidden for another member's report while subscribed", async () => {
+    seedFakeSubscription(state.memory, {
+      user_id: USER_ID,
+      merchant_trade_no: "MTN1",
+      current_period_end: "2999-01-01T00:00:00.000Z",
+    });
+    seedFakeReport(state.memory, {
+      id: REPORT_ID,
+      generation_status: "success",
+      basic_json: {},
+      advanced_json: {},
+      user_id: OTHER_ID,
+    });
+
+    const body = await readJson(await postUnlock({ report_id: REPORT_ID }));
+
+    expect(body).toMatchObject({ ok: false, reason: "forbidden", points_balance: 3 });
   });
 });
