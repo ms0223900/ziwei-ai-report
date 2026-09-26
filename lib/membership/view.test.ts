@@ -45,7 +45,6 @@ describe("resolveMembershipView", () => {
     expect(view.advancedLocked).toBe(true);
     expect(view.showCta).toBe(true);
     expect(view.ctaLabel).toBe("永久解鎖完整報告");
-    expect(view.followupLocked).toBe(true);
     expect(view.authSlot).toBe(REPORT_SLOTS.authEntry);
     expect(view.advanced).toBeNull();
     expectNoPaymentDenialCopy(view);
@@ -63,13 +62,12 @@ describe("resolveMembershipView", () => {
     expect(view.advancedLocked).toBe(true);
     expect(view.showCta).toBe(true);
     expect(view.ctaLabel).toBe("永久解鎖完整報告");
-    expect(view.followupLocked).toBe(true);
     expect(view.authSlot).toBe(REPORT_SLOTS.authSession);
     expect(view.advanced).toBeNull();
     expectNoPaymentDenialCopy(view);
   });
 
-  it("uses passed advanced text for unlocked and keeps followup locked", () => {
+  it("uses passed advanced text for unlocked", () => {
     const view = resolveMembershipView(
       baseInput({
         hasSession: true,
@@ -82,7 +80,6 @@ describe("resolveMembershipView", () => {
     expect(view.showCta).toBe(false);
     expect(view.ctaLabel).toBe("已開通");
     expect(JSON.stringify(view)).not.toContain("永久解鎖完整報告");
-    expect(view.followupLocked).toBe(true);
     expect(view.advanced?.rationale).toBe(REAL_ADVANCED.rationale);
     expect(view.advanced?.action_plan).toHaveLength(7);
     expect(view.advanced?.path_compare).toEqual(REAL_ADVANCED.path_compare);
@@ -104,7 +101,6 @@ describe("resolveMembershipView", () => {
     expect(view.advanced?.rationale).toBe(REAL_ADVANCED.rationale);
     expect(view.advanced?.action_plan?.[0]).toContain("第 1 天");
     expect(JSON.stringify(view)).not.toContain(PREVIEW_EXAMPLE_MARK);
-    expect(view.followupLocked).toBe(true);
   });
 
   it("drops advanced payload when there is no session", () => {
@@ -220,6 +216,87 @@ describe("resolveMembershipView", () => {
       expect(result.showUnlockWithPoint).toBe(false);
       expect(result.showPointsPackCta).toBe(true);
       expect(result.purchaseRequiresLogin).toBe(true);
+    });
+  });
+
+  describe("subscription state (unit 6 US-016)", () => {
+    function memberInput(
+      overrides: Partial<Parameters<typeof resolveMembershipView>[0]> = {},
+    ) {
+      return baseInput({
+        hasSession: true,
+        accessStatus: "locked",
+        isOwnReport: true,
+        pointsBalance: 2,
+        ...overrides,
+      });
+    }
+
+    it("unlocks the own report while the subscription is active", () => {
+      const view = resolveMembershipView(
+        memberInput({
+          hasActiveSubscription: true,
+          subscriptionActiveUntil: "2026-10-18T04:00:00.000Z",
+        }),
+      );
+
+      expect(view.unlockMode).toBe("subscription");
+      expect(view.advancedLocked).toBe(false);
+      expect(view.advanced).toEqual(REAL_ADVANCED);
+      expect(view.showCta).toBe(false);
+      expect(view.showUnlockWithPoint).toBe(false);
+      expect(view.pointsInsufficient).toBe(false);
+      expect(view.showPointsPackCta).toBe(true);
+    });
+
+    it("labels the CTA with the Asia/Taipei end date", () => {
+      const view = resolveMembershipView(
+        memberInput({
+          hasActiveSubscription: true,
+          subscriptionActiveUntil: "2026-10-17T16:30:00.000Z",
+        }),
+      );
+
+      expect(view.ctaLabel).toBe("訂閱有效至 2026/10/18");
+    });
+
+    it("falls back to a generic label when the end date is unknown", () => {
+      const view = resolveMembershipView(memberInput({ hasActiveSubscription: true }));
+
+      expect(view.ctaLabel).toBe("訂閱有效中");
+    });
+
+    it("keeps lifetime ahead of an active subscription", () => {
+      const view = resolveMembershipView(
+        memberInput({ accessStatus: "unlocked", hasActiveSubscription: true }),
+      );
+
+      expect(view.unlockMode).toBe("lifetime");
+    });
+
+    it("keeps a point unlock ahead of an active subscription", () => {
+      const view = resolveMembershipView(
+        memberInput({ unlockMode: "points", hasActiveSubscription: true }),
+      );
+
+      expect(view.unlockMode).toBe("points");
+    });
+
+    it("does not unlock a report the member does not own", () => {
+      const view = resolveMembershipView(
+        memberInput({ isOwnReport: false, hasActiveSubscription: true }),
+      );
+
+      expect(view.advancedLocked).toBe(true);
+    });
+
+    it("returns to the locked point offer once the subscription is gone", () => {
+      const view = resolveMembershipView(
+        memberInput({ hasActiveSubscription: false, pointsBalance: 1 }),
+      );
+
+      expect(view.advancedLocked).toBe(true);
+      expect(view.showUnlockWithPoint).toBe(true);
     });
   });
 });

@@ -58,11 +58,10 @@ describe("resolvePreviewView", () => {
     expect(view.title).toBe("小圓的基本分析");
     expect(view.advancedLocked).toBe(true);
     expect(view.showCta).toBe(true);
-    expect(view.followupLocked).toBe(true);
     expect(view.exampleBlocks).toBeNull();
   });
 
-  it("unlocks example blocks for B and keeps followup locked", () => {
+  it("unlocks example blocks for B", () => {
     const view = resolvePreviewView({
       state: "B",
       nickname: "小圓",
@@ -76,21 +75,19 @@ describe("resolvePreviewView", () => {
     expect(view.title).toBe("小圓的進階報告");
     expect(view.advancedLocked).toBe(false);
     expect(view.showCta).toBe(false);
-    expect(view.followupLocked).toBe(true);
     expect(view.exampleBlocks?.rationale).toContain(PREVIEW_EXAMPLE_MARK);
     expect(view.exampleBlocks?.pathCompare).toContain(PREVIEW_EXAMPLE_MARK);
     expect(view.exampleBlocks?.actionPlan).toContain(PREVIEW_EXAMPLE_MARK);
     expect(view.exampleBlocks?.rationale).not.toContain("真文 rationale");
   });
 
-  it("unlocks followup appearance for C and D with preview captions", () => {
-    const c = resolvePreviewView({ state: "C", nickname: "阿明" });
-    const d = resolvePreviewView({ state: "D", nickname: "阿明" });
-
-    expect(c.followupLocked).toBe(false);
-    expect(c.followupCaption).toBe("預覽：尚未扣點");
-    expect(d.followupLocked).toBe(false);
-    expect(d.followupCaption).toBe("本月剩餘 10 次（預覽）");
-    expect(d.subscribeLabel).toBe("訂閱有效（預覽）");
+  it("renders C and D the same as B now that follow-ups are removed", () => {
+    const b = resolvePreviewView({ state: "B", nickname: "小圓" });
+    const c = resolvePreviewView({ state: "C", nickname: "小圓" });
+    const d = resolvePreviewView({ state: "D", nickname: "小圓" });
+    expect(c).toEqual(b);
+    expect(d).toEqual(b);
+    expect(JSON.stringify(d)).not.toContain("追問");
   });
+
 });

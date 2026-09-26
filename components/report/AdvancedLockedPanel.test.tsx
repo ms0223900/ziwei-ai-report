@@ -9,6 +9,7 @@ import {
   POINTS_BACK_TO_REPORT,
   POINTS_INSUFFICIENT_NOTE,
   POINTS_PACK_CTA,
+  SUBSCRIPTION_CTA,
   UNLOCK_WITH_POINT_CTA,
 } from "../../lib/constants";
 import { resolvePreviewView } from "../../lib/commercial/preview";
@@ -213,7 +214,7 @@ describe("AdvancedLockedPanel points pack and point unlock (US-018)", () => {
     expect(JSON.parse(String(calls[0]?.[1].body))).toEqual({
       report_id: PERSIST_ID,
     });
-    expect(onPointUnlocked).toHaveBeenCalledWith(4);
+    expect(onPointUnlocked).toHaveBeenCalledWith(4, "unlocked");
   });
 
   it("tells a member with no points before they click, without the unlock button", () => {
@@ -300,3 +301,56 @@ describe("AdvancedLockedPanel point unlock copy", () => {
   });
 });
 
+describe("AdvancedLockedPanel monthly subscription CTA (unit 6 US-018)", () => {
+  it("offers the monthly plan to locked and lifetime members", () => {
+    render(
+      <>
+        <AdvancedLockedPanel membership={memberView()} persistId={PERSIST_ID} view={preview} />
+        <AdvancedLockedPanel
+          membership={memberView({ accessStatus: "unlocked" })}
+          persistId={PERSIST_ID}
+          view={preview}
+        />
+      </>,
+    );
+
+    expect(screen.getAllByRole("button", { name: SUBSCRIPTION_CTA })).toHaveLength(2);
+  });
+
+  it("hides the monthly plan and point unlock while the subscription is active", () => {
+    render(
+      <AdvancedLockedPanel
+        membership={memberView({
+          hasActiveSubscription: true,
+          subscriptionActiveUntil: "2026-10-18T04:00:00.000Z",
+          pointsBalance: 3,
+        })}
+        persistId={PERSIST_ID}
+        view={preview}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: SUBSCRIPTION_CTA })).toBeNull();
+    expect(screen.queryByRole("button", { name: UNLOCK_WITH_POINT_CTA })).toBeNull();
+    expect(screen.queryByRole("button", { name: MEMBERSHIP_CTA_UNLOCK_REPORT })).toBeNull();
+    expect(screen.getByText("訂閱有效至 2026/10/18")).toBeTruthy();
+  });
+
+  it("posts the monthly plan id to checkout", async () => {
+    const user = userEvent.setup();
+    const fetchSpy = vi.fn(async () =>
+      new Response(JSON.stringify({ message: "x" }), { status: 409 }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+    render(<AdvancedLockedPanel membership={memberView()} persistId={PERSIST_ID} view={preview} />);
+
+    await user.click(screen.getByRole("button", { name: SUBSCRIPTION_CTA }));
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      "/api/payments/checkout",
+      expect.objectContaining({
+        body: JSON.stringify({ plan_id: "subscribe_report_monthly" }),
+      }),
+    );
+  });
+});

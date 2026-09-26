@@ -6,6 +6,8 @@ import {
   POINTS_PACK_CLIENT_PLAN_ID,
   POINTS_PACK_CTA,
   REPORT_SLOTS,
+  SUBSCRIPTION_CLIENT_PLAN_ID,
+  SUBSCRIPTION_CTA,
 } from "../../lib/constants";
 import type { PreviewView } from "../../lib/commercial/preview";
 import type { MembershipAdvanced, MembershipView } from "../../lib/membership/view";
@@ -87,7 +89,7 @@ export function AdvancedLockedPanel({
   membership?: MembershipView;
   view: PreviewView;
   persistId?: string;
-  onPointUnlocked?: (pointsBalance: number) => void | Promise<void>;
+  onPointUnlocked?: (pointsBalance: number, reason?: string) => void | Promise<void>;
 }) {
   const realAdvanced =
     membership && !membership.advancedLocked ? membership.advanced : null;
@@ -162,6 +164,16 @@ export function AdvancedLockedPanel({
         />
       ) : null}
 
+      {membership && membership.unlockMode !== "subscription" ? (
+        <UnlockCheckoutCta
+          ctaLabel={SUBSCRIPTION_CTA}
+          hasSession={!membership.purchaseRequiresLogin}
+          planId={SUBSCRIPTION_CLIENT_PLAN_ID}
+          slot={REPORT_SLOTS.subscriptionCta}
+          variant="secondary"
+        />
+      ) : null}
+
       {membership?.showPointsPackCta ? (
         <UnlockCheckoutCta
           ctaLabel={POINTS_PACK_CTA}
@@ -172,7 +184,7 @@ export function AdvancedLockedPanel({
         />
       ) : null}
 
-      <CommercialSecondaryZone view={view} />
+      <CommercialSecondaryZone />
     </div>
   );
 }

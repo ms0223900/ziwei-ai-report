@@ -28,7 +28,7 @@ export function ReportCard({
   report: MaskedReportView;
   commercialPreviewEnabled?: boolean;
   membership?: MembershipView;
-  onPointUnlocked?: (pointsBalance: number) => void | Promise<void>;
+  onPointUnlocked?: (pointsBalance: number, reason?: string) => void | Promise<void>;
 }) {
   const [localState, setLocalState] = useState<PreviewState>("A");
   const policy = resolveCommercialPreviewPolicy({
@@ -52,7 +52,6 @@ export function ReportCard({
         title: membership.title,
         advancedLocked: false,
         showCta: false,
-        followupLocked: true,
         exampleBlocks: null,
       }
     : preview;

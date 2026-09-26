@@ -1,6 +1,8 @@
 import type { PreviewState } from "../commercial/preview";
 import {
   MEMBERSHIP_CTA_POINT_UNLOCKED,
+  MEMBERSHIP_CTA_SUBSCRIPTION_ACTIVE,
+  MEMBERSHIP_CTA_SUBSCRIPTION_UNTIL_PREFIX,
   MEMBERSHIP_CTA_UNLOCK_REPORT,
   MEMBERSHIP_CTA_UNLOCKED,
   REPORT_SLOTS,
@@ -14,7 +16,7 @@ export {
 
 export type MembershipAccessStatus = "locked" | "unlocked";
 
-export type MembershipUnlockMode = "lifetime" | "points" | "none";
+export type MembershipUnlockMode = "lifetime" | "points" | "subscription" | "none";
 
 export type MembershipAdvanced = {
   rationale: string;
@@ -36,6 +38,8 @@ export type ResolveMembershipViewInput = {
   pointsBalance?: number;
   unlockMode?: MembershipUnlockMode;
   isOwnReport?: boolean;
+  hasActiveSubscription?: boolean;
+  subscriptionActiveUntil?: string | null;
 };
 
 export type MembershipView = {
@@ -44,7 +48,6 @@ export type MembershipView = {
   showCta: boolean;
   ctaLabel: string;
   ctaNote: string | null;
-  followupLocked: boolean;
   authSlot: string;
   advanced: MembershipAdvanced | null;
   unlockMode: MembershipUnlockMode;
@@ -54,6 +57,21 @@ export type MembershipView = {
   pointsInsufficient: boolean;
   pointsBalance: number;
 };
+
+const TAIPEI_DATE = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Taipei",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+function subscriptionCtaLabel(activeUntil: string | null | undefined): string {
+  const until = activeUntil ? new Date(activeUntil) : null;
+  if (!until || Number.isNaN(until.getTime())) {
+    return MEMBERSHIP_CTA_SUBSCRIPTION_ACTIVE;
+  }
+  return `${MEMBERSHIP_CTA_SUBSCRIPTION_UNTIL_PREFIX} ${TAIPEI_DATE.format(until).replaceAll("-", "/")}`;
+}
 
 export function resolveMembershipView(
   input: ResolveMembershipViewInput,
@@ -72,7 +90,6 @@ export function resolveMembershipView(
       showCta: true,
       ctaLabel: MEMBERSHIP_CTA_UNLOCK_REPORT,
       ctaNote: null,
-      followupLocked: true,
       authSlot: REPORT_SLOTS.authEntry,
       advanced: null,
       unlockMode: "none",
@@ -85,7 +102,6 @@ export function resolveMembershipView(
   }
 
   const memberFlags = {
-    followupLocked: true,
     ctaNote: null,
     authSlot: REPORT_SLOTS.authSession,
     showPointsPackCta: true,
@@ -118,6 +134,20 @@ export function resolveMembershipView(
       ctaLabel: MEMBERSHIP_CTA_POINT_UNLOCKED,
       advanced: input.advanced ?? null,
       unlockMode: "points",
+      showUnlockWithPoint: false,
+      pointsInsufficient: false,
+    };
+  }
+
+  if (isOwnReport && input.hasActiveSubscription === true) {
+    return {
+      ...memberFlags,
+      title: advancedTitle,
+      advancedLocked: false,
+      showCta: false,
+      ctaLabel: subscriptionCtaLabel(input.subscriptionActiveUntil),
+      advanced: input.advanced ?? null,
+      unlockMode: "subscription",
       showUnlockWithPoint: false,
       pointsInsufficient: false,
     };

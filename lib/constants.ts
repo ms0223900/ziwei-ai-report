@@ -10,12 +10,13 @@ export const LOCKED_FIELDS = [
   "rationale",
 ] as const;
 
-export const UPCOMING_UNLOCK_NOTE = "解鎖即將開放，本版不收費。";
 export const MEMBERSHIP_GRANT_NOTE = "開通由講師受控流程處理，本版不收費";
 export const MEMBERSHIP_CTA_UPGRADE = "升級／開通";
 export const MEMBERSHIP_CTA_UNLOCK_REPORT = "永久解鎖完整報告";
 export const MEMBERSHIP_CTA_UNLOCKED = "已開通";
 export const MEMBERSHIP_CTA_POINT_UNLOCKED = "已用 1 點解鎖此報告";
+export const MEMBERSHIP_CTA_SUBSCRIPTION_ACTIVE = "訂閱有效中";
+export const MEMBERSHIP_CTA_SUBSCRIPTION_UNTIL_PREFIX = "訂閱有效至";
 
 export const REPORT_SLOTS = {
   lockActionPlan: "slot-lock-action-plan",
@@ -23,11 +24,10 @@ export const REPORT_SLOTS = {
   lockPathCompare: "slot-lock-path-compare",
   delivery: "slot-delivery",
   unlockCta: "slot-unlock-cta",
-  followup: "slot-followup",
-  subscribe: "slot-subscribe",
   authEntry: "slot-auth-entry",
   authSession: "slot-auth-session",
   pointsPackCta: "slot-points-pack-cta",
+  subscriptionCta: "slot-subscription-cta",
   unlockWithPoint: "slot-unlock-with-point",
   reportUnlocks: "slot-report-unlocks",
   homePointsPack: "slot-home-points-pack",
@@ -35,6 +35,9 @@ export const REPORT_SLOTS = {
 
 export const POINTS_PACK_CLIENT_PLAN_ID = "points_pack_5";
 export const POINTS_PACK_CTA = "購買點數包";
+export const SUBSCRIPTION_CLIENT_PLAN_ID = "subscribe_report_monthly";
+export const SUBSCRIPTION_CTA = "月繳訂閱（每月 TWD 19）";
+export const SUBSCRIPTION_EXPIRED_NOTE = "訂閱已失效，請重新整理";
 export const UNLOCK_WITH_POINT_CTA = "用 1 點解鎖此報告";
 export const POINTS_BALANCE_INLINE = "目前點數";
 export const POINTS_INSUFFICIENT_NOTE = "點數不足，無法用點數解鎖此報告。";
@@ -90,18 +93,8 @@ export const ERROR_MESSAGES = {
   ADVANCED_LOCKED: "尚未開通，無法讀取進階報告。",
 } as const;
 
-export const FOLLOWUP_PLACEHOLDER = "追問需點數或訂閱";
-export const FOLLOWUP_HINT = "追問需點數或訂閱（本版尚未開放）";
-export const SUBSCRIBE_LABEL = "了解訂閱權益";
-export const SUBSCRIBE_HINT =
-  "訂閱有效可看進階報告，本月可追問 10 次；第一版不做月報";
-export const MODE_UNLOCK_LINE = "單次解鎖：這份 report 可看進階；不附贈追問";
+export const MODE_UNLOCK_LINE = "單次解鎖：這份 report 可看進階";
 export const MODE_CREDIT_LINE = "點數：1 點可解鎖 1 份自己的報告進階內容";
-export const MODE_SUBSCRIBE_LINE =
-  "訂閱：可看進階＋本月追問 10 次；權限與用量分欄";
+export const MODE_SUBSCRIBE_LINE = "訂閱：有效期間內可看進階報告";
 export const PREVIEW_BANNER = "開發預覽｜尚未實作真實付款";
-export const FOLLOWUP_API_UNIMPLEMENTED = "追問 API 尚未實作";
-export const PREVIEW_NO_DEDUCT = "預覽：尚未扣點";
-export const PREVIEW_MONTHLY_REMAINING = "本月剩餘 10 次（預覽）";
-export const SUBSCRIBE_ACTIVE_PREVIEW = "訂閱有效（預覽）";
 export const PREVIEW_EXAMPLE_MARK = "預覽用範例";

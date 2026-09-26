@@ -687,3 +687,104 @@ describe("HomeClient 最後 1 點解鎖", () => {
   });
 });
 
+describe("HomeClient 月繳訂閱（unit 6 US-018）", () => {
+  const ACTIVE_UNTIL = "2026-10-18T04:00:00.000Z";
+
+  it("opens advanced on a freshly generated report for an active subscriber", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.includes(`/api/reports/${PERSIST_ID}`)) {
+        return jsonResponse(200, {
+          ...GET_ADVANCED_BODY,
+          access_status: "locked",
+          unlock_mode: "subscription",
+        });
+      }
+      if (url === "/api/report-unlocks") {
+        return jsonResponse(200, { items: [] });
+      }
+      return jsonResponse(200, MASKED_POST_BODY);
+    });
+
+    render(
+      <HomeClient
+        initialAccessStatus="locked"
+        initialHasSession
+        initialPointsBalance={2}
+        initialSubscriptionActiveUntil={ACTIVE_UNTIL}
+      />,
+    );
+    await submitAs(user);
+
+    expect(await screen.findByRole("heading", { name: "小圓的進階報告" })).toBeTruthy();
+    expect(screen.getByText(advancedValid.rationale)).toBeTruthy();
+    expect(screen.getByText("訂閱有效至 2026/10/18")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "用 1 點解鎖此報告" })).toBeNull();
+    expect(screen.queryByRole("button", { name: MEMBERSHIP_CTA_UNLOCK_REPORT })).toBeNull();
+    expect(screen.queryByRole("button", { name: "月繳訂閱（每月 TWD 19）" })).toBeNull();
+    expect(reportFetchUrls()).toEqual(["/api/reports", `/api/reports/${PERSIST_ID}`]);
+  });
+
+  it("falls back to the locked view with a notice when the subscription lapsed after render", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.includes(`/api/reports/${PERSIST_ID}`)) {
+        return jsonResponse(403, { error_code: "FORBIDDEN", message: "尚未開通，無法讀取進階報告。" });
+      }
+      if (url === "/api/report-unlocks") {
+        return jsonResponse(200, { items: [] });
+      }
+      return jsonResponse(200, MASKED_POST_BODY);
+    });
+
+    render(
+      <HomeClient
+        initialAccessStatus="locked"
+        initialHasSession
+        initialPointsBalance={1}
+        initialSubscriptionActiveUntil={ACTIVE_UNTIL}
+      />,
+    );
+    await submitAs(user);
+
+    expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
+    expect(screen.getByText("訂閱已失效，請重新整理")).toBeTruthy();
+    expect(screen.getByRole("button", { name: MEMBERSHIP_CTA_UNLOCK_REPORT })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "用 1 點解鎖此報告" })).toBeTruthy();
+    expect(screen.queryByText(advancedValid.rationale)).toBeNull();
+  });
+
+  it("treats a subscription reason from the point unlock as no point spent", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.includes("/api/reports/unlock-with-point")) {
+        return jsonResponse(200, { ok: true, reason: "subscription", points_balance: 3 });
+      }
+      if (url.includes(`/api/reports/${PERSIST_ID}`)) {
+        return jsonResponse(200, {
+          ...GET_ADVANCED_BODY,
+          access_status: "locked",
+          unlock_mode: "subscription",
+        });
+      }
+      if (url === "/api/report-unlocks") {
+        return jsonResponse(200, { items: [] });
+      }
+      return jsonResponse(200, MASKED_POST_BODY);
+    });
+
+    render(
+      <HomeClient initialAccessStatus="locked" initialHasSession initialPointsBalance={3} />,
+    );
+    await submitAs(user);
+    await user.click(await screen.findByRole("button", { name: "用 1 點解鎖此報告" }));
+
+    expect(await screen.findByRole("heading", { name: "小圓的進階報告" })).toBeTruthy();
+    expect(screen.queryByText("已用 1 點解鎖此報告")).toBeNull();
+    expect(screen.getByText("訂閱有效中")).toBeTruthy();
+  });
+});
+
