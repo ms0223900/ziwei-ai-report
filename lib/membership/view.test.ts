@@ -222,4 +222,85 @@ describe("resolveMembershipView", () => {
       expect(result.purchaseRequiresLogin).toBe(true);
     });
   });
+
+  describe("subscription state (unit 6 US-016)", () => {
+    function memberInput(
+      overrides: Partial<Parameters<typeof resolveMembershipView>[0]> = {},
+    ) {
+      return baseInput({
+        hasSession: true,
+        accessStatus: "locked",
+        isOwnReport: true,
+        pointsBalance: 2,
+        ...overrides,
+      });
+    }
+
+    it("unlocks the own report while the subscription is active", () => {
+      const view = resolveMembershipView(
+        memberInput({
+          hasActiveSubscription: true,
+          subscriptionActiveUntil: "2026-10-18T04:00:00.000Z",
+        }),
+      );
+
+      expect(view.unlockMode).toBe("subscription");
+      expect(view.advancedLocked).toBe(false);
+      expect(view.advanced).toEqual(REAL_ADVANCED);
+      expect(view.showCta).toBe(false);
+      expect(view.showUnlockWithPoint).toBe(false);
+      expect(view.pointsInsufficient).toBe(false);
+      expect(view.showPointsPackCta).toBe(true);
+    });
+
+    it("labels the CTA with the Asia/Taipei end date", () => {
+      const view = resolveMembershipView(
+        memberInput({
+          hasActiveSubscription: true,
+          subscriptionActiveUntil: "2026-10-17T16:30:00.000Z",
+        }),
+      );
+
+      expect(view.ctaLabel).toBe("訂閱有效至 2026/10/18");
+    });
+
+    it("falls back to a generic label when the end date is unknown", () => {
+      const view = resolveMembershipView(memberInput({ hasActiveSubscription: true }));
+
+      expect(view.ctaLabel).toBe("訂閱有效中");
+    });
+
+    it("keeps lifetime ahead of an active subscription", () => {
+      const view = resolveMembershipView(
+        memberInput({ accessStatus: "unlocked", hasActiveSubscription: true }),
+      );
+
+      expect(view.unlockMode).toBe("lifetime");
+    });
+
+    it("keeps a point unlock ahead of an active subscription", () => {
+      const view = resolveMembershipView(
+        memberInput({ unlockMode: "points", hasActiveSubscription: true }),
+      );
+
+      expect(view.unlockMode).toBe("points");
+    });
+
+    it("does not unlock a report the member does not own", () => {
+      const view = resolveMembershipView(
+        memberInput({ isOwnReport: false, hasActiveSubscription: true }),
+      );
+
+      expect(view.advancedLocked).toBe(true);
+    });
+
+    it("returns to the locked point offer once the subscription is gone", () => {
+      const view = resolveMembershipView(
+        memberInput({ hasActiveSubscription: false, pointsBalance: 1 }),
+      );
+
+      expect(view.advancedLocked).toBe(true);
+      expect(view.showUnlockWithPoint).toBe(true);
+    });
+  });
 });
