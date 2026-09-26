@@ -52,7 +52,6 @@ export function ReportCard({
         title: membership.title,
         advancedLocked: false,
         showCta: false,
-        followupLocked: true,
         exampleBlocks: null,
       }
     : preview;

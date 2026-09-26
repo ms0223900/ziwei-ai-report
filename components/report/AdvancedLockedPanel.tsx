@@ -184,7 +184,7 @@ export function AdvancedLockedPanel({
         />
       ) : null}
 
-      <CommercialSecondaryZone view={view} />
+      <CommercialSecondaryZone />
     </div>
   );
 }

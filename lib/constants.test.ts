@@ -47,8 +47,6 @@ describe("shared copy and error codes", () => {
       lockPathCompare: "slot-lock-path-compare",
       delivery: "slot-delivery",
       unlockCta: "slot-unlock-cta",
-      followup: "slot-followup",
-      subscribe: "slot-subscribe",
       authEntry: "slot-auth-entry",
       authSession: "slot-auth-session",
       pointsPackCta: "slot-points-pack-cta",

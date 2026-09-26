@@ -5,21 +5,14 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   DISCLAIMER,
-  FOLLOWUP_API_UNIMPLEMENTED,
-  FOLLOWUP_PLACEHOLDER,
   LOCK_CAPTION,
   MODE_CREDIT_LINE,
   MODE_SUBSCRIBE_LINE,
   MODE_UNLOCK_LINE,
   PREVIEW_BANNER,
   PREVIEW_EXAMPLE_MARK,
-  PREVIEW_MONTHLY_REMAINING,
-  PREVIEW_NO_DEDUCT,
   REPORT_SLOTS,
-  SUBSCRIBE_ACTIVE_PREVIEW,
   MEMBERSHIP_CTA_UNLOCK_REPORT,
-  SUBSCRIBE_LABEL,
-  UPCOMING_UNLOCK_NOTE,
 } from "../../lib/constants";
 import advancedValid from "../../lib/generation/fixtures/advanced.valid.json";
 import { resolveMembershipView } from "../../lib/membership/view";
@@ -81,20 +74,9 @@ describe("ReportCard", () => {
     expect(container.textContent).not.toContain("rationale");
     expect(container.textContent).not.toContain("path_a");
     expect(container.textContent).not.toContain("第 1 天");
-    const followup = screen.getByPlaceholderText(FOLLOWUP_PLACEHOLDER);
-    expect(followup).toBeTruthy();
-    expect(followup).toHaveProperty("readOnly", true);
-    expect(followup).not.toHaveProperty("disabled", true);
-    expect(screen.getByRole("button", { name: SUBSCRIBE_LABEL })).toBeTruthy();
     expect(screen.getByText(MODE_UNLOCK_LINE)).toBeTruthy();
     expect(screen.getByText(MODE_CREDIT_LINE)).toBeTruthy();
     expect(screen.getByText(MODE_SUBSCRIBE_LINE)).toBeTruthy();
-    expect(
-      container.querySelector(`[data-report-slot="${REPORT_SLOTS.followup}"]`),
-    ).toBeTruthy();
-    expect(
-      container.querySelector(`[data-report-slot="${REPORT_SLOTS.subscribe}"]`),
-    ).toBeTruthy();
     expect(
       container.querySelector(`[data-report-slot="${REPORT_SLOTS.lockActionPlan}"]`),
     ).toBeTruthy();
@@ -127,7 +109,7 @@ describe("ReportCard", () => {
     expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
   });
 
-  it("switches preview B to example copy and keeps followup locked", async () => {
+  it("switches preview B to example copy", async () => {
     const user = userEvent.setup();
     render(<ReportCard commercialPreviewEnabled report={demoReport} />);
 
@@ -137,34 +119,6 @@ describe("ReportCard", () => {
     expect(screen.getByRole("heading", { name: "小圓的進階報告" })).toBeTruthy();
     expect(screen.getAllByText(new RegExp(PREVIEW_EXAMPLE_MARK)).length).toBeGreaterThan(0);
     expect(screen.queryByRole("button", { name: "永久解鎖完整報告" })).toBeNull();
-    expect(screen.getByPlaceholderText(FOLLOWUP_PLACEHOLDER)).toHaveProperty(
-      "readOnly",
-      true,
-    );
-    expect(screen.getByText(DISCLAIMER)).toBeTruthy();
-  });
-
-  it("does not persist or fetch when submitting followup in preview C", async () => {
-    const user = userEvent.setup();
-    const fetchSpy = vi.spyOn(globalThis, "fetch");
-    render(<ReportCard commercialPreviewEnabled report={demoReport} />);
-
-    await user.selectOptions(screen.getByRole("combobox", { name: "預覽態" }), "C");
-    expect(screen.getByText(PREVIEW_NO_DEDUCT)).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "送出追問" }));
-
-    expect(screen.getByRole("status").textContent).toBe(FOLLOWUP_API_UNIMPLEMENTED);
-    expect(fetchSpy).not.toHaveBeenCalled();
-    fetchSpy.mockRestore();
-  });
-
-  it("shows subscription preview captions in state D", async () => {
-    const user = userEvent.setup();
-    render(<ReportCard commercialPreviewEnabled report={demoReport} />);
-
-    await user.selectOptions(screen.getByRole("combobox", { name: "預覽態" }), "D");
-    expect(screen.getByText(PREVIEW_MONTHLY_REMAINING)).toBeTruthy();
-    expect(screen.getByRole("button", { name: SUBSCRIBE_ACTIVE_PREVIEW })).toBeTruthy();
     expect(screen.getByText(DISCLAIMER)).toBeTruthy();
   });
 
@@ -180,21 +134,6 @@ describe("ReportCard", () => {
     expect(screen.queryByText("解鎖即將開放，本版不收費。")).toBeNull();
     expect(screen.queryByText("即將開放")).toBeNull();
     expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
-  });
-
-  it("shows the upcoming note from the locked followup and subscribe entry", async () => {
-    const user = userEvent.setup();
-    const fetchSpy = vi.spyOn(globalThis, "fetch");
-    render(<ReportCard report={demoReport} />);
-
-    await user.click(screen.getByPlaceholderText(FOLLOWUP_PLACEHOLDER));
-    expect(screen.getByRole("status").textContent).toBe(UPCOMING_UNLOCK_NOTE);
-    expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
-
-    await user.click(screen.getByRole("button", { name: SUBSCRIBE_LABEL }));
-    expect(screen.getAllByRole("status")[0].textContent).toBe(UPCOMING_UNLOCK_NOTE);
-    expect(fetchSpy).not.toHaveBeenCalled();
-    fetchSpy.mockRestore();
   });
 
   it("renders unlocked GET text instead of preview examples", async () => {
@@ -216,10 +155,6 @@ describe("ReportCard", () => {
     expect(container.textContent).not.toContain(PREVIEW_EXAMPLE_MARK);
     expect(screen.getByText("已開通")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "永久解鎖完整報告" })).toBeNull();
-    expect(screen.getByPlaceholderText(FOLLOWUP_PLACEHOLDER)).toHaveProperty(
-      "readOnly",
-      true,
-    );
   });
 
   it("shows unlock-report CTA for a locked member without instructor-fee copy", async () => {
@@ -280,4 +215,21 @@ describe("ReportCard", () => {
     expect(screen.getByText("命主：阿明")).toBeTruthy();
     expect(container.textContent).not.toContain("女命");
   });
+
+  it.each(["A", "B", "C", "D"] as const)(
+    "never renders follow-up input, submit or subscribe teaser in preview %s (unit 6 US-019)",
+    async (state) => {
+      const user = userEvent.setup();
+      const { container } = render(<ReportCard commercialPreviewEnabled report={demoReport} />);
+
+      await user.selectOptions(screen.getByRole("combobox", { name: "預覽態" }), state);
+
+      expect(container.querySelector('[data-report-slot="slot-followup"]')).toBeNull();
+      expect(container.querySelector('[data-report-slot="slot-subscribe"]')).toBeNull();
+      expect(screen.queryByRole("button", { name: "送出追問" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "了解訂閱權益" })).toBeNull();
+      expect(container.textContent).not.toContain("追問");
+      expect(container.textContent).not.toContain("即將開放");
+    },
+  );
 });

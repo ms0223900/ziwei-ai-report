@@ -1,11 +1,4 @@
-import {
-  FOLLOWUP_HINT,
-  PREVIEW_EXAMPLE_MARK,
-  PREVIEW_MONTHLY_REMAINING,
-  PREVIEW_NO_DEDUCT,
-  SUBSCRIBE_ACTIVE_PREVIEW,
-  SUBSCRIBE_LABEL,
-} from "../constants";
+import { PREVIEW_EXAMPLE_MARK } from "../constants";
 
 export type PreviewState = "A" | "B" | "C" | "D";
 
@@ -19,9 +12,6 @@ export type PreviewView = {
   title: string;
   advancedLocked: boolean;
   showCta: boolean;
-  followupLocked: boolean;
-  followupCaption: string;
-  subscribeLabel: string;
   exampleBlocks: PreviewExampleBlocks | null;
 };
 
@@ -104,9 +94,6 @@ export function resolvePreviewView(args: {
     title: `${args.nickname}的基本分析`,
     advancedLocked: true,
     showCta: true,
-    followupLocked: true,
-    followupCaption: FOLLOWUP_HINT,
-    subscribeLabel: SUBSCRIBE_LABEL,
     exampleBlocks: null,
   };
 
@@ -122,22 +109,6 @@ export function resolvePreviewView(args: {
     exampleBlocks: EXAMPLE_BLOCKS,
   };
 
-  if (args.state === "B") {
-    return unlocked;
-  }
-
-  if (args.state === "C") {
-    return {
-      ...unlocked,
-      followupLocked: false,
-      followupCaption: PREVIEW_NO_DEDUCT,
-    };
-  }
-
-  return {
-    ...unlocked,
-    followupLocked: false,
-    followupCaption: PREVIEW_MONTHLY_REMAINING,
-    subscribeLabel: SUBSCRIBE_ACTIVE_PREVIEW,
-  };
+  // B／C／D used to differ only by follow-up copy; follow-ups are gone.
+  return unlocked;
 }
