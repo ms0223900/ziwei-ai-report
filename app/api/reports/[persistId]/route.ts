@@ -5,7 +5,7 @@ import {
   loginRequiredError,
   reportNotFoundError,
 } from "../../../../lib/errors";
-import type { ProfileRow } from "../../../../lib/membership/ensureProfile";
+import { resolveReportEntitlement } from "../../../../lib/entitlements/resolve";
 import { createServiceRoleClient } from "../../../../lib/supabase/server";
 import { getSessionUser } from "../../../../lib/supabase/session";
 
@@ -69,26 +69,8 @@ export async function GET(
     return jsonError(reportNotFoundError());
   }
 
-  const { data: profile } = await client
-    .from("profiles")
-    .select()
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  const isLifetime =
-    (profile as ProfileRow | null)?.access_status === "unlocked";
-  let isPointUnlocked = false;
-  if (!isLifetime) {
-    const { data: unlock } = await client
-      .from("report_unlocks")
-      .select()
-      .eq("user_id", user.id)
-      .eq("report_id", persistId)
-      .maybeSingle();
-    isPointUnlocked = unlock != null;
-  }
-
-  if (!isLifetime && !isPointUnlocked) {
+  const entitlement = await resolveReportEntitlement(client, user.id, persistId);
+  if (entitlement === "none") {
     return jsonError(forbiddenLockedError());
   }
 
@@ -120,8 +102,8 @@ export async function GET(
     action_plan: advanced.action_plan,
     disclaimer: readString(basic.disclaimer) || DISCLAIMER,
     locked_fields: [],
-    ...(isLifetime
+    ...(entitlement === "lifetime"
       ? { access_status: "unlocked" as const }
-      : { access_status: "locked" as const, unlock_mode: "points" as const }),
+      : { access_status: "locked" as const, unlock_mode: entitlement }),
   });
 }
