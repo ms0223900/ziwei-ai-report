@@ -16,6 +16,8 @@ export const MEMBERSHIP_CTA_UPGRADE = "升級／開通";
 export const MEMBERSHIP_CTA_UNLOCK_REPORT = "永久解鎖完整報告";
 export const MEMBERSHIP_CTA_UNLOCKED = "已開通";
 export const MEMBERSHIP_CTA_POINT_UNLOCKED = "已用 1 點解鎖此報告";
+export const MEMBERSHIP_CTA_SUBSCRIPTION_ACTIVE = "訂閱有效中";
+export const MEMBERSHIP_CTA_SUBSCRIPTION_UNTIL_PREFIX = "訂閱有效至";
 
 export const REPORT_SLOTS = {
   lockActionPlan: "slot-lock-action-plan",
