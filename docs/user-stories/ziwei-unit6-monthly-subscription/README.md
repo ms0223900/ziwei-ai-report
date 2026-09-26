@@ -63,9 +63,9 @@
 - [x] US-019 移除追問文案與入口
 
 ### Phase 8 — 素材與交棒
-- [ ] US-020 固定 Payload 腳本 測試（預期紅燈；待實作轉綠）
-- [ ] US-021 固定 Payload 腳本 實作
-- [ ] US-022 取消 Checkpoint 與三位測試會員
+- [x] US-020 固定 Payload 腳本 測試（預期紅燈；待實作轉綠）
+- [x] US-021 固定 Payload 腳本 實作
+- [⚠️] US-022 取消 Checkpoint 與三位測試會員（待 Supabase 實跑）
 - [ ] US-023 交棒與文件更新
 
 ## 依賴鏈摘要
