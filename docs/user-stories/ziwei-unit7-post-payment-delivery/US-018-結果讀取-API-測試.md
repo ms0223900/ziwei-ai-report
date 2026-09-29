@@ -34,5 +34,5 @@
 
 **優先級**：P0  
 **相關功能**：Story 2／3  
-**來源**：Story 2 / Scenario 1～8；Story 3 / Scenario 1～3；Story 4 / Scenario 5  
+**來源**：Story 2 / Scenario 1～8；Story 3 / Scenario 1～3；Story 4 / Scenario 5；spec §7 問題 1  
 **依賴關係**：US-002

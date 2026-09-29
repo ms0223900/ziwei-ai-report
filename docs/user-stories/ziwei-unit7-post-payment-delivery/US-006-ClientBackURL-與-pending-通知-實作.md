@@ -22,5 +22,5 @@
 
 **優先級**：P0  
 **相關功能**：Story 1  
-**來源**：Story 1 / Scenario 1、Scenario 2  
+**來源**：Story 1 / Scenario 1、Scenario 2；Story 5 / Scenario 1  
 **依賴關係**：US-004、US-005
