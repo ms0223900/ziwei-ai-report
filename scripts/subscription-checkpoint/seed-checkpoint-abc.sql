@@ -38,6 +38,16 @@ with ids as (
 delete from public.report_unlocks
 where user_id in (select user_id from ids);
 
+with ids as (
+  select * from (values
+    ('77ba05f6-21c3-41b4-8e84-e920aae1df44'::uuid),
+    ('84ca06c5-10fb-4478-a6d9-ab52973f7c2f'::uuid),
+    ('4dc205b3-b4a8-43ce-ba3c-8727fe027a03'::uuid)
+  ) as t(user_id)
+)
+delete from public.point_transactions
+where user_id in (select user_id from ids);
+
 delete from public.orders
 where merchant_trade_no in ('TESTSUBA0001', 'TESTSUBB0001', 'TESTSUBC0001');
 

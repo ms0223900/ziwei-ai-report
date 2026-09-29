@@ -13,6 +13,8 @@ delete from public.subscriptions
 where user_id in ('<A uuid>', '<B uuid>', '<C uuid>');
 delete from public.report_unlocks
 where user_id in ('<A uuid>', '<B uuid>', '<C uuid>');
+delete from public.point_transactions
+where user_id in ('<A uuid>', '<B uuid>', '<C uuid>');
 delete from public.orders
 where merchant_trade_no in ('TESTSUBA0001', 'TESTSUBB0001', 'TESTSUBC0001');
 
