@@ -16,6 +16,9 @@ where user_id in ('<A uuid>', '<B uuid>', '<C uuid>');
 delete from public.orders
 where merchant_trade_no in ('TESTSUBA0001', 'TESTSUBB0001', 'TESTSUBC0001');
 
+delete from public.reports
+where user_id in ('<A uuid>', '<B uuid>', '<C uuid>');
+
 -- 2. 權益欄：三人都是 locked；C 留 1 點供 S7-6
 update public.profiles
 set access_status = 'locked',

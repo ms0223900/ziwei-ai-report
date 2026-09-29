@@ -5,7 +5,7 @@
 > 前一版規格：[`2026-09-17-ziwei-unit4-ecpay-sandbox-unlock.md`](2026-09-17-ziwei-unit4-ecpay-sandbox-unlock.md)  
 > 類型：**開發類**（方案表第二筆、建單閘門依 `plan_id`、Webhook 履約分派、加點／扣點帳本、單點解鎖 RPC）。  
 > 本檔為開發類規格（第 0～6 節；第 7 節僅獨立審查發現強相關阻塞時附加）。  
-> **本單覆寫** `AGENTS.md`／`docs/spec.md`「本版不做扣點」。驗簽、Tunnel、`ReturnURL`、`1|OK` 字串仍以單元 4 為準，本單不重做。
+> **本單覆寫** `AGENTS.md`／`docs/spec.md`「本版不做扣點」以及單元 2 文案「點數只買追問、不解鎖報告」。驗簽、Tunnel、`ReturnURL`、`1|OK` 字串仍以單元 4 為準，本單不重做。
 
 ---
 
@@ -15,9 +15,9 @@
 - **Goal**: 已登入會員可買 `points_pack_5`（TWD 49、加 5 點）。同一條 ReturnURL 在驗簽／對單／對金額／排除 `SimulatePaid=1` 之後，依 DB `orders.plan_id` 分派：點數包只加點並寫 credit；終身方案仍只改 `access_status`。對自己的未解鎖報告，受控 RPC 在同一事務扣 1 點、寫 debit 與 `report_unlocks`。重送已履約的付款不加點；已 paid 但無 credit 必須補加。重整後可從簡單選單再開已單點解鎖的報告。
 - **Impacted Areas**:
   - 新建：`supabase/migrations/`（`point_transactions`、`report_unlocks`、`reports.user_id`；檔名自訂時間戳）、`unlock_report_with_point` RPC、`POST` 單點解鎖 Route Handler（建議 `app/api/reports/unlock-with-point/route.ts`）、已單次解鎖選單元件、點數包 CTA（與終身解鎖 CTA 分開）
-  - 改動：`lib/payments/plans.ts`（`CheckoutPlan` 型別目前寫死終身方案）、`lib/payments/plans.test.ts`、`app/api/payments/checkout/route.ts`（已 `unlocked` 對所有 `plan_id` 回 409）、`app/api/payments/checkout/route.test.ts`、`app/api/payments/ecpay/webhook/route.ts`（`OrderRow` 未含 `plan_id`；`status===paid` 只跑 `unlockIfLocked`）、`app/api/payments/ecpay/webhook/route.test.ts`、`lib/reports/store.ts`（insert 無 `user_id`）、`app/api/reports/route.ts`、`app/api/reports/[persistId]/route.ts`（進階 GET 只認 `access_status===unlocked`，**不查** `reports.user_id`）、`app/api/reports/[persistId]/route.test.ts`、`lib/membership/view.ts`（`unlocked` 時 `showCta: false`）、`components/report/UnlockCheckoutCta.tsx`（寫死 `unlock_report_lifetime`）、`components/report/AdvancedLockedPanel.tsx`、`lib/constants.ts`（`MODE_CREDIT_LINE`）、`test/fakes/supabase.ts`
+  - 改動：`lib/payments/plans.ts`（`CheckoutPlan` 型別目前寫死終身方案）、`lib/payments/plans.test.ts`、`app/api/payments/checkout/route.ts`（已 `unlocked` 對所有 `plan_id` 回 409）、`app/api/payments/checkout/route.test.ts`、`app/api/payments/ecpay/webhook/route.ts`（`OrderRow` 未含 `plan_id`；`status===paid` 只跑 `unlockIfLocked`）、`app/api/payments/ecpay/webhook/route.test.ts`、`lib/reports/store.ts`（insert 無 `user_id`）、`app/api/reports/route.ts`、`app/api/reports/[persistId]/route.ts`（進階 GET 只認 `access_status===unlocked`，**不查** `reports.user_id`）、`app/api/reports/[persistId]/route.test.ts`、`lib/membership/view.ts`（`unlocked` 時 `showCta: false`）、`components/report/UnlockCheckoutCta.tsx`（寫死 `unlock_report_lifetime`）、`components/report/AdvancedLockedPanel.tsx`、`lib/constants.ts`（`MODE_CREDIT_LINE`／`FOLLOWUP_HINT` 仍寫「點數只買追問、不解鎖報告」）、`test/fakes/supabase.ts`
   - 沿用、本單不重做：CheckMacValue、`SimulatePaid`、`ReturnURL`／`ClientBackURL`、`1|OK`、proxy matcher、`POST /api/dev/grant-access`、單元 1 生成／ajv／遮罩 schema、`orders` 表（不加 `fulfilled_at`）
-  - 明確不做：第二條 Webhook、`PeriodReturnURL`、訂閱、退款、結果頁、管理後台、舊報告 `user_id` 回填、`orders.fulfilled_at`、用 `access_status` 或 `reports.status` 代表單點解鎖
+  - 明確不做：第二條 Webhook、`PeriodReturnURL`、追問、訂閱、退款、結果頁、管理後台、舊報告 `user_id` 回填、`orders.fulfilled_at`、用 `access_status` 或 `reports.status` 代表單點解鎖
 - **Stakeholders**: 已登入會員（含已永久解鎖者）；課程學員／講師；綠界 Stage 後端（同一 ReturnURL）
 
 ---
@@ -97,7 +97,7 @@
 - `access_status=unlocked`：隱藏終身解鎖主按鈕；**不隱藏**買點入口。
 - `access_status=locked` 且已登入：可同時顯示終身解鎖 CTA 與買點入口。
 - 訪客：買點與終身解鎖皆先走「請先登入」；不建單。
-- 單元 2 次要區的 `MODE_CREDIT_LINE` 與「用 1 點解鎖」預留按鈕，在本單主路徑改為真實的單點解鎖入口，文案不得與本單矛盾。
+- 單元 2 預覽文案 `MODE_CREDIT_LINE`／`FOLLOWUP_HINT`（「點數只買 1 次追問；不解鎖報告」）若仍出現在本單會碰到的畫面，改為不與本單矛盾的文案，或從單點解鎖／買點主路徑移除。禁止在本單主路徑宣稱「點數不解鎖報告」。
 
 ### For Story 4 — Webhook 分派
 
@@ -364,7 +364,7 @@ HashKey／HashIV／service role 不得進 `NEXT_PUBLIC_*`。
 - `points_balance >= 0` constraint：MVP: false — Ticket Could Have
 - QueryTradeInfo、結果頁、通知、管理後台：MVP: false — 單元 7
 - 訂閱／PeriodReturnURL：MVP: false — 單元 6
-- 點數到期、退款追回、多包、浮動扣點、舊資料 `user_id` 回填後台：MVP: false — Ticket Won't Have；null 列本單不可解鎖、不可 GET 進階
+- 追問、點數到期、退款追回、多包、浮動扣點、舊資料 `user_id` 回填後台：MVP: false — Ticket Won't Have；null 列本單不可解鎖、不可 GET 進階
 
 ---
 
@@ -376,7 +376,7 @@ HashKey／HashIV／service role 不得進 `NEXT_PUBLIC_*`。
 - 現況 checkout 在讀到 `access_status==="unlocked"` 時無條件 409。必須先 `resolveCheckoutPlan(planId)` 再決定閘門。
 - `CheckoutPlan` 與 `UnlockCheckoutCta` 的 `UNLOCK_PLAN_ID` 常數若未拆，買點會送錯方案。
 - `GET /api/reports/[persistId]` 現況只認終身開通、不查 `user_id`。本單必須：(1) 單點解鎖後帳號仍 `locked` 也能 GET 自己的報告；(2) 終身開通也只能 GET `reports.user_id` 為自己的列。現有 GET 測試（unlocked + 無 `user_id` 的 seed 即 200）必須改掉。單點成功 JSON 不得把 `access_status` 設成 `"unlocked"`。
-- `lib/constants.ts` 的 `MODE_CREDIT_LINE` 須與本單核心操作一致（點數：1 點可解鎖 1 份自己的報告進階內容）。
+- `lib/constants.ts` 的 `MODE_CREDIT_LINE`／`FOLLOWUP_HINT` 與本單核心操作矛盾，主路徑畫面不可再使用舊句。
 - `test/fakes/supabase.ts` 需能插入／unique 衝突 `point_transactions.source_order_id` 與 `report_unlocks(user_id,report_id)`。
 - 加點與扣點都必須與餘額更新同一事務；先回 `1|OK` 再寫入失敗會讓綠界不再重試。
 - 訪客報告無 `user_id` 是刻意行為，不是 bug；單點解鎖應 `forbidden`，**終身 GET 同樣拒絕**。課堂不要再用「拿示範 uuid 給已開通帳號看進階」。

@@ -14,7 +14,7 @@
 - **Impacted Areas**:
   - 新建：`app/page.tsx`（目前僅 A1 佔位）、`app/api/reports/route.ts`、`components/birth-form/`、`components/report/`、`lib/`（validation、high-risk、schema、prompt、generation、store、masking）、`supabase/migrations/`（`reports`）
   - 既有參照：`docs/spec.md`（`focus` 英文枚舉須對齊本檔，見第 7 節問題 1）、`docs/architecture.md`、`docs/design-brief.md`、`designs/ziwei-unit1.pen`、`.env.example`、`app/layout.tsx`
-  - 明確不做：`users`／`orders`／`credits`／`subscriptions`、Auth、ECPay
+  - 明確不做：`users`／`orders`／`credits`／`subscriptions`、Auth、ECPay、追問 API
 - **Stakeholders**: 訪客／求測者（無登入）；課程學員（Mock 零 key 可跑）；後續單元的會員／金流接棒（本版只留畫面接點）
 
 ---
@@ -95,7 +95,7 @@
   - `invalid-json`：回傳非 JSON → **422** `SCHEMA_INVALID`（視為產出無法通過驗證，不是上游 HTTP 失敗）。
   - `schema-missing-field`：basic canned **拿掉 `overall`** 再跑 `report.basic.v1` → 422。
 - **Live**：`POST https://openrouter.ai/api/v1/chat/completions`；`Authorization: Bearer $OPENROUTER_API_KEY`。產出必須通過 `report.complete.v1`。通過後拆成 `basic_json`（basic 欄位）與 `advanced_json`（完整物件）。主模型 = `OPENROUTER_PRIMARY_MODEL`；僅當主模型**請求**失敗（timeout／非 2xx）或**驗證**失敗時：同模型再試 1 次，仍失敗才切 `OPENROUTER_FALLBACK_MODEL`。禁止依請求自動選模型。HTTP 200 仍只回 basic 子集。
-- 畫面 B/C/D：**本版不實作**。
+- 追問 Prompt、畫面 B/C/D、follow-up JSON：**本版不實作**。
 
 **Live `report.complete.v1` 欄位（Mock 兩份 canned 不要求單物件同時具備全部）**
 
@@ -171,7 +171,7 @@
 - ChartMatrix 是裝飾暫定盤，不是真排盤、不是 API 欄；禁止為此加性別輸入。
 - 底部 disclaimer + CTA **「解鎖完整報告」**。
 - 點擊 CTA：不呼叫付款、不改 `status`、不把畫面切成進階。可 disabled 或提示「即將開放」；**禁止**假裝付款成功。
-- 「用 1 點解鎖」入口：本版不出現（Could Have 才以鎖定態出現）。
+- 追問輸入框：本版不出現（Could Have 才以鎖定態出現）。
 - 頁首與結果底部都要有娛樂用途聲明。layout metadata 已有一句；結果卡仍須顯示 `disclaimer`。
 
 **本版只標記、不實作的商業接點（畫面必須找得到同一組位置）**
@@ -181,9 +181,9 @@
 | 方案／升級入口 | 「解鎖完整報告」；點了不變已解鎖 | 單次解鎖可看進階 |
 | 鎖定區 | 行動／依據／兩條路徑鎖定 | 展示 `rationale`／`path_compare`／`action_plan` |
 | 交付位置 | 同一報告頁，進階欄位位置預留 | 不重算，只打開已存欄位 |
-| 點數解鎖 | 不出現 | 有點數時，用 1 點解鎖這份報告 |
+| 追問 | 不出現 | 已解鎖且有點數／訂閱才可問 |
 
-三種收費模式只寫在產品說明／註解，本版不更新對應欄位：單次解鎖看進階，不附贈點數；點數用 1 點解鎖 1 份報告；訂閱有效期間內看進階。
+三種收費模式只寫在產品說明／註解，本版不更新對應欄位：單次解鎖看進階不附贈追問；點數只買 1 次追問；訂閱看進階 + 本月追問 10 次。
 
 ### For Story 4 — 高風險短路
 
@@ -242,10 +242,11 @@
 - **未知時辰標示**: Given `time_unknown=true` When 顯示結果 Then 可見準確度較低／未知時辰。
 - **Disclaimer**: Given 表單頁與結果頁 When 檢視 Then 介面與報告皆有娛樂用途聲明（文案對齊子筆記 disclaimer）。
 - **邊界 — 接點可指出**: Given 結果頁 When 驗收 Then 能指出方案入口、鎖定區、付款後交付位置（同一頁預留進階欄位）。
+- **邊界 — 無追問主流程**: Given 未付款結果頁 When 檢視 Then 沒有可送出的追問輸入。
 
 ### For Story 4
 
-- **Happy Path**: Given `nickname` 含財務投資語意（單元 1 沒有問題輸入欄，例句只能放暱稱，例如「這筆投資會不會賺」） When 送出 Then HTTP 200、`error_code=HIGH_RISK`、`category=financial_risk`、畫面為 07 安全殼（H1「這題我不能用命盤作答」+ 財務固定正文 + disclaimer + 回表單）；不呼叫 LLM；DB 無新列；無解鎖 CTA；不渲染畫面 A。
+- **Happy Path**: Given `nickname` 含財務投資語意（單元 1 無追問欄，例句只能放暱稱，例如「這筆投資會不會賺」） When 送出 Then HTTP 200、`error_code=HIGH_RISK`、`category=financial_risk`、畫面為 07 安全殼（H1「這題我不能用命盤作答」+ 財務固定正文 + disclaimer + 回表單）；不呼叫 LLM；DB 無新列；無解鎖 CTA；不渲染畫面 A。
 - **錯誤／誤判邊界**: Given 一般暱稱「小圓」無高風險字 When 送出 Then 不走安全短路，走正常生成。
 - **邊界 — 自傷**: Given 輸入含自傷／傷害他人 When 送出 Then 顯示子筆記自傷文案；不寫 DB。
 
@@ -261,7 +262,7 @@
 
 ### DB Schema
 
-本版只建 `reports`。不建 `users`、`orders`、`credits`、`subscriptions`。不新增 `user_id`。
+本版只建 `reports`。不建 `users`、`orders`、`credits`、`subscriptions`、`follow_ups`。不新增 `user_id`。
 
 | 欄位 | 型態 | 說明 |
 |---|---|---|
@@ -324,7 +325,7 @@
 - **Story 5 失敗繁中可重試**: MVP: true
 - **公開測試網址、無痕跑完**: MVP: true（Checkpoint A7）
 - **開發環境變數預覽「遮罩前全文」**: MVP: false — 正式訪客必須永遠未付款；對稿用 canned JSON 即可
-- **「用 1 點解鎖」入口以鎖定態出現**: MVP: false — Ticket Could Have；本版不出現
+- **追問輸入框以鎖定態出現**: MVP: false — Ticket Could Have；本版不出現追問
 - **Token／費用紀錄**: MVP: false — Ticket Could Have
 - **切換 Mock／Live 的開發控制台 UI**: MVP: false — Ticket Could Have；用環境變數即可
 - **會員／登入／RLS owner policy／訂單／ECPay／Webhook／真正解鎖／扣點／訂閱／補時辰重出／塔羅合盤月報**: MVP: false — Ticket Won't Have；禁止本單實作

@@ -42,7 +42,7 @@
 - [x] 鎖定三塊不是真實 `rationale`／路徑／7 天步驟
 - [x] LockCaption 與 US-008／spec 同句
 - [x] 點 CTA 不改 `status`、無金流、不切畫面 B；出現「解鎖即將開放，本版不收費。」
-- [x] 底部完整 disclaimer
+- [x] 無追問輸入；底部完整 disclaimer
 
 #### 驗收說明
 
@@ -118,7 +118,7 @@
 
 ---
 
-**AC-9：底部 disclaimer**
+**AC-9：無追問；底部 disclaimer**
 
 狀態：✅ 通過
 

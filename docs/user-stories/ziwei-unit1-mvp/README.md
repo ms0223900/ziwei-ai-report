@@ -3,7 +3,7 @@
 > 來源：[`docs/specs/2026-09-05-ziwei-unit1-mvp.md`](../../specs/2026-09-05-ziwei-unit1-mvp.md)、[`docs/design-brief.md`](../../design-brief.md)、[`docs/architecture.md`](../../architecture.md)、[`designs/ziwei-unit1.pen`](../../../designs/ziwei-unit1.pen)  
 > 非阻塞項：[`docs/specs/2026-09-05-ziwei-unit1-mvp-issues.md`](../../specs/2026-09-05-ziwei-unit1-mvp-issues.md)  
 > 現況：Checkpoint A1 已完成；本目錄覆蓋 A2–A7。  
-> **不做**：會員／登入、RLS owner policy、訂單／ECPay、真正解鎖或扣點、畫面 B/C/D。
+> **不做**：會員／登入、RLS owner policy、訂單／ECPay、真正解鎖或扣點、追問主流程、畫面 B/C/D。
 
 ## 全域驗收 Checklist
 
