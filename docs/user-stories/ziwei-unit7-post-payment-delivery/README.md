@@ -28,7 +28,7 @@
 - [x] US-004 通知寫入 helper 實作
 
 ### Phase 1 — 回跳帶訂單 id
-- [ ] US-005 ClientBackURL 與 pending 通知 測試（預期紅燈；待實作轉綠）
+- [x] US-005 ClientBackURL 與 pending 通知 測試（預期紅燈；待實作轉綠）
 - [ ] US-006 ClientBackURL 與 pending 通知 實作
 
 ### Phase 2 — failed 終態
