@@ -1,4 +1,5 @@
 -- 單元 6 Checkpoint：預填三位測試會員（A 有效／B 扣款失敗／C 到期），可重複執行（先清再建）。
+-- 本檔給「自己的 UUID」。ziwei-ai-report 四個驗收帳請改跑 reset-checkpoint.sql（含 D，一次還原）。
 -- 在 Supabase SQL Editor 執行前，把 <A uuid>／<B uuid>／<C uuid> 換成 auth.users.id。
 -- profiles_guard_entitlements 只放行 service_role，整段必須在同一個 transaction 內先宣告角色。
 
