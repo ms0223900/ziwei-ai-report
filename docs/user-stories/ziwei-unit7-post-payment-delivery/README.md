@@ -22,10 +22,10 @@
 ## 全域驗收 Checklist
 
 ### Phase 0 — schema、fake 與通知寫入
-- [ ] US-001 建立 notifications 與 admin_actions 遷移
-- [ ] US-002 記憶體 fake 通知與管理紀錄
-- [ ] US-003 通知寫入 helper 測試（預期紅燈；待實作轉綠）
-- [ ] US-004 通知寫入 helper 實作
+- [x] US-001 建立 notifications 與 admin_actions 遷移
+- [x] US-002 記憶體 fake 通知與管理紀錄
+- [x] US-003 通知寫入 helper 測試（預期紅燈；待實作轉綠 → 已由 US-004 轉綠）
+- [x] US-004 通知寫入 helper 實作
 
 ### Phase 1 — 回跳帶訂單 id
 - [ ] US-005 ClientBackURL 與 pending 通知 測試（預期紅燈；待實作轉綠）
