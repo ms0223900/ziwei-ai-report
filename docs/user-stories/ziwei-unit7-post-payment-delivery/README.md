@@ -32,8 +32,8 @@
 - [x] US-006 ClientBackURL 與 pending 通知 實作
 
 ### Phase 2 — failed 終態
-- [x] US-007 mark_order_failed 測試（預期紅燈；待實作轉綠）
-- [ ] US-008 mark_order_failed 實作
+- [x] US-007 mark_order_failed 測試（預期紅燈；待實作轉綠 → 已由 US-008 轉綠）
+- [x] US-008 mark_order_failed 實作
 - [ ] US-009 ReturnURL failed 終態 測試（預期紅燈；待實作轉綠）
 - [ ] US-010 ReturnURL failed 終態 實作
 - [ ] US-011 PeriodReturnURL failed 短路 測試（預期紅燈；待實作轉綠）
