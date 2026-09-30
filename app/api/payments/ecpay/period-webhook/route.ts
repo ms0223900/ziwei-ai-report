@@ -2,6 +2,7 @@ import {
   readEcpayHashFromEnv,
   verifyCheckMacValue,
 } from "../../../../../lib/ecpay/check-mac";
+import { notifySubscriptionActive } from "../../../../../lib/notifications/notify-subscription-active";
 import {
   SUBSCRIBE_REPORT_MONTHLY_PLAN_ID,
   resolveCheckoutPlan,
@@ -139,9 +140,15 @@ export async function POST(request: Request): Promise<Response> {
     p_gwsr: gwsr,
     p_processed_at: parseProcessDate(processDateRaw),
   });
-  const row = (Array.isArray(data) ? data[0] : data) as { ok?: boolean } | null;
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { ok?: boolean; reason?: string }
+    | null;
   if (error || row?.ok !== true) {
     return reject("period event write failed");
+  }
+  // 只有真的延長期間（renewed）才通知；first_duplicate、payment_failed、已失效訂閱都不建。
+  if (row.reason === "renewed") {
+    await notifySubscriptionActive(client, idempotencyKey);
   }
   return ok();
 }
