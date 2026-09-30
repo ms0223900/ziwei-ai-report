@@ -36,8 +36,8 @@
 - [x] US-008 mark_order_failed 實作
 - [x] US-009 ReturnURL failed 終態 測試（預期紅燈；待實作轉綠 → 已由 US-010 轉綠）
 - [x] US-010 ReturnURL failed 終態 實作
-- [x] US-011 PeriodReturnURL failed 短路 測試（預期紅燈；待實作轉綠）
-- [ ] US-012 PeriodReturnURL failed 短路 實作
+- [x] US-011 PeriodReturnURL failed 短路 測試（預期紅燈；待實作轉綠 → 已由 US-012 轉綠）
+- [x] US-012 PeriodReturnURL failed 短路 實作
 
 ### Phase 3 — 履約與扣點通知
 - [ ] US-013 履約成功通知 測試（預期紅燈；待實作轉綠）
