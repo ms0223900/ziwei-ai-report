@@ -740,3 +740,145 @@ describe("POST /api/payments/ecpay/webhook — subscribe_report_monthly", () => 
     );
   });
 });
+
+describe("POST /api/payments/ecpay/webhook — failed terminal state", () => {
+  const originalPaymentEnv = Object.fromEntries(
+    PAYMENT_ENV_KEYS.map((key) => [key, process.env[key]]),
+  ) as Record<(typeof PAYMENT_ENV_KEYS)[number], string | undefined>;
+
+  beforeEach(() => {
+    state.memory = createFakeSupabaseMemory();
+    state.failProfileUpdate = false;
+    seedFakeUser(state.memory, { id: USER_ID, email: "yuan@example.com" }, { points_balance: 2 });
+    setPaymentEnv();
+    installFulfillRpc();
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    for (const key of PAYMENT_ENV_KEYS) {
+      const value = originalPaymentEnv[key];
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  });
+
+  const AMOUNTS: Record<string, number> = {
+    unlock_report_lifetime: 99,
+    points_pack_5: 49,
+    subscribe_report_monthly: 19,
+  };
+
+  function seedPlanOrder(planId: string, status: FakeOrder["status"]) {
+    return seedPendingOrder({ plan_id: planId, amount: AMOUNTS[planId], status });
+  }
+
+  function planFields(planId: string, overrides: Record<string, string | undefined> = {}) {
+    return successFields({ TradeAmt: String(AMOUNTS[planId]), ...overrides });
+  }
+
+  function orderFailedNotifications() {
+    return [...state.memory.notifications.values()].filter(
+      (row) => row.type === "order_failed",
+    );
+  }
+
+  it("S4-1: pending + RtnCode != 1 → failed, one order_failed, no entitlement change, 1|OK", async () => {
+    seedPlanOrder("points_pack_5", "pending");
+    const profileBefore = { ...profileRow() };
+
+    const response = await postWebhook(planFields("points_pack_5", { RtnCode: "10100058" }));
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(orderRow()?.status).toBe("failed");
+    const rows = orderFailedNotifications();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      user_id: USER_ID,
+      source_type: "order",
+      source_id: ORDER_ID,
+      idempotency_key: `order-failed:${ORDER_ID}`,
+    });
+    expect(profileRow()).toEqual(profileBefore);
+    expect(state.memory.pointTransactions.size).toBe(0);
+    expect(state.memory.subscriptions.size).toBe(0);
+  });
+
+  it("S4-2: resending the same failure payload keeps one order_failed and status failed", async () => {
+    seedPlanOrder("points_pack_5", "pending");
+    const payload = planFields("points_pack_5", { RtnCode: "10100058" });
+
+    await postWebhook(payload);
+    const second = await postWebhook(payload);
+
+    expect(await readBody(second)).toBe("1|OK");
+    expect(orderRow()?.status).toBe("failed");
+    expect(orderFailedNotifications()).toHaveLength(1);
+  });
+
+  it("S4-3 lifetime: failed + RtnCode=1 → 1|OK, stays failed, not unlocked", async () => {
+    seedPlanOrder("unlock_report_lifetime", "failed");
+
+    const response = await postWebhook(planFields("unlock_report_lifetime"));
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(orderRow()?.status).toBe("failed");
+    expect(profileRow()?.access_status).toBe("locked");
+    expect(state.memory.pointTransactions.size).toBe(0);
+  });
+
+  it("S4-3 points pack: failed + RtnCode=1 → 1|OK, stays failed, no credit", async () => {
+    seedPlanOrder("points_pack_5", "failed");
+
+    const response = await postWebhook(planFields("points_pack_5"));
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(orderRow()?.status).toBe("failed");
+    expect(creditsFor(ORDER_ID)).toHaveLength(0);
+    expect(profileRow()?.points_balance).toBe(2);
+  });
+
+  it("S4-3 monthly: failed + RtnCode=1 → 1|OK, stays failed, no subscription", async () => {
+    seedPlanOrder("subscribe_report_monthly", "failed");
+
+    const response = await postWebhook(planFields("subscribe_report_monthly"));
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(orderRow()?.status).toBe("failed");
+    expect(state.memory.subscriptions.size).toBe(0);
+    expect(state.memory.subscriptionEvents.size).toBe(0);
+  });
+
+  it("S6-5 regression: a paid points pack without credit is still backfilled with 1|OK", async () => {
+    seedPlanOrder("points_pack_5", "paid");
+
+    const response = await postWebhook(planFields("points_pack_5"));
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(creditsFor(ORDER_ID)).toHaveLength(1);
+    expect(orderFailedNotifications()).toHaveLength(0);
+  });
+
+  it("regression: SimulatePaid=1 still acks a pending order without changing it", async () => {
+    seedPlanOrder("points_pack_5", "pending");
+
+    const response = await postWebhook(planFields("points_pack_5", { SimulatePaid: "1" }));
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(orderRow()?.status).toBe("pending");
+    expect(state.memory.notifications.size).toBe(0);
+  });
+
+  it("regression: a bad CheckMacValue on a failed order is still rejected", async () => {
+    seedPlanOrder("points_pack_5", "failed");
+    const payload = { ...planFields("points_pack_5"), CheckMacValue: "BAD" };
+
+    const response = await postWebhook(payload);
+
+    expect(await readBody(response)).not.toBe("1|OK");
+    expect(orderRow()?.status).toBe("failed");
+  });
+});
