@@ -67,8 +67,7 @@ function seedCredit(orderId: string) {
     delta: 5,
     type: "credit_purchase",
     source_order_id: orderId,
-    trade_no: null,
-    payment_date: null,
+    report_id: null,
   });
 }
 
