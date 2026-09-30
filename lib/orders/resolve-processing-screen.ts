@@ -1,4 +1,8 @@
-// TODO(US-019)：實作。此為 US-018 測試用空殼，只為讓測試能載入。
+import {
+  POINTS_PACK_5_PLAN_ID,
+  SUBSCRIBE_REPORT_MONTHLY_PLAN_ID,
+  UNLOCK_REPORT_LIFETIME_PLAN_ID,
+} from "../payments/plans";
 
 export type ProcessingScreen =
   | "accepted"
@@ -23,7 +27,33 @@ export type ProcessingEvidence = {
   now: Date;
 };
 
+// spec §2 Story 2：先看 orders.status，再看本筆證據；每筆訂單只落在一個 screen。
 export function resolveProcessingScreen(evidence: ProcessingEvidence): ProcessingScreen {
-  void evidence;
-  throw new Error("not implemented");
+  const { order } = evidence;
+  if (order.status === "pending") {
+    return "accepted";
+  }
+  if (order.status === "failed") {
+    return "incomplete";
+  }
+  if (order.status !== "paid") {
+    return "needs_manual";
+  }
+
+  if (order.planId === UNLOCK_REPORT_LIFETIME_PLAN_ID) {
+    return evidence.accessStatus === "unlocked" ? "unlock_completed" : "needs_manual";
+  }
+  if (order.planId === POINTS_PACK_5_PLAN_ID) {
+    return evidence.hasOwnCredit ? "points_credited" : "needs_manual";
+  }
+  if (order.planId === SUBSCRIBE_REPORT_MONTHLY_PLAN_ID) {
+    const sub = evidence.ownSubscription;
+    if (!sub?.hasFirstSuccess) {
+      return "needs_manual";
+    }
+    const withinPeriod = evidence.now.getTime() <= new Date(sub.currentPeriodEnd).getTime();
+    const inactiveStatus = sub.status === "cancelled" || sub.status === "expired";
+    return withinPeriod && !inactiveStatus ? "subscription_active" : "subscription_inactive";
+  }
+  return "needs_manual";
 }
