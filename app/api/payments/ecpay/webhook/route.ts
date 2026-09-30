@@ -2,6 +2,8 @@ import {
   readEcpayHashFromEnv,
   verifyCheckMacValue,
 } from "../../../../../lib/ecpay/check-mac";
+import { insertNotification } from "../../../../../lib/notifications/insert-notification";
+import { notifySubscriptionActive } from "../../../../../lib/notifications/notify-subscription-active";
 import { markOrderFailed } from "../../../../../lib/payments/mark-order-failed";
 import {
   POINTS_PACK_5_PLAN_ID,
@@ -141,26 +143,26 @@ async function markOrderPaid(
   return !error;
 }
 
+type RpcOutcome = { ok: boolean; reason?: string };
+
 async function fulfillPointsPack(
   client: Awaited<ReturnType<typeof createServiceRoleClient>>,
   orderId: string,
-): Promise<boolean> {
+): Promise<RpcOutcome> {
   const { data, error } = await client.rpc("fulfill_points_pack_order", {
     order_id: orderId,
   });
   if (error) {
-    return false;
+    return { ok: false };
   }
-  const row = Array.isArray(data) ? data[0] : data;
-  if (
-    row &&
-    typeof row === "object" &&
-    "ok" in row &&
-    (row as { ok?: unknown }).ok === false
-  ) {
-    return false;
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { ok?: unknown; reason?: string }
+    | null
+    | undefined;
+  if (row && typeof row === "object" && "ok" in row && row.ok === false) {
+    return { ok: false, reason: row.reason };
   }
-  return true;
+  return { ok: true, reason: row?.reason };
 }
 
 // "conflict" means the member already holds another live contract; ack so
@@ -168,12 +170,12 @@ async function fulfillPointsPack(
 async function activateSubscription(
   client: Awaited<ReturnType<typeof createServiceRoleClient>>,
   orderId: string,
-): Promise<boolean> {
+): Promise<RpcOutcome> {
   const { data, error } = await client.rpc("activate_subscription_from_order", {
     p_order_id: orderId,
   });
   if (error) {
-    return false;
+    return { ok: false };
   }
   const row = (Array.isArray(data) ? data[0] : data) as
     | { ok?: boolean; reason?: string }
@@ -181,9 +183,9 @@ async function activateSubscription(
     | undefined;
   if (row?.reason === "conflict") {
     console.error("[ecpay webhook]", `subscription conflict for order ${orderId}`);
-    return true;
+    return { ok: true, reason: "conflict" };
   }
-  return row?.ok === true;
+  return { ok: row?.ok === true, reason: row?.reason };
 }
 
 async function unlockIfLocked(
@@ -252,16 +254,29 @@ export async function POST(request: Request): Promise<Response> {
 
   if (order.plan_id === POINTS_PACK_5_PLAN_ID) {
     const credited = await fulfillPointsPack(client, order.id);
-    if (!credited) {
+    if (!credited.ok) {
       return reject("points credit failed");
+    }
+    // 通知在履約 RPC 提交之後另寫；失敗只留 log。
+    if (credited.reason === "credited") {
+      await insertNotification(client, {
+        userId: order.user_id,
+        type: "credit_completed",
+        sourceType: "order",
+        sourceId: order.id,
+        idempotencyKey: `credit:${order.id}`,
+      });
     }
     return ok();
   }
 
   if (order.plan_id === SUBSCRIBE_REPORT_MONTHLY_PLAN_ID) {
     const activated = await activateSubscription(client, order.id);
-    if (!activated) {
+    if (!activated.ok) {
       return reject("subscription activation failed");
+    }
+    if (activated.reason === "activated") {
+      await notifySubscriptionActive(client, `return:${merchantTradeNo}`);
     }
     return ok();
   }
@@ -276,6 +291,13 @@ export async function POST(request: Request): Promise<Response> {
           : "entitlement write failed",
       );
     }
+    await insertNotification(client, {
+      userId: order.user_id,
+      type: "unlock_completed",
+      sourceType: "order",
+      sourceId: order.id,
+      idempotencyKey: `unlock:${order.id}`,
+    });
     return ok();
   }
 
