@@ -8,6 +8,10 @@ const nextConfig = {
   turbopack: {
     root: __dirname,
   },
+  // 單元 7：/admin/orders 非白名單以 forbidden() 回 HTTP 403。
+  experimental: {
+    authInterrupts: true,
+  },
 };
 
 export default nextConfig;
