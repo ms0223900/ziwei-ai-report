@@ -3,6 +3,7 @@ import { computeCheckMacValue } from "../../../../../lib/ecpay/check-mac";
 import {
   createFakeServiceRoleClient,
   createFakeSupabaseMemory,
+  failNextNotificationInsert,
   seedFakeSubscription,
   seedFakeUser,
   type FakeSubscription,
@@ -330,5 +331,90 @@ describe("POST /api/payments/ecpay/period-webhook — linked order failed", () =
 
     expect(await response.text()).toBe("1|OK");
     expect(events()).toHaveLength(1);
+  });
+});
+
+describe("POST /api/payments/ecpay/period-webhook — subscription notifications", () => {
+  const originalEnv = Object.fromEntries(
+    PAYMENT_ENV_KEYS.map((key) => [key, process.env[key]]),
+  ) as Record<(typeof PAYMENT_ENV_KEYS)[number], string | undefined>;
+
+  beforeEach(() => {
+    state.memory = createFakeSupabaseMemory();
+    seedFakeUser(state.memory, { id: USER_ID, email: "yuan@example.com" }, {
+      subscription_status: "active",
+    });
+    seedFakeSubscription(state.memory, {
+      user_id: USER_ID,
+      merchant_trade_no: MTN,
+      current_period_end: PERIOD_END,
+    });
+    process.env.ECPAY_HASH_KEY = HASH_KEY;
+    process.env.ECPAY_HASH_IV = HASH_IV;
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    for (const key of PAYMENT_ENV_KEYS) {
+      const value = originalEnv[key];
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  });
+
+  function notifications() {
+    return [...state.memory.notifications.values()];
+  }
+
+  it("S5-4: one subscription_active keyed by the renewal event id, resend adds none", async () => {
+    const response = await postPeriod(periodFields());
+    await postPeriod(periodFields());
+
+    expect(await response.text()).toBe("1|OK");
+    const renewal = events().find((row) => row.event_type === "renewal_success");
+    expect(renewal).toBeDefined();
+    expect(notifications()).toHaveLength(1);
+    expect(notifications()[0]).toMatchObject({
+      user_id: USER_ID,
+      type: "subscription_active",
+      source_type: "subscription_event",
+      source_id: renewal?.id,
+      idempotency_key: `sub:${renewal?.id}`,
+    });
+  });
+
+  it("writes no notification for first_duplicate", async () => {
+    await postPeriod(periodFields({ TotalSuccessTimes: "1" }));
+
+    expect(events()).toHaveLength(1);
+    expect(notifications()).toHaveLength(0);
+  });
+
+  it("writes no notification for payment_failed", async () => {
+    await postPeriod(periodFields({ RtnCode: "10100058" }));
+
+    expect(events()).toHaveLength(1);
+    expect(notifications()).toHaveLength(0);
+  });
+
+  it("writes no notification for SimulatePaid=1", async () => {
+    await postPeriod(periodFields({ SimulatePaid: "1" }));
+
+    expect(notifications()).toHaveLength(0);
+  });
+
+  it("S5-5: keeps the renewal and 1|OK when the notification insert fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    failNextNotificationInsert(state.memory);
+
+    const response = await postPeriod(periodFields());
+
+    expect(await response.text()).toBe("1|OK");
+    expect(subscription()?.current_period_end).toBe("2026-11-18T04:00:00.000Z");
+    expect(notifications()).toHaveLength(0);
   });
 });
