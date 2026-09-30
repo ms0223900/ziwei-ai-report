@@ -64,3 +64,34 @@ describe("readEcpayCheckoutEnv period return url", () => {
     expect(env?.periodReturnUrl).toBe("");
   });
 });
+
+describe("readEcpayCheckoutEnv client back base", () => {
+  beforeEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("exposes the trimmed APP_BASE_URL as the base for the order-scoped back URL", () => {
+    stubEnv({ APP_BASE_URL: "https://app.example.com/" });
+
+    const env = readEcpayCheckoutEnv() as unknown as Record<string, unknown> | null;
+
+    expect(env?.appBaseUrl).toBe("https://app.example.com");
+  });
+
+  it("does not carry a whole ECPAY_CLIENT_BACK_URL through to the checkout env", () => {
+    stubEnv({
+      APP_BASE_URL: "https://app.example.com",
+      ECPAY_CLIENT_BACK_URL: "https://legacy.example.com/orders/processing",
+    });
+
+    const env = readEcpayCheckoutEnv();
+
+    expect(JSON.stringify(env)).not.toContain(
+      "https://legacy.example.com/orders/processing",
+    );
+  });
+});
