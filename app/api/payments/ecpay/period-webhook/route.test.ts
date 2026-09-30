@@ -234,3 +234,101 @@ describe("POST /api/payments/ecpay/period-webhook", () => {
     expect(subscription()?.status).toBe("cancelled");
   });
 });
+
+describe("POST /api/payments/ecpay/period-webhook — linked order failed", () => {
+  const ORDER_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+  const originalEnv = Object.fromEntries(
+    PAYMENT_ENV_KEYS.map((key) => [key, process.env[key]]),
+  ) as Record<(typeof PAYMENT_ENV_KEYS)[number], string | undefined>;
+
+  function seed(orderStatus: "failed" | "paid" | null) {
+    state.memory = createFakeSupabaseMemory();
+    seedFakeUser(state.memory, { id: USER_ID, email: "yuan@example.com" }, {
+      subscription_status: "active",
+    });
+    if (orderStatus) {
+      state.memory.orders.set(ORDER_ID, {
+        id: ORDER_ID,
+        user_id: USER_ID,
+        plan_id: "subscribe_report_monthly",
+        merchant_trade_no: MTN,
+        amount: 19,
+        currency: "TWD",
+        status: orderStatus,
+        trade_no: null,
+        payment_date: null,
+      });
+    }
+    seedFakeSubscription(state.memory, {
+      user_id: USER_ID,
+      merchant_trade_no: MTN,
+      current_period_end: PERIOD_END,
+      order_id: orderStatus ? ORDER_ID : null,
+    });
+  }
+
+  beforeEach(() => {
+    process.env.ECPAY_HASH_KEY = HASH_KEY;
+    process.env.ECPAY_HASH_IV = HASH_IV;
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    for (const key of PAYMENT_ENV_KEYS) {
+      const value = originalEnv[key];
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  });
+
+  it("S4-4: acks a renewal without writing events when the linked order is failed", async () => {
+    seed("failed");
+
+    const response = await postPeriod(periodFields());
+
+    expect(await response.text()).toBe("1|OK");
+    expect(events()).toHaveLength(0);
+    expect(subscription()?.current_period_end).toBe(PERIOD_END);
+  });
+
+  it("short-circuits a payment failure the same way when the linked order is failed", async () => {
+    seed("failed");
+
+    const response = await postPeriod(periodFields({ RtnCode: "10100058" }));
+
+    expect(await response.text()).toBe("1|OK");
+    expect(subscription()?.status).toBe("active");
+    expect(events()).toHaveLength(0);
+  });
+
+  it("regression: an unknown MerchantTradeNo is still 0|Error", async () => {
+    seed("failed");
+
+    const response = await postPeriod(periodFields({ MerchantTradeNo: "ZWUNKNOWN0001" }));
+
+    expect(await response.text()).toBe("0|Error");
+    expect(events()).toHaveLength(0);
+  });
+
+  it("regression: a null order_id does not short-circuit and still writes the event", async () => {
+    seed(null);
+
+    const response = await postPeriod(periodFields());
+
+    expect(await response.text()).toBe("1|OK");
+    expect(events()).toHaveLength(1);
+    expect(subscription()?.current_period_end).toBe("2026-11-18T04:00:00.000Z");
+  });
+
+  it("regression: a paid linked order does not short-circuit", async () => {
+    seed("paid");
+
+    const response = await postPeriod(periodFields());
+
+    expect(await response.text()).toBe("1|OK");
+    expect(events()).toHaveLength(1);
+  });
+});

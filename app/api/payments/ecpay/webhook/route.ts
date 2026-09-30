@@ -2,6 +2,7 @@ import {
   readEcpayHashFromEnv,
   verifyCheckMacValue,
 } from "../../../../../lib/ecpay/check-mac";
+import { markOrderFailed } from "../../../../../lib/payments/mark-order-failed";
 import {
   POINTS_PACK_5_PLAN_ID,
   SUBSCRIBE_REPORT_MONTHLY_PLAN_ID,
@@ -123,17 +124,6 @@ async function loadProfile(
   return data as ProfileRow;
 }
 
-async function markOrderFailed(
-  client: Awaited<ReturnType<typeof createServiceRoleClient>>,
-  orderId: string,
-): Promise<boolean> {
-  const { error } = await client
-    .from("orders")
-    .update({ status: "failed" })
-    .eq("id", orderId);
-  return !error;
-}
-
 async function markOrderPaid(
   client: Awaited<ReturnType<typeof createServiceRoleClient>>,
   order: OrderRow,
@@ -236,13 +226,21 @@ export async function POST(request: Request): Promise<Response> {
     return ok();
   }
 
+  // failed 是終態：驗簽、對單、對金額都通過也不再更新或履約，只回 1|OK 讓綠界停止重送。
+  if (order.status === "failed") {
+    return ok();
+  }
+
   const rtnCode = trimField(fields, "RtnCode");
   const tradeNo = trimField(fields, "TradeNo");
   const paymentDate = parseEcpayPaymentDate(fields.PaymentDate ?? "");
 
   if (order.status !== "paid") {
     if (rtnCode !== "1") {
-      await markOrderFailed(client, order.id);
+      const result = await markOrderFailed(client, order.id);
+      if (result === "error") {
+        return reject("order failed write failed");
+      }
       return ok();
     }
 
