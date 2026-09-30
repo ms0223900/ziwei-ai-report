@@ -4,6 +4,7 @@ import {
   POINTS_PACK_5_PLAN_ID,
   SUBSCRIBE_REPORT_MONTHLY_PLAN_ID,
 } from "../payments/plans";
+import { formatTaipeiDate } from "../time/taipei-date";
 import {
   resolveProcessingScreen,
   type ProcessingEvidence,
@@ -36,13 +37,6 @@ const CTAS: Record<ProcessingScreen, { primary: CtaKind; secondary: "home" | "pl
   subscription_active: { primary: "report", secondary: "plans" },
   subscription_inactive: { primary: "plans", secondary: "home" },
 };
-
-// 以 Asia/Taipei 顯示日期（yyyy/MM/dd）。
-function formatTaipeiDate(iso: string): string {
-  const d = new Date(new Date(iso).getTime() + 8 * 60 * 60 * 1000);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getUTCFullYear()}/${pad(d.getUTCMonth() + 1)}/${pad(d.getUTCDate())}`;
-}
 
 type OrderRow = {
   id: string;

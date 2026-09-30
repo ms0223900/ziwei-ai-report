@@ -63,4 +63,16 @@ describe("AuthSessionBar", () => {
     expect(screen.queryByRole("button", { name: "儲存" })).toBeNull();
     expect(screen.getByRole("button", { name: "登出" })).toBeTruthy();
   });
+
+  it("links to /notifications for a signed-in member", () => {
+    render(
+      <AuthSessionBar
+        accessStatus="locked"
+        displayName="yuan"
+        userId="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: "通知" }).getAttribute("href")).toBe("/notifications");
+  });
 });

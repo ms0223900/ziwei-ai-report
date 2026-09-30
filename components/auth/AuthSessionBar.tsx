@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { REPORT_SLOTS } from "../../lib/constants";
 import { createBrowserSupabaseClient } from "../../lib/supabase/client";
 
@@ -95,6 +96,12 @@ export function AuthSessionBar({
             </p>
           ) : null}
           */}
+          <Link
+            className="inline-flex min-h-9 items-center px-3 text-label text-ink underline-offset-4 hover:underline"
+            href="/notifications"
+          >
+            通知
+          </Link>
           <button
             className="min-h-9 rounded-control px-3 text-label text-ink-soft hover:text-ink"
             onClick={() => {

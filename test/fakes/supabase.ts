@@ -377,6 +377,11 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
       filters.push({ column, value });
       return api;
     },
+    // PostgREST `.is(column, null)`；fake 以相等比對。
+    is(column: string, value: null) {
+      filters.push({ column, value });
+      return api;
+    },
     order(column: string, options?: { ascending?: boolean }) {
       orderBy = { column, ascending: options?.ascending !== false };
       return api;

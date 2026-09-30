@@ -21,4 +21,10 @@ describe("AuthEntry", () => {
       "/register",
     );
   });
+
+  it("does not show the notifications entry when signed out", () => {
+    render(<AuthEntry />);
+
+    expect(screen.queryByRole("link", { name: "通知" })).toBeNull();
+  });
 });
