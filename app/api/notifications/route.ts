@@ -1,6 +1,19 @@
-// TODO(US-022)：實作。此為 US-021 測試用空殼，只為讓測試能載入。
+import { listNotifications } from "../../../lib/notifications/list-notifications";
+import { createServiceRoleClient } from "../../../lib/supabase/server";
+import { createSessionClient, getSessionUser } from "../../../lib/supabase/session";
+
 export const dynamic = "force-dynamic";
 
 export async function GET(): Promise<Response> {
-  throw new Error("not implemented");
+  const user = await getSessionUser();
+  const session = user ? await createSessionClient() : null;
+  if (!user || !session) {
+    return Response.json({ error: "請先登入" }, { status: 401 });
+  }
+  const service = await createServiceRoleClient();
+  const notifications = await listNotifications(session, service, user.id);
+  if (!notifications) {
+    return Response.json({ error: "讀取通知失敗，請稍後再試" }, { status: 500 });
+  }
+  return Response.json({ notifications });
 }
