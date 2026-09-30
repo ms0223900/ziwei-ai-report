@@ -1,4 +1,5 @@
 import { jsonError, loginRequiredError } from "../../../../lib/errors";
+import { insertNotification } from "../../../../lib/notifications/insert-notification";
 import { createServiceRoleClient } from "../../../../lib/supabase/server";
 import { getSessionUser } from "../../../../lib/supabase/session";
 
@@ -45,6 +46,35 @@ function unlockJson(row: UnlockRow): Response {
   });
 }
 
+type ServiceClient = Awaited<ReturnType<typeof createServiceRoleClient>>;
+
+// RPC 不回傳 transaction id；以 user_id＋report_id＋type=debit_unlock 的 unique 列另查。查不到就不寫通知。
+async function notifyReportUnlocked(
+  client: ServiceClient,
+  userId: string,
+  reportId: string,
+): Promise<void> {
+  const { data, error } = await client
+    .from("point_transactions")
+    .select()
+    .eq("user_id", userId)
+    .eq("report_id", reportId)
+    .eq("type", "debit_unlock")
+    .maybeSingle();
+  const transactionId = (data as { id?: string } | null)?.id;
+  if (error || !transactionId) {
+    console.error("[notifications] debit transaction not found", reportId, error);
+    return;
+  }
+  await insertNotification(client, {
+    userId,
+    type: "report_unlocked",
+    sourceType: "report",
+    sourceId: reportId,
+    idempotencyKey: `debit:${transactionId}`,
+  });
+}
+
 export async function POST(request: Request): Promise<Response> {
   const user = await getSessionUser();
   if (!user) {
@@ -82,5 +112,10 @@ export async function POST(request: Request): Promise<Response> {
     });
   }
 
-  return unlockJson(readRow(data) ?? { ok: false, reason: "forbidden", points_balance: 0 });
+  const row = readRow(data) ?? { ok: false, reason: "forbidden", points_balance: 0 };
+  // 只有真正扣點解鎖才通知；其他 reason（含餘額不足、他人報告）都不建。
+  if (row.ok === true && row.reason === "unlocked") {
+    await notifyReportUnlocked(client, user.id, reportId);
+  }
+  return unlockJson(row);
 }

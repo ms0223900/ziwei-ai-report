@@ -1,7 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createFakeServiceRoleClient,
   createFakeSupabaseMemory,
+  failNextNotificationInsert,
   seedFakeReport,
   seedFakeSubscription,
   seedFakeUser,
@@ -407,5 +408,114 @@ describe("POST /api/reports/unlock-with-point — subscription (unit 6 US-014)",
     const body = await readJson(await postUnlock({ report_id: REPORT_ID }));
 
     expect(body).toMatchObject({ ok: false, reason: "forbidden", points_balance: 3 });
+  });
+});
+
+describe("POST /api/reports/unlock-with-point — report_unlocked notification", () => {
+  beforeEach(() => {
+    state.memory = createFakeSupabaseMemory();
+    state.userId = USER_ID;
+    seedFakeUser(
+      state.memory,
+      { id: USER_ID, email: "yuan@example.com" },
+      { access_status: "locked", points_balance: 3 },
+    );
+    seedOwnedReport();
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function notifications() {
+    return [...state.memory.notifications.values()];
+  }
+
+  it("S5-3: one report_unlocked keyed by the debit transaction id when reason=unlocked", async () => {
+    const body = await readJson(await postUnlock({ report_id: REPORT_ID }));
+
+    expect(body.reason).toBe("unlocked");
+    const debits = [...state.memory.pointTransactions.values()].filter(
+      (row) =>
+        row.user_id === USER_ID &&
+        row.report_id === REPORT_ID &&
+        row.type === "debit_unlock",
+    );
+    expect(debits).toHaveLength(1);
+    expect(notifications()).toHaveLength(1);
+    expect(notifications()[0]).toMatchObject({
+      user_id: USER_ID,
+      type: "report_unlocked",
+      source_type: "report",
+      source_id: REPORT_ID,
+      idempotency_key: `debit:${debits[0]?.id}`,
+    });
+  });
+
+  it("S5-3: already_unlocked on a second call adds no notification", async () => {
+    await postUnlock({ report_id: REPORT_ID });
+    const body = await readJson(await postUnlock({ report_id: REPORT_ID }));
+
+    expect(body.reason).toBe("already_unlocked");
+    expect(notifications()).toHaveLength(1);
+  });
+
+  it("S5-3: insufficient writes no notification", async () => {
+    const profile = state.memory.profiles.get(USER_ID)!;
+    state.memory.profiles.set(USER_ID, { ...profile, points_balance: 0 });
+
+    const body = await readJson(await postUnlock({ report_id: REPORT_ID }));
+
+    expect(body.reason).toBe("insufficient");
+    expect(notifications()).toHaveLength(0);
+  });
+
+  it("S5-3: forbidden writes no notification", async () => {
+    state.userId = OTHER_ID;
+    seedFakeUser(state.memory, { id: OTHER_ID, email: "other@example.com" }, { points_balance: 3 });
+
+    const body = await readJson(await postUnlock({ report_id: REPORT_ID }));
+
+    expect(body.reason).toBe("forbidden");
+    expect(notifications()).toHaveLength(0);
+  });
+
+  it("S5-3: lifetime writes no notification", async () => {
+    const profile = state.memory.profiles.get(USER_ID)!;
+    state.memory.profiles.set(USER_ID, { ...profile, access_status: "unlocked" });
+
+    const body = await readJson(await postUnlock({ report_id: REPORT_ID }));
+
+    expect(body.reason).toBe("lifetime");
+    expect(notifications()).toHaveLength(0);
+  });
+
+  it("S5-3: subscription writes no notification", async () => {
+    seedFakeSubscription(state.memory, {
+      user_id: USER_ID,
+      merchant_trade_no: "MTN1",
+      current_period_end: "2999-01-01T00:00:00.000Z",
+    });
+
+    const body = await readJson(await postUnlock({ report_id: REPORT_ID }));
+
+    expect(body.reason).toBe("subscription");
+    expect(notifications()).toHaveLength(0);
+  });
+
+  it("returns the same success response when the notification insert fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    failNextNotificationInsert(state.memory);
+
+    const response = await postUnlock({ report_id: REPORT_ID });
+
+    expect(response.status).toBe(200);
+    expect(await readJson(response)).toEqual({
+      ok: true,
+      reason: "unlocked",
+      points_balance: 2,
+    });
+    expect(notifications()).toHaveLength(0);
   });
 });

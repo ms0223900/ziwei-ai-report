@@ -3,6 +3,7 @@ import { computeCheckMacValue } from "../../../../../lib/ecpay/check-mac";
 import {
   createFakeServiceRoleClient,
   createFakeSupabaseMemory,
+  failNextNotificationInsert,
   seedFakeSubscription,
   seedFakeUser,
   setFakeRpc,
@@ -880,5 +881,153 @@ describe("POST /api/payments/ecpay/webhook — failed terminal state", () => {
 
     expect(await readBody(response)).not.toBe("1|OK");
     expect(orderRow()?.status).toBe("failed");
+  });
+});
+
+describe("POST /api/payments/ecpay/webhook — fulfillment notifications", () => {
+  const originalPaymentEnv = Object.fromEntries(
+    PAYMENT_ENV_KEYS.map((key) => [key, process.env[key]]),
+  ) as Record<(typeof PAYMENT_ENV_KEYS)[number], string | undefined>;
+
+  beforeEach(() => {
+    state.memory = createFakeSupabaseMemory();
+    state.failProfileUpdate = false;
+    seedFakeUser(state.memory, { id: USER_ID, email: "yuan@example.com" });
+    setPaymentEnv();
+    installFulfillRpc();
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    for (const key of PAYMENT_ENV_KEYS) {
+      const value = originalPaymentEnv[key];
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  });
+
+  function notifications(type?: string) {
+    return [...state.memory.notifications.values()].filter(
+      (row) => type === undefined || row.type === type,
+    );
+  }
+
+  function firstSuccessEventId() {
+    return [...state.memory.subscriptionEvents.values()].find(
+      (row) => row.idempotency_key === `return:${MERCHANT_TRADE_NO}`,
+    )?.id;
+  }
+
+  it("S5-2 lifetime: one unlock_completed after unlocking, resend adds none", async () => {
+    seedPendingOrder();
+
+    const response = await postWebhook(successFields());
+    await postWebhook(successFields());
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(profileRow()?.access_status).toBe("unlocked");
+    expect(notifications()).toHaveLength(1);
+    expect(notifications("unlock_completed")[0]).toMatchObject({
+      user_id: USER_ID,
+      source_type: "order",
+      source_id: ORDER_ID,
+      idempotency_key: `unlock:${ORDER_ID}`,
+    });
+  });
+
+  it("S5-2 points pack: one credit_completed when the RPC credits, resend adds none", async () => {
+    seedPointsPackOrder();
+
+    const response = await postWebhook(successFields({ TradeAmt: "49" }));
+    await postWebhook(successFields({ TradeAmt: "49" }));
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(creditsFor(ORDER_ID)).toHaveLength(1);
+    expect(notifications()).toHaveLength(1);
+    expect(notifications("credit_completed")[0]).toMatchObject({
+      user_id: USER_ID,
+      source_type: "order",
+      source_id: ORDER_ID,
+      idempotency_key: `credit:${ORDER_ID}`,
+    });
+  });
+
+  it("S5-2 monthly: one subscription_active keyed by the first_success event id, resend adds none", async () => {
+    seedPendingOrder({ plan_id: "subscribe_report_monthly", amount: 19 });
+
+    const response = await postWebhook(successFields({ TradeAmt: "19" }));
+    await postWebhook(successFields({ TradeAmt: "19" }));
+
+    expect(await readBody(response)).toBe("1|OK");
+    const eventId = firstSuccessEventId();
+    expect(eventId).toBeDefined();
+    expect(notifications()).toHaveLength(1);
+    expect(notifications("subscription_active")[0]).toMatchObject({
+      user_id: USER_ID,
+      source_type: "subscription_event",
+      source_id: eventId,
+      idempotency_key: `sub:${eventId}`,
+    });
+  });
+
+  it("writes no notification for SimulatePaid=1", async () => {
+    seedPendingOrder();
+
+    await postWebhook(successFields({ SimulatePaid: "1" }));
+
+    expect(notifications()).toHaveLength(0);
+  });
+
+  it("writes no notification when the CheckMacValue is bad", async () => {
+    seedPendingOrder();
+
+    await postWebhook({ ...successFields(), CheckMacValue: "BAD" });
+
+    expect(notifications()).toHaveLength(0);
+  });
+
+  it("writes no subscription_active when activation returns conflict", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    seedPendingOrder({ plan_id: "subscribe_report_monthly", amount: 19 });
+    seedFakeSubscription(state.memory, {
+      user_id: USER_ID,
+      merchant_trade_no: "ZW_OTHER_CONTRACT",
+      current_period_end: "2999-01-01T00:00:00.000Z",
+    });
+
+    const response = await postWebhook(successFields({ TradeAmt: "19" }));
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(notifications()).toHaveLength(0);
+  });
+
+  it("S5-5: keeps the lifetime unlock, paid order and 1|OK when the notification insert fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    seedPendingOrder();
+    failNextNotificationInsert(state.memory);
+
+    const response = await postWebhook(successFields());
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(orderRow()?.status).toBe("paid");
+    expect(profileRow()?.access_status).toBe("unlocked");
+    expect(notifications()).toHaveLength(0);
+  });
+
+  it("S5-5: keeps the points credit and 1|OK when the notification insert fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    seedPointsPackOrder();
+    failNextNotificationInsert(state.memory);
+
+    const response = await postWebhook(successFields({ TradeAmt: "49" }));
+
+    expect(await readBody(response)).toBe("1|OK");
+    expect(orderRow()?.status).toBe("paid");
+    expect(creditsFor(ORDER_ID)).toHaveLength(1);
+    expect(notifications()).toHaveLength(0);
   });
 });

@@ -4,7 +4,7 @@
 | --- | --- |
 | `reset-checkpoint.sql` | **跑這一支**：A/B/C 預填＋D 清成乾淨帳，可重複執行 |
 | `seed.sql` | 通用版：自行替換 `<A uuid>` 等（不含 D） |
-| `expire.sql` / `cancel.sql` | 單一會員到期／取消（替換 `<USER uuid>`） |
+| `expire.sql` / `cancel.sql` | 單一會員到期／取消（替換 `<USER uuid>`）；`cancel.sql` 取消 commit 後另補一則 `subscription_inactive` 通知 |
 
 ## 重跑驗收
 
