@@ -107,6 +107,19 @@
 | `OPENROUTER_FALLBACK_MODEL` | server-only | 備援(不同 provider 更佳) | 本版 |
 | `ECPAY_MERCHANT_ID` / `ECPAY_HASH_KEY` / `ECPAY_HASH_IV` | server-only | 金流簽章 | 單元 4 |
 | `ECPAY_ENV` | server-only | `stage` / `prod` | 單元 4 |
-| `APP_BASE_URL` | server-only | 回跳/Webhook 網址根 | 單元 4 |
+| `APP_BASE_URL` | server-only | 回跳/Webhook 網址根；單元 7 起 `ClientBackURL` 一律由此組成 `/orders/processing?order={id}` | 單元 4 |
+| `ADMIN_USER_IDS` | server-only | 管理者白名單（逗號分隔 uuid）；空值＝沒有管理者；禁止 `NEXT_PUBLIC_` | 單元 7 |
 
 前端一律不載入 server-only 變數;secret 不用 `NEXT_PUBLIC_` 前綴。Live 備援（主失敗→重試→備援）允許本機／預覽驗證，不以 Vercel Hobby 10 秒為硬 SLA。
+
+## 7. 單元 7 付款後交付（已實作）
+
+規格全文：[`docs/specs/2026-09-28-ziwei-unit7-post-payment-delivery.md`](specs/2026-09-28-ziwei-unit7-post-payment-delivery.md)。架構與路由見 [`architecture.md`](architecture.md) §7。
+
+- **回跳帶訂單 id**：綠界回跳到 `/orders/processing?order={id}`；結果頁只讀本筆訂單與本筆履約證據，不採信任何回跳參數。
+- **failed 終態**：所有 `pending → failed` 只經 `mark_order_failed`；`failed` 之後不再更新、不再履約。
+- **通知只做 App 內**：八種 type 寫入 `notifications`，在 `/notifications` 列表與標為已讀；不寄 Email、不推播。
+- **管理者補償**：白名單管理者（`ADMIN_USER_IDS`，server-only）只能對「已 paid、有交易編號、無 credit」的點數包補 5 點一次，帳本 type 仍是 `credit_purchase`。
+- **報告頁**：進階內容仍依伺服器權益（永久 → 單點 → 訂閱有效期間 → 鎖定）；有永久或訂閱權益時主 CTA 不是「用 1 點解鎖」。
+- **本版不做**：pending 逾時寫入、結果頁輪詢或重查按鈕、`expired` 事件與失效通知、`grant_lifetime`／`retry_fulfillment`、手改訂閱期間、「我的訂單與權益」、Email／推播、退款、發票、第四種 `orders.status`。
+

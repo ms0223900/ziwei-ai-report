@@ -160,3 +160,29 @@ select count(*) from public.point_transactions where source_order_id = '<fixture
 | 通知頁沒有新通知 | 遷移沒套用（通知寫入失敗只記 server log，不影響付款）；查 Vercel log 的 `[notifications]` |
 
 不連 Supabase 也能先確認邏輯：`npx vitest run app/api/orders app/api/notifications app/api/admin app/api/payments lib/payments lib/notifications lib/admin scripts`。
+
+## 8. 交棒給單元 8
+
+### 8.1 本版刻意不做
+
+| 項目 | 現況 | 之後要做時的接點 |
+| --- | --- | --- |
+| pending 逾時寫入 | 門檻分鐘數未定；沒有任何生產路徑把逾時訂單標成 failed | 只能呼叫 `markOrderFailed()`，不得另寫一套；不得在結果頁 GET 裡呼叫 |
+| 結果頁輪詢／重查按鈕 | `primaryCta.kind=refresh` 只是連回同一頁，重新整理即重讀 | 輪詢不得建通知 |
+| `expired` 事件與失效通知 | `expire.sql` 只改期間，沒有 `expired` 事件列，也就不建 `subscription_inactive` | 先補事件寫入路徑，再依 `sub:{event_id}` 另一次 INSERT 通知 |
+| `grant_lifetime`／`retry_fulfillment` | 補償 API 對非 `credit_points` 一律 `422`「本版只接受補點」 | 沿用 `admin_actions` 的 key 規則（成功鍵固定、rejected／skipped 用獨立 uuid 鍵） |
+| 手改訂閱期間、「我的訂單與權益」 | 未做 | — |
+| Email、推播、退款、發票、第四種 `orders.status` | 未做 | — |
+
+### 8.2 單元 8 會用到的資料結構
+
+- `notifications.type`：`order_pending`、`order_failed`、`unlock_completed`、`credit_completed`、`report_unlocked`、`subscription_active`、`subscription_inactive`、`admin_compensated`；`idempotency_key` 規則見規格 §2 Story 5 的表。
+- `admin_actions.idempotency_key`：成功 `compensate:{order_id}:credit_points`；拒絕 `...:rejected:{uuid}`；已履約跳過 `...:skipped:{uuid}`。
+- 結果頁七個 screen 與判斷順序：`lib/orders/resolve-processing-screen.ts`；回應形狀：`lib/orders/read-processing-result.ts`。
+- 新表、路由、寫入規則總覽：[`docs/architecture.md`](../../architecture.md) §7；環境變數：[`docs/spec.md`](../../spec.md) §6。
+
+### 8.3 尚待人工確認（實跑時一併做）
+
+- US-029 的真機項目（§1～§5，紀錄填 §6）。
+- US-020：375px 寬無橫向捲動。
+- US-026：非白名單開 `/admin/orders` 的實際 HTTP 狀態為 403。

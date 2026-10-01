@@ -138,3 +138,37 @@ ziwei-ai-report/
 | A7 | 無痕全流程 + Vercel deploy | 無痕:填→結果→鎖定 CTA→提示;Production env 完備 |
 
 各 checkpoint 可獨立 build/typecheck,各一個 commit;mock 預設讓課程學員零 key 也能跑完主流程。
+
+## 7. 單元 7 付款後交付（已實作）
+
+> 規格：[`docs/specs/2026-09-28-ziwei-unit7-post-payment-delivery.md`](specs/2026-09-28-ziwei-unit7-post-payment-delivery.md)；任務與驗收：[`docs/user-stories/ziwei-unit7-post-payment-delivery/`](user-stories/ziwei-unit7-post-payment-delivery/README.md)；課堂 Checkpoint：[`howto-post-payment-delivery.md`](user-stories/ziwei-unit7-post-payment-delivery/howto-post-payment-delivery.md)。
+
+### 7.1 資料表（`supabase/migrations/20260928000000_notifications_admin_actions.sql`）
+
+| 表 | 重點欄位 | 權限 |
+| --- | --- | --- |
+| `notifications` | `user_id`、`type`（8 值）、`source_type`（`order`／`report`／`subscription_event`／`admin_action`）、`source_id`、`idempotency_key` unique、`created_at`、`read_at` | RLS on；authenticated 只能 SELECT 自己的列；INSERT 與已讀只經 service role |
+| `admin_actions` | `admin_user_id`、`action`（本版只有 `credit_points`）、`reason`、`source_order_id` → `orders`、`idempotency_key` unique、`before_state`／`after_state`、`result`（`ok`／`skipped_already_fulfilled`／`rejected`） | RLS on；authenticated、anon 無任何權限 |
+
+不新增 `orders` 欄位或 `orders.status` 值；`point_transactions` 不新增 type。
+
+### 7.2 路由
+
+| 路由 | 檔案 | 說明 |
+| --- | --- | --- |
+| `GET /api/orders/processing?order={id}` | `app/api/orders/processing/route.ts` | 需 session；只讀；回七個互斥 screen 之一（`lib/orders/resolve-processing-screen.ts`） |
+| `/orders/processing?order={id}` | `app/orders/processing/page.tsx` | 結果頁（RSC），與 API 共用 `lib/orders/read-processing-result.ts`；忽略 `RtnCode`／`SimulatePaid` 等 query |
+| `GET /api/notifications` | `app/api/notifications/route.ts` | 需 session；自己的通知、新到舊（`lib/notifications/list-notifications.ts`） |
+| `POST /api/notifications/{id}/read` | `app/api/notifications/[id]/read/route.ts` | 需 session；service role 確認擁有者且 `read_at is null` 才寫 |
+| `/notifications` | `app/notifications/page.tsx` | 通知頁；頁首入口只在登入時出現（`components/auth/AuthSessionBar.tsx`） |
+| `POST /api/admin/compensations` | `app/api/admin/compensations/route.ts` | 白名單管理者補點；只呼叫 `fulfill_points_pack_order` |
+| `/admin/orders?order={id}` | `app/admin/orders/page.tsx` | 管理者查詢頁；非白名單以 `forbidden()` 回 403（`next.config.mjs` 啟用 `experimental.authInterrupts`，畫面在 `app/forbidden.tsx`） |
+
+新 API 都需要 session，不在 `proxy.ts` 的排除清單內（排除清單仍只有綠界 Webhook）。
+
+### 7.3 寫入規則
+
+- **`pending → failed` 唯一入口**：`lib/payments/mark-order-failed.ts` 的 `markOrderFailed()`。帶 `status=pending` 條件更新，再另一次寫 `order_failed`；生產呼叫端只有 ReturnURL（`RtnCode != 1`），Checkpoint 用 `scripts/post-payment-checkpoint/mark-failed.sql`（同步驟）。沒有逾時呼叫端。
+- **failed 是終態**：ReturnURL 對已 `failed` 的訂單回 `1|OK` 不履約；PeriodReturnURL 在 `subscriptions.order_id` 指向的訂單已 `failed` 時回 `1|OK`、不寫週期事件。
+- **通知**：一律經 `lib/notifications/insert-notification.ts` 的 `insertNotification()`，在履約提交之後另寫；同一 `idempotency_key` 跳過、其他錯誤只記 log 不 throw，不回滾履約。各 type 的寫入點與 key 見規格 §2 Story 5；`cancel.sql` 在取消 commit 後另一次交易補 `subscription_inactive`。
+- **回跳**：建單時 `ClientBackURL` = `{APP_BASE_URL}/orders/processing?order={orders.id}`（`lib/payments/checkout-env.ts` 只提供 `appBaseUrl`），並寫一則 `order_pending`。
