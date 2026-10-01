@@ -1,5 +1,7 @@
 /** @vitest-environment jsdom */
 
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -9,6 +11,7 @@ import {
   HIGH_RISK_MESSAGES,
   MEMBERSHIP_CTA_UNLOCK_REPORT,
   PREVIEW_EXAMPLE_MARK,
+  UNLOCK_WITH_POINT_CTA,
 } from "../../lib/constants";
 import advancedValid from "../../lib/generation/fixtures/advanced.valid.json";
 import { HomeClient } from "./HomeClient";
@@ -785,6 +788,130 @@ describe("HomeClient 月繳訂閱（unit 6 US-018）", () => {
     expect(await screen.findByRole("heading", { name: "小圓的進階報告" })).toBeTruthy();
     expect(screen.queryByText("已用 1 點解鎖此報告")).toBeNull();
     expect(screen.getByText("訂閱有效中")).toBeTruthy();
+  });
+});
+
+describe("HomeClient 報告頁主 CTA 不採信回跳（unit 7 US-027）", () => {
+  const ACTIVE_UNTIL = "2999-10-18T04:00:00.000Z";
+
+  afterEach(() => {
+    window.history.replaceState(null, "", "/");
+  });
+
+  it("S7-2: a lifetime member sees advanced and no 用 1 點解鎖 CTA even with points", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.includes(`/api/reports/${PERSIST_ID}`)) {
+        return jsonResponse(200, GET_ADVANCED_BODY);
+      }
+      if (url === "/api/report-unlocks") {
+        return jsonResponse(200, []);
+      }
+      return jsonResponse(200, MASKED_POST_BODY);
+    });
+
+    render(<HomeClient initialAccessStatus="unlocked" initialHasSession initialPointsBalance={3} />);
+    await submitAs(user);
+
+    expect(await screen.findByRole("heading", { name: "小圓的進階報告" })).toBeTruthy();
+    expect(screen.getByText(advancedValid.rationale)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: UNLOCK_WITH_POINT_CTA })).toBeNull();
+  });
+
+  it("S7-2: an active subscriber sees advanced and no 用 1 點解鎖 CTA even with points", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.includes(`/api/reports/${PERSIST_ID}`)) {
+        return jsonResponse(200, { ...GET_ADVANCED_BODY, access_status: "locked", unlock_mode: "subscription" });
+      }
+      if (url === "/api/report-unlocks") {
+        return jsonResponse(200, []);
+      }
+      return jsonResponse(200, MASKED_POST_BODY);
+    });
+
+    render(
+      <HomeClient
+        initialAccessStatus="locked"
+        initialHasSession
+        initialPointsBalance={3}
+        initialSubscriptionActiveUntil={ACTIVE_UNTIL}
+      />,
+    );
+    await submitAs(user);
+
+    expect(await screen.findByRole("heading", { name: "小圓的進階報告" })).toBeTruthy();
+    expect(screen.getByText(advancedValid.rationale)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: UNLOCK_WITH_POINT_CTA })).toBeNull();
+  });
+
+  it("S7-1: a locked report stays locked when the URL carries RtnCode=1 / SimulatePaid=1", async () => {
+    window.history.replaceState(null, "", "/?RtnCode=1&SimulatePaid=1&TradeAmt=99&order=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.includes(`/api/reports/${PERSIST_ID}`)) {
+        return jsonResponse(403, { error_code: "FORBIDDEN", message: "尚未開通，無法讀取進階報告。" });
+      }
+      if (url === "/api/report-unlocks") {
+        return jsonResponse(200, []);
+      }
+      return jsonResponse(200, MASKED_POST_BODY);
+    });
+
+    render(<HomeClient initialAccessStatus="locked" initialHasSession initialPointsBalance={2} />);
+    await submitAs(user);
+
+    expect(await screen.findByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
+    expect(screen.queryByText(advancedValid.rationale)).toBeNull();
+    expect(screen.getByText("未開封")).toBeTruthy();
+    expect(screen.getByRole("button", { name: UNLOCK_WITH_POINT_CTA })).toBeTruthy();
+  });
+
+  it("does not read the URL query in the report page modules", () => {
+    for (const file of [
+      "components/home/HomeClient.tsx",
+      "components/report/AdvancedLockedPanel.tsx",
+      "components/report/ReportCard.tsx",
+      "lib/membership/view.ts",
+      "app/page.tsx",
+    ]) {
+      const source = readFileSync(path.join(process.cwd(), file), "utf8");
+      expect(source, file).not.toMatch(/useSearchParams|location\.search|searchParams|RtnCode|SimulatePaid/);
+    }
+  });
+
+  it("S7-3: the point-unlocked menu still opens its report, with no account-center route", async () => {
+    const OTHER_PERSIST_ID = "22222222-2222-4222-8222-222222222222";
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === "/api/report-unlocks") {
+        return jsonResponse(200, [
+          { report_id: OTHER_PERSIST_ID, nickname: "阿星", created_at: "2026-09-22T08:00:00.000Z" },
+        ]);
+      }
+      if (url.includes(`/api/reports/${OTHER_PERSIST_ID}`)) {
+        return jsonResponse(200, {
+          ...GET_ADVANCED_BODY,
+          persist_id: OTHER_PERSIST_ID,
+          nickname: "阿星",
+          access_status: "locked",
+          unlock_mode: "points",
+        });
+      }
+      return jsonResponse(404, { error_code: "NOT_FOUND" });
+    });
+
+    render(<HomeClient initialAccessStatus="locked" initialHasSession />);
+    await user.click(await screen.findByRole("button", { name: "阿星・2026-09-22" }));
+
+    expect(await screen.findByRole("heading", { name: "阿星的進階報告" })).toBeTruthy();
+    for (const route of ["account", "orders/page.tsx", "me", "my-orders"]) {
+      expect(existsSync(path.join(process.cwd(), "app", route)), route).toBe(false);
+    }
   });
 });
 
