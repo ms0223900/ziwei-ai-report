@@ -21,6 +21,7 @@
 - [x] 登出後頁首回到 `slot-auth-entry`
 - [x] 訪客送出合法生辰，POST 不因未登入失敗
 - [x] 首次登入進階仍鎖定（`access_status` 仍 `locked`）
+- [x] 已登入頁首左上角的名稱是連到 `/` 的連結，從通知、結果頁、管理頁點擊可回首頁
 
 #### 驗收說明
 
@@ -60,6 +61,14 @@
 狀態：✅ 通過
 
 - `ensureProfile` 預設 `locked`；本包未改 ReportCard 鎖定區
+
+**AC-6：頁首名稱連到 `/`**
+
+狀態：✅ 通過
+
+- `components/auth/AuthSessionBar.tsx`：名稱由 `<p>` 改為 `next/link` 連到 `/`（保留樣式，加 hover 底線與 `min-h-9` 點擊高度）；`AuthSessionBar.test.tsx` 斷言連結 href
+- 限制：已在 `/` 時，Next.js 同路徑導航不會重置 `HomeClient` 的報告 state，所以在首頁看報告時點名稱不會回到表單；從 `/notifications`、`/orders/processing`、`/admin/orders` 點擊會回首頁
+- 訪客頁首（`AuthEntry`）沒有帳號名稱，未改
 
 **測試策略**：Test-After
 > 理由：常駐頁首與多畫面可見性屬 UI，適合實作後補 DOM 斷言。
