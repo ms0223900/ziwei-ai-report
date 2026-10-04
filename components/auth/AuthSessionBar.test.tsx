@@ -75,4 +75,16 @@ describe("AuthSessionBar", () => {
 
     expect(screen.getByRole("link", { name: "通知" }).getAttribute("href")).toBe("/notifications");
   });
+
+  it("links the display name to the home page", () => {
+    render(
+      <AuthSessionBar
+        accessStatus="locked"
+        displayName="yuan"
+        userId="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: "yuan" }).getAttribute("href")).toBe("/");
+  });
 });
