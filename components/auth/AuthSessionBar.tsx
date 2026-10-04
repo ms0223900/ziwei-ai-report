@@ -62,7 +62,12 @@ export function AuthSessionBar({
         data-access-status={accessStatus}
         data-report-slot={REPORT_SLOTS.authSession}
       >
-        <p className="font-serif text-label text-ink">{displayName}</p>
+        <Link
+          className="inline-flex min-h-9 items-center font-serif text-label text-ink underline-offset-4 hover:underline"
+          href="/"
+        >
+          {displayName}
+        </Link>
         <div className="flex flex-wrap items-center gap-2">
           {/*
           <form className="flex flex-wrap items-center gap-2" onSubmit={handleSaveName}>
