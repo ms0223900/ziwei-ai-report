@@ -26,9 +26,9 @@
 - [x] US-003 probe 小工具 實作
 
 ### Phase 1 — 固定資料包
-- [ ] US-004 單次解鎖 fixture
-- [ ] US-005 點數 fixture
-- [ ] US-006 通知未建立 fixture
+- [x] US-004 單次解鎖 fixture
+- [x] US-005 點數 fixture
+- [⚠️] US-006 通知未建立 fixture（README 註記待 US-007）
 
 ### Phase 2 — 操作文件與處置
 - [ ] US-007 README 與訂閱步驟
