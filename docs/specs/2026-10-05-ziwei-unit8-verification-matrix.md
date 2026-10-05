@@ -97,16 +97,21 @@
 
 - **FR-1**
   - Given `docs/unit8/verification-matrix.md` When 列出 ID Then 含上表 13 個 Must ID＋U7-C，且每列 13 欄皆非空（未實跑列證據欄寫 Checkpoint 檔名）。
+    - 此 AC 需先處理第 7 節阻塞問題 3 才能驗證。
   - Given 任一列 When 讀「預期」欄 Then 僅出現可查的欄位值／screen／idempotency_key，不出現「正常」「成功即可」等無法查證的描述。
 - **FR-2**
   - Given 跑 `fixture-lifetime-pending.sql` When 開 `/orders/processing?order={id}` Then 顯示確認中、`access_status=locked`、無 `unlock:{id}` 通知。
   - Given 上述訂單接著跑 `mark-failed.sql` When 重開結果頁 Then 顯示未完成，`order-failed:{id}` 恰 1 筆。
   - Given 同一 fixture 連跑兩次 When 查 `TESTU8LIFE0001` Then 只有 1 筆訂單、`order-pending:` 通知 1 筆，無外鍵錯誤。
   - Given 已 paid 的單次訂單 When 同一 ReturnURL payload 送第二次 Then 回 `1|OK`、`unlock:{id}` 仍 1 筆。
+    - 此 AC 需先處理第 7 節阻塞問題 1 才能驗證。
   - Given payload 帶 `--simulate` 或 `--bad-mac` When 送出 Then 訂單不變為 paid、`access_status` 不變（`SimulatePaid=1` 只回 1|OK；錯簽被拒）。
+    - 此 AC 需先處理第 7 節阻塞問題 1 才能驗證。
 - **FR-3**
   - Given 跑 `fixture-points-zero.sql` 並產生新報告 When 按用點解鎖 Then API 回 `ok=false, reason=insufficient`、餘額 0、無 `debit_unlock`、無 `report_unlocked` 通知。
+    - 此 AC 需先處理第 7 節阻塞問題 2 才能驗證。
   - Given `TESTU8PTS0001` pending When 送第一次 ReturnURL Then 餘額 +5、credit 1 筆、`credit:{id}` 1 筆；When 送第二次 Then 三者皆不變。
+    - 此 AC 需先處理第 7 節阻塞問題 1 才能驗證。
 - **FR-4**
   - Given A 首頁已載入且訂閱有效 When 執行 `expire.sql` 後產生新報告 Then 進階 GET 403、畫面為鎖定分支並顯示「訂閱已失效，請重新整理」、無白屏或空佔位。
   - Given 重新整理 When 再產生報告 Then 不顯示訂閱有效狀態、進階為鎖定。
@@ -164,6 +169,40 @@
   - U8-S-F3 Notion 寫「重新整理或重進報告」；程式不支援重開靠訂閱看的舊報告，本 spec 以「產生新報告觸發進階 GET」代替「重進報告」。需 PM 確認此替代可接受。
   - U8-S-F4 Notion 寫「C 取消後」；reset 的 C 是 expired 而非 cancelled。兩者權益判斷相同（皆看期末），本 spec 以 expired 的 C 驗。若需驗「取消」語意，需另指定帳號跑 `cancel.sql` 後再用點解鎖。
   - Notion 寫「U8-S-F4 訂閱 403」語意不明；本 spec 解讀為「靠訂閱讀其他報告回 403」。
+  - （獨立審查 IMPORTANT／P1，以下未改第 1～5 節，進 `/user-stories` 前需定案）
+  - FR-5 重跑規則：`fulfill_points_pack_order` 只靠 unique `source_order_id` 冪等，每次都會讓 `points_balance` +5，刪掉 credit 也不會退回。「先清後建」每次重跑都會多加 5 點，違反 FR-5 AC2。替換方向：只保留冪等寫法（訂單 `on conflict (merchant_trade_no) do nothing` → 對同一 id 呼叫 RPC，第二次回 `already_fulfilled` → 用 `credit:{id}` 刪舊通知），刪掉「二擇一」。
+  - U8-S-S 帳號：reset 的 A 沒有 `first_success` 事件，結果頁會是 `needs_manual`、管理原因「需要補償」。替換方向：U8-S-S 指定用 D 真實建單＋`--kind return --amount 19`。續訂通知 key 是 `sub:{renewal event id}`，要另列。
+  - U8-S-F1：`past_due` 但期末未過時進階仍 200（單元 6 定案）。替換方向：註明以 B（期末已過）判讀；對期末未過的帳號送失敗事件，預期 GET 200。
+  - 「進階 GET 403」怎麼觀察：期末已過、未解鎖時首頁不發進階 GET（`HomeClient.tsx` `loadAdvanced`），所以 U8-S-F1／F2／F4「其他報告」在畫面上看不到 403。替換方向：直接開 `/api/reports/{report_id}`（`report_id` 取 reset 結尾 SELECT）確認 403；畫面欄寫「進階鎖定」。
+  - U8-L-D 的 paid 單從哪來：替換方向是重跑 fixture → 第一次送（= U8-L-S，帳號轉 unlocked）→ 第二次送（= U8-L-D）→ 重跑 fixture 還原 locked。
+  - FR-2 AC5 缺前置狀態：替換方向是 Given `TESTU8LIFE0001` 為 pending。`--simulate` 回 `1|OK`、`--bad-mac` 回 `0|Error`，兩者訂單皆仍 pending、`access_status=locked`。
+  - U8-S-D 冪等 key：失敗事件 key 是 `failed:{mtn}:{gwsr}`，payload 預設 gwsr 每次不同。替換方向：§4 補此 key；重送時固定 `--gwsr` 與 `--total-success-times`。
+  - FR-1 表格欄名與值：「結果頁 screen」欄填的是中文簡稱，「通知（idempotency_key）」欄混了 type。替換方向：欄名改「結果頁（screen 值＋標題）」「通知（type／idempotency_key）」，值取 `lib/orders/read-processing-result.ts`，例如 `accepted`「付款已受理，正在確認」。
+  - 多列「結果頁／管理紀錄」填 `—`：Notion §3 要求每條 Must 都要有。替換方向：填可查值（例如 `subscription_inactive` screen、`subscription_events` 的 key／筆數），真的不適用寫「不適用：<理由>」。
+  - Notion §11「關鍵失敗：使用者與管理者都有下一步」目前沒有對應 AC。替換方向：在 FR-1 加一條，要求 U8-L-F／U8-P-F／U8-S-F1 列寫出使用者 CTA 與管理者原因。
+  - U7-C 判為 MVP:false，卻被 FR-1 AC1 強制要求。替換方向：從 AC1 移除，或在表格補 U7-C 列（`compensate:{order_id}:credit_points`、`admin_compensated`、「人工補償完成」）。
+  - FR-6 缺錯誤類 AC。替換方向：任一卡缺可勾選的「重新驗測條件」→ 不算處置完成。
+  - U8-S-F3／F4 的替代解讀（上兩條）在 §0 標的是 [由程式碼推得]，與本節「需 PM 確認」不一致；以本節為準，視為仍需確認。
+  - 另見 `2026-10-05-ziwei-unit8-verification-matrix-issues.md`，盤點到的非阻塞問題。
 - **三、動態詢問與邊界調整**
   - 8-2 若驗出 Notion §7.6 的阻斷型情境（例如並發扣點負餘額、failed 後遲到成功 webhook 改單），先記處置卡，不在課內改產品程式；要改程式須先問（Notion §13 Ask first）。
   - 課堂現場金流不穩時選定模式改固定 Payload，矩陣仍須留下該模式的成功與失敗列。
+
+## 7. ⚠️ 需求前置阻塞問題（獨立審查發現）
+
+- 問題 1：ReturnURL payload 指令沒帶 `--amount`，webhook 一律回 `0|Error`
+  - 等級：CRITICAL／P0（兩位審查者都指出）
+  - 證據：`scripts/ecpay-subscription-payload.mjs:42,78`（`TradeAmt` 預設 `19`）；`app/api/payments/ecpay/webhook/route.ts:221-229`（先比對金額，再看 `SimulatePaid`）；`lib/payments/plans.ts`（單次 99、點數包 49）；單元 7 howto 一律寫 `--amount 49／99`。
+  - 影響：FR-2 AC4、AC5；FR-3 AC2。
+  - 替換句：FR-2「`… --kind return --mtn <MTN> --amount 99`」；FR-3「以 `--kind return --amount 49` 送第一次與第二次」；`--simulate`／`--bad-mac` 同樣加 `--amount`；fixture INSERT 寫明 `amount=99`／`49`、`currency='TWD'`。
+- 問題 2：0 點時畫面沒有「用 1 點解鎖此報告」按鈕，無法「按用點解鎖」
+  - 等級：CRITICAL／P0（兩位審查者都指出；屬單元 5 刻意設計）
+  - 證據：`lib/membership/view.ts:167`（餘額 0 → `pointsInsufficient=true`）；`components/report/UnlockWithPointCta.tsx:47,97`（不渲染按鈕、不呼叫 API）；`docs/user-stories/ziwei-unit5-points-pack-unlock/howto-points-pack.md:134`。
+  - 影響：FR-3 AC1。
+  - 替換句：「Given 跑 `fixture-points-zero.sql` 並產生新報告 R When 看進階鎖定區 Then 顯示『點數不足，無法用點數解鎖此報告。』、不出現解鎖按鈕；SQL 確認餘額 0、R 無 `debit_unlock`／`report_unlocks`／`report_unlocked`。（選做）以登入身分 POST `/api/reports/unlock-with-point`（fixture 報告 id）回 `ok=false, reason=insufficient`。」矩陣 U8-P-F「結果頁」欄同步改寫。
+- 問題 3：FR-1 AC1「每列 13 欄皆非空」與 Notion §7.1「處置：通過則空」衝突
+  - 等級：CRITICAL（需求文字）
+  - 證據：Notion §7.1 處置欄定義；交付時（課前）「實際結果」「通過／未通過」本來就還沒填。
+  - 影響：FR-1 AC1。
+  - 替換句：「Given 矩陣交付版（課前）When 列出 ID Then 含 13 個 Must ID；前 10 欄（案例 ID～管理紀錄）皆非空，不適用寫『不適用：<理由>』；『實際結果／證據位置』預填 SQL 檔名或『Checkpoint：<檔名>』；『通過／未通過』為可勾選空格；頁首註明處置欄『通過則空、未通過連到處置卡』。」
+- 另見：`2026-10-05-ziwei-unit8-verification-matrix-issues.md`
