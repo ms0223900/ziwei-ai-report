@@ -93,14 +93,14 @@
     | U8-L-F | D | `access_status=locked` | pending→`accepted`「付款已受理，正在確認」，primary=`refresh`；failed→`incomplete`「付款未完成，尚未變更權益」，primary=`plans` | 無 `unlock:{order_id}`；failed 有 `order_failed`／`order-failed:{order_id}` 1 筆 | pending「等待 Webhook」；failed「無法處理」 |
     | U8-L-D | D | 同 U8-L-S，不變 | 仍 `unlock_completed`「完整解讀已解鎖」 | `unlock:{order_id}` 仍 1 筆 | 仍「已履約」 |
     | U8-P-S | D | `credit_purchase`（`source_order_id`）1 筆、餘額 +5 | `points_credited`「已新增 5 點」 | `credit_completed`／`credit:{order_id}` 1 筆 | 「已履約」 |
-    | U8-P-F | D | 餘額 0；報告 R 無 `debit_unlock`、無 `report_unlocks` | 首頁顯示「點數不足，無法用點數解鎖此報告。」、無解鎖按鈕，鎖定區有「購買點數包」CTA；`probe.mjs unlock R` 回 `ok=false, reason=insufficient` | R 無 `report_unlocked` | 不適用：未建單，以 SQL 查 R 的帳本 |
+    | U8-P-F | D | 餘額 0；報告 R 無 `debit_unlock`、無 `report_unlocks` | 首頁顯示「點數不足，無法用點數解鎖此報告。」、無解鎖按鈕，鎖定區有「購買點數包」CTA；`probe.mjs unlock R` 回 `ok=false, reason=insufficient` | R 無 `report_unlocked` | `point_transactions` 無 `report_id=R` 的 `debit_unlock`、`report_unlocks` 無 R（SQL 帳本）；`/admin/orders` 不適用：未建單 |
     | U8-P-D | D | 餘額與 credit 筆數不變 | 仍 `points_credited`「已新增 5 點」 | `credit:{order_id}` 仍 1 筆 | 仍「已履約」 |
     | U8-S-S | D | `first_success`（`return:{mtn}`）1 筆、`current_period_end > now()`；`probe.mjs advanced Rd` 200、`unlock_mode=subscription` | `subscription_active`「訂閱有效至 YYYY/MM/DD」，primary=`report` | `subscription_active`／`sub:{first_success event id}` 1 筆 | 「已履約」 |
     | U8-S-F1 | B | `past_due`、期末不動（昨天）；`probe.mjs advanced` 403 | 首頁進階鎖定，鎖定區顯示「月繳訂閱（每月 TWD 19）」與「購買點數包」CTA | 無新增 `subscription_active` | 送失敗事件後 `subscription_events` 有 `failed:TESTSUBB0001:GU8B1` 1 筆 |
     | U8-S-F2 | 到期：C；取消：A（`cancel.sql`） | 期末 < now；`probe.mjs advanced` 403 | 首頁進階鎖定；結果頁不適用：reset 訂單沒有 `first_success`，會落在 `needs_manual`，不作為判讀依據 | 取消：`subscription_inactive`／`sub:{cancelled event id}` 1 筆；到期：無失效通知（定稿行為，不算失敗） | 取消：事件 `cancel:{subscription_id}:{mtn}` 1 筆；到期：不適用：`expire.sql` 不寫事件 |
     | U8-S-F3 | A | 期末已過後的下一次進階 GET 回 403 | 頁面開著時產生新報告 → 鎖定分支＋「訂閱已失效，請重新整理」，不白屏；重新整理後新報告仍鎖定 | 不適用：讀時到期不建通知 | 不適用：無訂單變動 |
     | U8-S-F4 | C | R 的 `probe.mjs advanced` 200、`unlock_mode=points`；C 的另一份報告 403 | R 可從已解鎖選單開啟；新報告鎖定並顯示點數不足 | `report_unlocked`／`debit:{tx_id}` 1 筆 | `point_transactions` 有 R 的 `debit_unlock` 1 筆 |
-    | U8-S-D | D | 期末與 `subscription_events` 筆數不變 | 仍 `subscription_active`「訂閱有效至 YYYY/MM/DD」 | `subscription_active` 筆數不變 | `return:{mtn}` 仍 1 筆；period 重送用 `--total-success-times 1`，記為 `first_duplicate`，不延展、不通知 |
+    | U8-S-D | D | 期末不變；return 重送時 `subscription_events` 筆數不變。period 以 `--total-success-times 1` 送：第 1 次新增 `period:{mtn}:1`（`first_duplicate`）1 筆，第 2 次起筆數不變；兩者都不延展、不新增 `subscription_active` | 仍 `subscription_active`「訂閱有效至 YYYY/MM/DD」 | `subscription_active` 筆數不變 | `return:{mtn}` 仍 1 筆；period 重送用 `--total-success-times 1`，記為 `first_duplicate`，不延展、不通知 |
     | U8-N-F | D | credit 1 筆 | `points_credited`「已新增 5 點」 | `credit:{order_id}` 0 筆 | 「已履約但無通知」 |
     | U7-C | D（Should） | 受控補點後 credit 1 筆 | `points_credited`「已新增 5 點」 | `admin_compensated`／`admin:{action_id}` 1 筆 | `compensate:{order_id}:credit_points`、「人工補償完成」 |
 
@@ -132,7 +132,8 @@
     4. 重跑 fixture，把 D 還原成 locked。
 - **FR-4 點數**（預設 D）
   - `fixture-points-zero.sql`：
-    - 同一 transaction 先以 `set_config` 宣告 service_role，再把 D 設成 `points_balance=0`、`access_status='locked'`。
+    - 同一 transaction 先以 `set_config` 宣告 service_role，再把 D 設成 `points_balance=0`、`access_status='locked'`、`subscription_status='none'`。
+    - README 註明：餘額由首頁伺服器渲染時讀取，跑完 fixture 要先重新整理首頁再產生報告。
     - 刪除 D 的 `subscriptions`／`report_unlocks`（先刪 `subscription_events`）。
     - 建 1 份 `generation_status='success'` 報告 R（欄位同 reset C），結尾 SELECT 印出 R 的 id。R 是 `probe.mjs unlock R` 的目標；畫面驗證則由學員產生新報告（舊報告無法重開）。
   - `fixture-points-replay.sql`：
@@ -142,11 +143,11 @@
     - 結尾 SELECT `order_id`、`status`、本筆 credit 筆數、`points_balance`。
     - README 註明：重跑後餘額會再 +5，判讀以「本筆訂單的 credit 筆數」與「送第二次前後的餘額差」為準。
 - **FR-5 訂閱**（只寫步驟，沿用既有 SQL／payload）
-  - U8-S-S：D 登入後先產生 1 份新報告 Rd，在 Rd 的鎖定區按「月繳訂閱（每月 TWD 19）」建單 → 以 SQL 查出 MTN → `post /api/payments/ecpay/webhook "$(payload --kind return --mtn <MTN> --amount 19)"` → 看結果頁、`probe.mjs advanced Rd`、通知。
+  - U8-S-S：D 登入後先產生 1 份新報告 Rd，在 Rd 的鎖定區按「月繳訂閱（每月 TWD 19）」建單（只按一次；遇 409 先重跑 reset）→ 以 SQL 查出 MTN → `post /api/payments/ecpay/webhook "$(payload --kind return --mtn <MTN> --amount 19)"` → 看結果頁、`probe.mjs advanced Rd`、通知。
   - U8-S-D：
     - 成功事件：同一 return payload 再送一次；或送 period payload `--total-success-times 1`（`first_duplicate`，不延展、不通知）。
     - 不用預設的 `--total-success-times 2`，它會真的續期一次。
-    - 預期期末與事件筆數不變。
+    - 預期期末不變、`subscription_active` 筆數不變；事件筆數依矩陣 U8-S-D 列判讀。
   - U8-S-F1：B 已是 `past_due`／期末昨天，`probe.mjs advanced` 回 403。接著必做：`post /api/payments/ecpay/period-webhook "$(payload --mtn TESTSUBB0001 --rtn-code 10100058 --gwsr GU8B1)"` 送兩次，預期都回 `1|OK`、`failed:TESTSUBB0001:GU8B1` 恰 1 筆、期末不變。矩陣註明：對期末未過的帳號送失敗事件，預期為 `past_due` 但 GET 仍 200（單元 6 定案）。
   - U8-S-F2：
     - 到期：C（reset 後已是 expired）。
@@ -194,11 +195,11 @@
 - **FR-1**
   - Given 矩陣交付版（課前）When 列出 ID Then 含 13 個 Must ID。前 10 欄（案例 ID～管理紀錄）皆非空，不適用的格子寫「不適用：<理由>」。「實際結果／證據位置」預填 SQL 檔名、`probe.mjs` 指令或「Checkpoint：<檔名>」。「通過／未通過」為可勾選空格。頁首註明處置欄「通過則空、未通過連到處置卡」。
   - Given 任一列 When 讀「預期權益／結果頁／通知／管理紀錄」Then 只出現可查的欄位值、screen 值與標題、type／idempotency_key、原因字串或事件 key，不出現「正常」「成功即可」這類無法查證的描述，也沒有 `—`。
-  - Given U8-L-F、U8-P-F、U8-S-F1 列 When 讀結果頁與管理紀錄欄 Then 各寫出使用者下一步（例：`incomplete` primary=`plans`；點數不足提示）與管理者原因或事件（例：「等待 Webhook」「無法處理」、`failed:{mtn}:{gwsr}`）。
+  - Given U8-L-F、U8-P-F、U8-S-F1 列 When 讀結果頁與管理紀錄欄 Then 各寫出使用者下一步（例：`incomplete` primary=`plans`；點數不足提示）與管理者原因或事件（例：「等待 Webhook」「無法處理」、`failed:{mtn}:{gwsr}`）。U8-P-F 的管理者證據以 R 的帳本 SQL 為準。
   - Given 矩陣（Should）When 檢查 Then 有 U7-C 列並標「處置練習」。
 - **FR-2**
   - Given B 的有效 Cookie 與 B 的 reset 報告 id When `probe.mjs advanced <id>` Then 印出 `403` 與 `error_code`。
-  - Given A 的有效 Cookie 與 A 的 reset 報告 id（訂閱有效）When `probe.mjs advanced <id>` Then 印出 `200`、`unlock_mode=subscription`，輸出不含 `rationale`／`action_plan`／`path_compare` 的內容。
+  - Given 剛跑完 `reset-checkpoint.sql`、A 尚未跑 expire／cancel，且有 A 的有效 Cookie 與 A 的 reset 報告 id When `probe.mjs advanced <id>` Then 印出 `200`、`unlock_mode=subscription`，輸出不含 `rationale`／`action_plan`／`path_compare` 的內容。
   - Given 缺 `--cookie`，或 `report_id` 不是 UUID When 執行 Then 以繁中錯誤結束、exit code ≠ 0、沒有送出 HTTP 請求。
   - Given 任一次執行 When 檢查輸出與檔案系統 Then 輸出不含 Cookie 值，也沒有寫出檔案。
 - **FR-3**
@@ -208,15 +209,15 @@
   - Given 剛跑完 fixture（pending）When 以 `--amount 99` 送第一次 ReturnURL Then 回 `1|OK`、`paid`、`access_status=unlocked`、`unlock:{id}` 1 筆；When 送第二次 Then 回 `1|OK`，`unlock:{id}` 仍 1 筆。
   - Given 剛跑完 fixture（pending）When 送 `--simulate --amount 99` 或 `--bad-mac --amount 99` Then 前者回 `1|OK`、後者回 `0|Error`；兩者訂單皆仍 pending、`access_status=locked`、沒有 `unlock:{id}`。
 - **FR-4**
-  - Given 跑 `fixture-points-zero.sql` 並產生新報告 When 看進階鎖定區 Then 顯示「點數不足，無法用點數解鎖此報告。」、沒有「用 1 點解鎖此報告」按鈕。SQL 確認餘額 0，fixture 報告 R 無 `debit_unlock`／`report_unlocks`／`report_unlocked`。
+  - Given 跑 `fixture-points-zero.sql`、重新整理首頁後產生新報告 When 看進階鎖定區 Then 顯示「點數不足，無法用點數解鎖此報告。」、沒有「用 1 點解鎖此報告」按鈕。SQL 確認餘額 0，fixture 報告 R 無 `debit_unlock`／`report_unlocks`／`report_unlocked`。
   - Given 同上 When `probe.mjs unlock R` Then 回 `ok=false, reason=insufficient`，餘額仍 0。
-  - Given `fixture-points-zero.sql` 或 `fixture-points-replay.sql` When 連跑兩次 Then 不出錯，結尾 SELECT 與跑一次時相同（replay 的訂單 id 會換新）。
+  - Given `fixture-points-zero.sql` 或 `fixture-points-replay.sql` When 連跑兩次 Then 不出錯，結尾 SELECT 除 id 外與跑一次時相同（R 的 id 與 replay 的訂單 id 會換新）。
   - Given `TESTU8PTS0001` pending When 以 `--amount 49` 送第一次 ReturnURL Then 餘額 +5、credit 1 筆、`credit:{id}` 1 筆；When 送第二次 Then 三者皆不變。
 - **FR-5**
   - Given D 已產生報告 Rd 並以月繳 CTA 真實建單 When 以 `--amount 19` 送 return payload Then `first_success` 1 筆、結果頁 `subscription_active`「訂閱有效至 …」、`probe.mjs advanced Rd` 200 且 `unlock_mode=subscription`、`sub:{event id}` 1 筆；When 再送一次 Then 期末、事件筆數、`subscription_active` 筆數皆不變。
   - Given reset 後的 B When `probe.mjs advanced <B 報告>` Then 403，`subscriptions.status=past_due`，期末仍為 reset 值。
   - Given reset 後的 B When 以 `--rtn-code 10100058 --gwsr GU8B1` 送失敗 period payload 兩次 Then 兩次都回 `1|OK`、`failed:TESTSUBB0001:GU8B1` 只有 1 筆、期末不變、`probe.mjs advanced` 仍 403。
-  - Given C（到期）或跑過 `cancel.sql` 的 A（取消）When `probe.mjs advanced` Then 403；取消時 `subscription_inactive` 1 筆，再跑一次 `cancel.sql` 不新增。
+  - Given C（到期）或跑過 `cancel.sql` 的 A（取消）When `probe.mjs advanced` Then 403；取消時 `sub:{本次 cancelled 事件 id}` 恰 1 筆，再跑一次 `cancel.sql` 不新增。
   - Given A 首頁已載入且訂閱有效 When 執行 `expire.sql` 後產生新報告 Then 進階 GET 403、畫面為鎖定分支並顯示「訂閱已失效，請重新整理」，沒有白屏或空佔位；When 重新整理後再產生報告 Then 進階仍鎖定。
   - Given reset 後的 C 用點解鎖新報告 R When 重新整理並從已解鎖選單開 R Then `probe.mjs advanced R` 回 200、`unlock_mode=points`；When 對 C 的 reset 報告執行 `probe.mjs advanced` Then 403。
 - **FR-6**
