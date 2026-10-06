@@ -25,6 +25,7 @@
 - [ ] U8-S-F3、U8-S-F4 步驟照 spec FR-5
 - [ ] U7-C：用 D 補點後，先跑 `fixture-paid-no-credit.sql` 第 1 段再跑 reset
 - [ ] 通知筆數一律以 `idempotency_key` 或 `source_id` 查，不看面板總數；id 以結尾 SELECT 為準
+- [ ] U8-N-F：註明換帳號前要先依外鍵順序（notifications → admin_actions → point_transactions → orders）手動刪除舊的 `TESTU8NTF0001`（承接 US-006 AC-7）
 - [ ] 若實作時 D 無法靠「reset＋fixture」還原，改獨立帳號並記錄原因
 - [ ] 不寫入 HashKey/HashIV 或 Cookie 值
 

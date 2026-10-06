@@ -21,14 +21,14 @@
 ## 全域驗收 Checklist
 
 ### Phase 0 — 矩陣與探測工具
-- [ ] US-001 驗測矩陣文件
-- [ ] US-002 probe 小工具 測試（預期紅燈；待實作轉綠）
-- [ ] US-003 probe 小工具 實作
+- [x] US-001 驗測矩陣文件
+- [x] US-002 probe 小工具 測試（預期紅燈；待實作轉綠 → 已由 US-003 轉綠）
+- [x] US-003 probe 小工具 實作
 
 ### Phase 1 — 固定資料包
-- [ ] US-004 單次解鎖 fixture
-- [ ] US-005 點數 fixture
-- [ ] US-006 通知未建立 fixture
+- [x] US-004 單次解鎖 fixture
+- [x] US-005 點數 fixture
+- [⚠️] US-006 通知未建立 fixture（README 註記待 US-007）
 
 ### Phase 2 — 操作文件與處置
 - [ ] US-007 README 與訂閱步驟
