@@ -28,10 +28,10 @@
 ### Phase 1 — 固定資料包
 - [x] US-004 單次解鎖 fixture
 - [x] US-005 點數 fixture
-- [⚠️] US-006 通知未建立 fixture（README 註記待 US-007）
+- [x] US-006 通知未建立 fixture
 
 ### Phase 2 — 操作文件與處置
-- [ ] US-007 README 與訂閱步驟
+- [x] US-007 README 與訂閱步驟
 - [ ] US-008 處置卡
 - [ ] US-011 課堂操作 howto（8-1／8-2／8-3）
 
