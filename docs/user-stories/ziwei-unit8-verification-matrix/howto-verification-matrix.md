@@ -7,7 +7,7 @@
 1. **還原帳號**：在 Supabase SQL Editor 跑 `scripts/subscription-checkpoint/reset-checkpoint.sql`，記下結尾 SELECT 印出的 A～D `report_id`。
 2. **金流設定**：確認 `.env.local` 有 `ECPAY_HASH_KEY`、`ECPAY_HASH_IV`。這兩個值只放這裡，不貼進任何檔案或聊天。
 3. **終端機**：照 README「開始前」設定 `export BASE=…`，並貼上 `payload()`、`post()` 兩個函式。
-4. **瀏覽器**：照 README「取得 `probe.mjs` 要用的 Cookie」，替要驗的帳號各準備一個登入中的視窗。建議用無痕視窗分開帳號，因為 Cookie 和報告必須屬於同一個帳號。
+4. **Cookie 暫存檔**：照 README「取得 `probe.mjs` 要用的 Cookie」，用 `login-cookie.mjs` 替每個要驗的帳號各寫一個暫存檔（例如 `/tmp/cookie-a.txt`）。Cookie 和報告必須屬於同一個帳號；要看畫面的步驟，另外用無痕視窗分開帳號登入。
 5. **開好兩份文件**：矩陣、[`docs/unit8/disposition-cards.md`](../../unit8/disposition-cards.md)（下稱處置卡）。
 
 ## 8-1 建立矩陣（7 分）

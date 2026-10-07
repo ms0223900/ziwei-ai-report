@@ -11,6 +11,7 @@
 | `fixture-points-replay.sql` | 點數包 pending 單 `TESTU8PTS0001`，加點只由 ReturnURL 觸發 | U8-P-S、U8-P-D | D | 無 |
 | `fixture-notification-missing.sql` | 已履約（credit 1 筆）但沒有 `credit:{id}` 通知 | U8-N-F | D | 無 |
 | `probe.mjs` | 以會員 Cookie 呼叫進階 GET 或點數解鎖 API，只印判讀欄位 | U8-P-F、U8-S-* | 依案例 | `<report_id>`、Cookie |
+| `login-cookie.mjs` | 以測試帳號登入，把 session cookie 寫成權限 600 的暫存檔 | 全部需要 Cookie 的步驟 | 依案例 | `--email`、`--out`、`CHECKPOINT_PASSWORD` |
 | `../subscription-checkpoint/reset-checkpoint.sql` | 還原 A／B／C／D（沿用單元 6） | 全部 | A～D | 無 |
 | `../subscription-checkpoint/expire.sql`、`cancel.sql` | 單一會員到期或取消（沿用單元 6） | U8-S-F2、U8-S-F3 | A／C | `<USER uuid>` |
 | `../post-payment-checkpoint/mark-failed.sql` | pending 單改 failed＋`order_failed` 通知（沿用單元 7） | U8-L-F | D | `<ORDER uuid>` |
@@ -41,12 +42,23 @@ post() { curl -sS -X POST "$BASE$1" -H 'Content-Type: application/x-www-form-url
 
 ### 取得 `probe.mjs` 要用的 Cookie
 
-1. 用要驗的帳號登入演示站，打開開發者工具的 Network 分頁。
-2. 重新整理頁面，點任一個送往 `ziwei-ai-report.vercel.app` 的請求，在 Request Headers 複製整行 `cookie` 的值。Supabase 可能把 session 分成好幾段 cookie，要整行複製。
-3. 執行：`node scripts/unit8-checkpoint/probe.mjs advanced <report_id> --base $BASE --cookie "<剛複製的值>"`
+用 `login-cookie.mjs` 登入，並把 session cookie 寫成只有自己可讀的暫存檔（權限 600）。2026-10-07 真機實跑就是用這個做法：
+
+```bash
+export CHECKPOINT_PASSWORD=Test1234   # 測試帳號共用密碼
+node --env-file=.env.local scripts/unit8-checkpoint/login-cookie.mjs --email checkpoint.a@aaa.com --out /tmp/cookie-a.txt
+node scripts/unit8-checkpoint/probe.mjs advanced <report_id> --base $BASE --cookie "$(cat /tmp/cookie-a.txt)"
+```
+
+- 每個要驗的帳號各登入一次，各寫一個檔，例如 `/tmp/cookie-a.txt`～`/tmp/cookie-d.txt`。
+- 工具只用 `.env.local` 的 `NEXT_PUBLIC_SUPABASE_URL`／`NEXT_PUBLIC_SUPABASE_ANON_KEY`，不用 service role，也不印 cookie 值。
+- 結果頁、管理頁也可以讀同一個檔：`curl -sS "$BASE/api/orders/processing?order=$ORDER" -H "Cookie: $(cat /tmp/cookie-d.txt)"`。
+- session 會過期：中途 probe 回 401 時，重跑一次登入指令即可。
+
+**備案（不能跑 node 時）**：用要驗的帳號在瀏覽器登入演示站，開發者工具 Network 分頁點任一個送往 `ziwei-ai-report.vercel.app` 的請求，在 Request Headers 整行複製 `cookie` 的值，再貼到 `--cookie "<值>"`。
 
 注意：
-- Cookie 等同登入狀態，只貼在自己的終端機，不要寫進檔案或截圖。
+- Cookie 等同登入狀態，不要貼進筆記、截圖或 commit。
 - Cookie 和 `report_id` 必須屬於同一個帳號，否則會回 404。
 - `probe.mjs unlock` 會真的扣點，只對 0 點帳號使用。
 
@@ -142,4 +154,4 @@ post() { curl -sS -X POST "$BASE$1" -H 'Content-Type: application/x-www-form-url
 | reset 撞外鍵 `admin_actions_source_order_id` | 補點留下的 `admin_actions`：見上方 U7-C |
 | 首頁餘額沒變 | 跑完 SQL 後沒有重新整理首頁 |
 | `probe.mjs` 回 404 | Cookie 和報告不是同一個帳號 |
-| `probe.mjs` 回 401、3xx 或登入相關錯誤 | Cookie 不完整或已過期：重新登入後整行複製 |
+| `probe.mjs` 回 401、3xx 或登入相關錯誤 | Cookie 過期或不完整：重跑 `login-cookie.mjs` |

@@ -1,7 +1,7 @@
 # 單元 8 驗測與 Checkpoint Playbook
 
 > 取材自：`docs/user-stories/ziwei-unit8-verification-matrix/` US-001～US-011 的驗收說明、`docs/unit8/live-acceptance-2026-10-07.md`、spec 三輪獨立審查（2026-10-05～10-07，PR #94～#97）。
-> 下次蒸餾從 US-012 或單元 9 開始。
+> US-012（cookie 登入小工具）已併入 §四。下次蒸餾從 US-013 或單元 9 開始。
 
 本檔記錄寫 Checkpoint 素材與跑真機驗收時「不查就會踩到」的事。操作步驟以 [`scripts/unit8-checkpoint/README.md`](../../scripts/unit8-checkpoint/README.md) 為準，預期值以 [`docs/unit8/verification-matrix.md`](../unit8/verification-matrix.md) 為準，本檔不重複。
 
@@ -51,7 +51,7 @@
 ## 四、真機驗收（演示站）
 
 - **雲端 Claude Code 環境連不到演示站**（agent proxy 回 `connect_rejected`），也沒有 Supabase 權限。真機項目要由人實跑，或在有連線的環境跑。
-- **Cookie 取得**：2026-10-07 實跑時，用 `@supabase/ssr` 的 `createBrowserClient` 加記憶體 cookie jar，`signInWithPassword` 後把 cookie 寫成權限 600 的暫存檔，probe 與 curl 只讀那個檔。比從 DevTools 複製穩定，也不會把 cookie 貼進筆記。
+- **Cookie 取得**：用 `scripts/unit8-checkpoint/login-cookie.mjs`（US-012）。它以 `@supabase/ssr` 的 `createBrowserClient`（`isSingleton: false`）加上記憶體 cookie jar 呼叫 `signInWithPassword`，再把 cookie 寫成權限 600 的暫存檔，probe 與 curl 只讀那個檔。這是 2026-10-07 實跑用的做法，比從 DevTools 複製穩定，也不會把 cookie 貼進筆記。
   - Session 會過期：中途 probe 回 401 時，重新登入即可。
 - **403 的 `error_code` 是大寫的 `FORBIDDEN`**。
 - **帳號順序**：
