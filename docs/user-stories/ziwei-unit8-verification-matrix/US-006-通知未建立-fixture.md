@@ -18,14 +18,14 @@
 - [x] 刪除 `idempotency_key = 'credit:' || <該 id>` 的通知；不 INSERT 任何成功通知
 - [x] 結尾 SELECT `order_id`、`status`、`credits`、`credit_notifications`、`points_balance`
 - [x] 以 PGlite 實跑：第一次 RPC 回 `credited`、`credits=1`、`credit_notifications=0`；第二次回 `already_fulfilled`、credit 仍 1 筆、餘額不變
-- [⚠️] README 註明：換帳號前要先依外鍵順序手動刪除舊的 `TESTU8NTF0001`
+- [x] README 註明：換帳號前要先依外鍵順序手動刪除舊的 `TESTU8NTF0001`
 
 
 #### 驗收說明
 
-**整體結論**：PARTIAL ⚠️
+**整體結論**：PASS ✅（US-007 完成後由 PARTIAL 轉為 PASS）
 
-> `fixture-notification-missing.sql` 已建立，文字斷言全過；另以 PGlite 0.x 建立 `auth.users` 與 `auth.uid()`／`auth.role()` 的替身、套用 `supabase/migrations/` 全部 8 支 migration 後實跑（腳本放 scratchpad，不入庫）：第一次 `credits=1`、`credit_notifications=0`、餘額 5，第二次完全相同。唯一缺口是「README 註明換帳號要先刪舊單」：README 由 US-007 建立，目前這段說明只寫在 SQL 檔頭。
+> `fixture-notification-missing.sql` 已建立，文字斷言全過；另以 PGlite 0.x 建立 `auth.users` 與 `auth.uid()`／`auth.role()` 的替身、套用 `supabase/migrations/` 全部 8 支 migration 後實跑（腳本放 scratchpad，不入庫）：第一次 `credits=1`、`credit_notifications=0`、餘額 5，第二次完全相同。README 的「換帳號先刪舊單」說明已由 US-007 補上。
 
 ---
 
@@ -65,16 +65,9 @@
 
 **AC-7：README 註明換帳號前先刪舊單**
 
-狀態：⚠️ 部分實作
+狀態：✅ 通過
 
-- 目前寫在 `fixture-notification-missing.sql` 檔頭第 4 行
-- **差異說明**：`scripts/unit8-checkpoint/README.md` 尚未建立（屬 US-007），本條已併入 US-007 的驗收條件
-
----
-
-**後續建議**
-
-- 完成 US-007 時把這段寫進 README，再把本條改為 `[x]`
+- `scripts/unit8-checkpoint/README.md`「點數」第 4 點寫明依外鍵順序刪除舊的 `TESTU8NTF0001`（由 US-007 補上）
 
 **測試策略**：Test-After  
 > 理由：SQL fixture，以文字斷言＋PGlite 實跑補測；結果頁、通知面板與管理頁歸 US-009。
