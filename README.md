@@ -17,6 +17,9 @@
 - [`docs/architecture.md`](docs/architecture.md) — 檔案架構參考(檔案樹、藍本對照、陷阱清單、Checkpoint 規劃)
 - [`docs/design-brief.md`](docs/design-brief.md) — 單元 1 畫面規範（視覺／交互；文案與 schema 仍跟產品 spec）
 - [`docs/brand-guidelines.md`](docs/brand-guidelines.md) — 墨箋夜讀品牌 guideline
+- [`docs/checkpoints.md`](docs/checkpoints.md) — 課程 cp-01～cp-09 起始／完成版本 SHA、所需遷移與還原工具
+- [`docs/rescue-kit.md`](docs/rescue-kit.md) — 課堂卡關自助修復與講師備援
+- [`docs/unit9/`](docs/unit9/) — 單元 9 兩分鐘商業模式展示腳本與上線前缺口盤點表
 - [`assets/design-tokens.json`](assets/design-tokens.json) — 三層 design token
 
 ## 狀態
