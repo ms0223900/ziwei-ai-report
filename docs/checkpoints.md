@@ -35,7 +35,7 @@ repo 的 `docs/specs/*-unitN-*` 與 `docs/user-stories/ziwei-unitN-*` 用的是 
 | cp-06 | 6 訂閱制 | unit6 | `85f56da` | `7028644` | #79 訂閱 reset SQL（A/B/C/D 固定 UUID） |
 | cp-07 | 7 付款後交付與最小營運 | unit7 | `7028644` | `cd7d5b1` | #93 頁首帳號連首頁 |
 | cp-08 | 8 成功／失敗驗測與處置 | unit8 | `cd7d5b1` | `5883f8d` | #98 單元 8 驗測 playbook |
-| cp-09 | 9 商業模式演練與缺口 | （無） | `5883f8d` | 合併後回填 | 本次新增 `docs/unit9/` 的 PR |
+| cp-09 | 9 商業模式演練與缺口 | （無） | `5883f8d` | `a77b641` | #99 cp 對照表、Rescue Kit 與單元 9 素材 |
 
 ### 切點判斷
 
@@ -47,6 +47,7 @@ repo 的 `docs/specs/*-unitN-*` 與 `docs/user-stories/ziwei-unitN-*` 用的是 
 - **cp-06 完成版** `7028644`：unit6 最後一個合併是 #75（`f0e54fa`），但訂閱 reset SQL（#79）在 unit7 spec（#78）之後才合併。#78 只加 spec 文件、#77 只更新 agent skills，不影響程式，所以把完成版切在 #79。之後的 #80（`a760d18`）內容與 #79 相同。
 - **cp-07 完成版** `cd7d5b1`：unit7 最後一個合併是 #92（`df0fe2c`），#93 是 unit8 開始前的小 UI 修正，一併算進 cp-07，讓 cp-08 起始版等於 cp-07 完成版。
 - **cp-08 完成版** `5883f8d`：單元 8 真機驗收（2026-10-07）全部通過後的 `main`。
+- **cp-09 完成版** `a77b641`：#99 合併，新增 cp 對照表、Rescue Kit 與 `docs/unit9/`。
 
 ## 每個 cp 需要的資料庫狀態
 
@@ -80,5 +81,5 @@ repo 的 `docs/specs/*-unitN-*` 與 `docs/user-stories/ziwei-unitN-*` 用的是 
 git fetch origin main
 git branch unit04-start 141bc26
 git branch unit04-done  11e1622
-# 其他 cp 依上表類推；cp-09 完成版等 PR 合併後回填 SHA 再切
+# 其他 cp 依上表類推
 ```
