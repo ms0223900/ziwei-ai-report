@@ -68,7 +68,9 @@
 
 - **Story A1（Mock）**
   - Scenario 1：Given `AI_PROVIDER=mock`、`birth_time="子"` When `POST /api/reports` Then 回應 `overall` 以「（子時）」開頭，且回應與 DB `basic_json`、`advanced_json` 皆不含「未知時辰」。
+    - 此 AC 需先處理第 7 節阻塞問題 1 才能驗證。
   - Scenario 2：Given `AI_PROVIDER=mock` When 分別以 `birth_time="子"` 與 `"午"` 產生報告 Then 兩份 `overall` 字串不同。
+    - 此 AC 需先處理第 7 節阻塞問題 1 才能驗證。
   - Scenario 3：Given `AI_PROVIDER=mock`、`birth_time=null` When `POST /api/reports` Then `overall` 以「（未知時辰，準確度較低）」開頭，與現行 fixture 相同。
   - Scenario 4（邊界）：Given 12 支時辰逐一輸入 When 呼叫 `generateMockReport` Then 12 份 `overall` 互不相同，且全部通過 `report.complete.v1` 驗證。
   - Scenario 5（錯誤）：Given `MOCK_AI_MODE=invalid-json` When `POST /api/reports` Then 行為與現行相同（schema 失敗、不寫 DB、繁中可讀錯誤）。
@@ -121,6 +123,20 @@
 - **二、規格與需求灰區**
   - Mock 的 12 句時辰基調內容沒有產品提供的文案來源，由實作者撰寫；若需品牌口吻審稿，需另行確認。
   - 未選時辰的報告仍與現行一樣全員相同（mock）；本單只處理「選了時辰卻被忽略」。
+  - （獨立審查 IMPORTANT）Story A1 未指明改哪份 fixture：`basic.valid.json` 與 `advanced.valid.json` 的 `overall` 都以「（未知時辰，準確度較低）」開頭，且 `advanced_json` 會原樣寫入。替換方向：「`basic.overall` 與 `advanced.overall` 各自以同一規則改寫（前綴＋基調句＋各自原句）；`advanced.rationale` 同步改寫。」
+  - （獨立審查 IMPORTANT）Story A3 防呆位置對 mock 無效：mock 路徑的 `complete` 只用於驗證，寫入的是另外的 `basic`／`advanced` 物件（`app/api/reports/route.ts:238-240`）。替換方向：「Live：在 `validateComplete(complete)` 之後、`splitCompleteForPersist` 之前對 `complete` 防呆；Mock：對 `basic` 與 `advanced` 各自防呆，再進既有三項驗證。」
+  - （獨立審查 IMPORTANT）Story A3 防呆與 Scenario 5 可能衝突：`overall` 非字串時天真補前綴會產生「（寅時）undefined」並通過 schema。替換方向：「防呆只在 `typeof overall === "string"` 時執行」；Scenario 5 改用「缺 `rationale`」並註明以 mock 掉 provider 方式測。
+  - （獨立審查 IMPORTANT）寫入失敗 fallback 畫面是否在範圍內未定：`components/report/overlay.ts:21-35` 直接 import `basic.valid.json`（不是 `generateMockReport` 呼叫端，第 6 節第一點描述有誤），`PERSIST_FAILED` 時會顯示所選時辰但 `overall` 寫「未知時辰」。需決定：`overlayCannedReport` 依 `body.birth_time` 套用同一套前綴／基調，或明寫本單不處理此 fallback。
+  - （獨立審查 IMPORTANT）`generateMockReport` 新簽名未定。替換方向：「簽名改為 `generateMockReport(mode?: MockAiMode, birth?: ValidatedBirth)`；既有單參數呼叫行為不變。」
 - **三、動態詢問與邊界調整**
   - Live 驗收時若模型常常不遵守「依時辰寫出不同敘述」，防呆只能保證前綴；是否需加重試或改模型，屆時再議。
   - 舊報告（`prompt_version=zwds-v1`）不重新生成。
+  - 另見 `2026-10-09-ziwei-birth-time-and-pending-notice-issues.md`，盤點到的非阻塞問題。
+
+## 7. ⚠️ 需求前置阻塞問題（獨立審查發現）
+
+- 問題 1：Mock 生成點不在 `provider.ts`，照第 2 節改完 API 仍輸出固定 fixture
+  - 等級：P0（擋住 AC）
+  - 證據：`app/api/reports/route.ts:221-223` mock 分支直接呼叫 `generateMockReport()`；`generateLiveReport`（`lib/generation/provider.ts:19` 的 mock 分支）只在 `AI_PROVIDER === "openrouter"` 時被呼叫（`route.ts:184-187`），正式流程不會走到 provider 的 mock 分支。
+  - 影響：Story A1 Scenario 1、Scenario 2 無法通過。
+  - 替換句：「`app/api/reports/route.ts` mock 分支的 `generateMockReport()` 改傳入已驗證的 `birth`（`provider.ts` 的 mock 分支同步傳入，以保持一致）。」
