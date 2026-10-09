@@ -128,6 +128,8 @@
 - **二、規格與需求灰區**
   - Mock 的 12 句時辰基調內容沒有產品提供的文案來源，由實作者撰寫；若需品牌口吻審稿，需另行確認。
   - 未選時辰的報告仍與現行一樣全員相同（mock）；本單只處理「選了時辰卻被忽略」。
+  - （獨立審查 IMPORTANT）Story A3 防呆函式未定名稱與位置，A3 Scenario 6 在 route 層測不到（live 的非字串 `overall` 會先被 `openrouter.ts:81` 與 `route.ts:203` 擋下；mock fixture 一定是字串）。替換方向：「防呆實作為純函式 `applyBirthTimePrefix(overall: unknown, birth: ValidatedBirth): unknown`，放在 `lib/generation/birth-time-prefix.ts` 並 export；S6 以單元測試直接呼叫；S5 為回歸測試，確認防呆不改變既有 schema 失敗流程。」
+  - （獨立審查 IMPORTANT）第 0 節 Goal「選了時辰不出現『未知時辰』」未區分 mock／live；live 伺服器只保證 `overall` 前綴，其他欄位無保證也無 AC。替換方向：Goal 改為「Mock：選了時辰的報告全文不出現『未知時辰』且不同時辰 `overall` 不同。Live：prompt 要求同上；伺服器只保證 `overall` 前綴正確，其他欄位依模型遵循度，不列為本單驗收。」
 - **三、動態詢問與邊界調整**
   - Live 驗收時若模型常常不遵守「依時辰寫出不同敘述」，防呆只能保證前綴；是否需加重試或改模型，屆時再議。
   - 舊報告（`prompt_version=zwds-v1`）不重新生成。
