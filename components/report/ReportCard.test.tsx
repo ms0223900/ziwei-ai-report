@@ -1,20 +1,20 @@
 /** @vitest-environment jsdom */
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   DISCLAIMER,
-  FOLLOWUP_API_UNIMPLEMENTED,
-  FOLLOWUP_PLACEHOLDER,
   LOCK_CAPTION,
   MODE_CREDIT_LINE,
   MODE_SUBSCRIBE_LINE,
   MODE_UNLOCK_LINE,
+  POINT_UNLOCK_HINT,
+  POINT_UNLOCK_LABEL,
   PREVIEW_BANNER,
   PREVIEW_EXAMPLE_MARK,
-  PREVIEW_MONTHLY_REMAINING,
   PREVIEW_NO_DEDUCT,
+  PREVIEW_POINT_UNLOCKED,
   REPORT_SLOTS,
   SUBSCRIBE_ACTIVE_PREVIEW,
   MEMBERSHIP_CTA_UNLOCK_REPORT,
@@ -81,16 +81,17 @@ describe("ReportCard", () => {
     expect(container.textContent).not.toContain("rationale");
     expect(container.textContent).not.toContain("path_a");
     expect(container.textContent).not.toContain("第 1 天");
-    const followup = screen.getByPlaceholderText(FOLLOWUP_PLACEHOLDER);
-    expect(followup).toBeTruthy();
-    expect(followup).toHaveProperty("readOnly", true);
-    expect(followup).not.toHaveProperty("disabled", true);
+    const pointUnlock = screen.getByRole("button", { name: POINT_UNLOCK_LABEL });
+    expect(pointUnlock.getAttribute("aria-disabled")).toBe("true");
+    expect(pointUnlock).not.toHaveProperty("disabled", true);
+    expect(screen.getByText(POINT_UNLOCK_HINT)).toBeTruthy();
+    expect(container.textContent).not.toContain("追問");
     expect(screen.getByRole("button", { name: SUBSCRIBE_LABEL })).toBeTruthy();
     expect(screen.getByText(MODE_UNLOCK_LINE)).toBeTruthy();
     expect(screen.getByText(MODE_CREDIT_LINE)).toBeTruthy();
     expect(screen.getByText(MODE_SUBSCRIBE_LINE)).toBeTruthy();
     expect(
-      container.querySelector(`[data-report-slot="${REPORT_SLOTS.followup}"]`),
+      container.querySelector(`[data-report-slot="${REPORT_SLOTS.pointUnlock}"]`),
     ).toBeTruthy();
     expect(
       container.querySelector(`[data-report-slot="${REPORT_SLOTS.subscribe}"]`),
@@ -127,7 +128,7 @@ describe("ReportCard", () => {
     expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
   });
 
-  it("switches preview B to example copy and keeps followup locked", async () => {
+  it("switches preview B to example copy and hides the point-unlock button", async () => {
     const user = userEvent.setup();
     render(<ReportCard commercialPreviewEnabled report={demoReport} />);
 
@@ -137,23 +138,21 @@ describe("ReportCard", () => {
     expect(screen.getByRole("heading", { name: "小圓的進階報告" })).toBeTruthy();
     expect(screen.getAllByText(new RegExp(PREVIEW_EXAMPLE_MARK)).length).toBeGreaterThan(0);
     expect(screen.queryByRole("button", { name: "解鎖完整報告" })).toBeNull();
-    expect(screen.getByPlaceholderText(FOLLOWUP_PLACEHOLDER)).toHaveProperty(
-      "readOnly",
-      true,
-    );
+    expect(screen.queryByRole("button", { name: POINT_UNLOCK_LABEL })).toBeNull();
+    expect(screen.getByRole("button", { name: SUBSCRIBE_LABEL })).toBeTruthy();
     expect(screen.getByText(DISCLAIMER)).toBeTruthy();
   });
 
-  it("does not persist or fetch when submitting followup in preview C", async () => {
+  it("does not persist or fetch when clicking the used point unlock in preview C", async () => {
     const user = userEvent.setup();
     const fetchSpy = vi.spyOn(globalThis, "fetch");
     render(<ReportCard commercialPreviewEnabled report={demoReport} />);
 
     await user.selectOptions(screen.getByRole("combobox", { name: "預覽態" }), "C");
     expect(screen.getByText(PREVIEW_NO_DEDUCT)).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "送出追問" }));
+    await user.click(screen.getByRole("button", { name: PREVIEW_POINT_UNLOCKED }));
 
-    expect(screen.getByRole("status").textContent).toBe(FOLLOWUP_API_UNIMPLEMENTED);
+    expect(screen.queryByRole("status")).toBeNull();
     expect(fetchSpy).not.toHaveBeenCalled();
     fetchSpy.mockRestore();
   });
@@ -163,14 +162,14 @@ describe("ReportCard", () => {
     render(<ReportCard commercialPreviewEnabled report={demoReport} />);
 
     await user.selectOptions(screen.getByRole("combobox", { name: "預覽態" }), "D");
-    expect(screen.getByText(PREVIEW_MONTHLY_REMAINING)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: POINT_UNLOCK_LABEL })).toBeNull();
     expect(screen.getByRole("button", { name: SUBSCRIBE_ACTIVE_PREVIEW })).toBeTruthy();
     expect(screen.getByText(DISCLAIMER)).toBeTruthy();
   });
 
   it("keeps unlock-report CTA from changing access after click", async () => {
     const user = userEvent.setup();
-    render(<ReportCard report={demoReport} />);
+    const { container } = render(<ReportCard report={demoReport} />);
 
     await user.click(
       screen.getByRole("button", { name: MEMBERSHIP_CTA_UNLOCK_REPORT }),
@@ -178,16 +177,19 @@ describe("ReportCard", () => {
 
     expect(screen.getByRole("dialog", { name: "請先登入" })).toBeTruthy();
     expect(screen.queryByText("解鎖即將開放，本版不收費。")).toBeNull();
-    expect(screen.queryByText("即將開放")).toBeNull();
+    const unlockCta = container.querySelector(
+      `[data-report-slot="${REPORT_SLOTS.unlockCta}"]`,
+    ) as HTMLElement;
+    expect(within(unlockCta).queryByText("即將開放")).toBeNull();
     expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
   });
 
-  it("shows the upcoming note from the locked followup and subscribe entry", async () => {
+  it("shows the upcoming note from the locked point unlock and subscribe entry", async () => {
     const user = userEvent.setup();
     const fetchSpy = vi.spyOn(globalThis, "fetch");
     render(<ReportCard report={demoReport} />);
 
-    await user.click(screen.getByPlaceholderText(FOLLOWUP_PLACEHOLDER));
+    await user.click(screen.getByRole("button", { name: POINT_UNLOCK_LABEL }));
     expect(screen.getByRole("status").textContent).toBe(UPCOMING_UNLOCK_NOTE);
     expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
 
@@ -216,10 +218,7 @@ describe("ReportCard", () => {
     expect(container.textContent).not.toContain(PREVIEW_EXAMPLE_MARK);
     expect(screen.getByText("已開通")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "解鎖完整報告" })).toBeNull();
-    expect(screen.getByPlaceholderText(FOLLOWUP_PLACEHOLDER)).toHaveProperty(
-      "readOnly",
-      true,
-    );
+    expect(screen.queryByRole("button", { name: POINT_UNLOCK_LABEL })).toBeNull();
   });
 
   it("shows unlock-report CTA for a locked member without instructor-fee copy", async () => {

@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -341,7 +341,10 @@ describe("HomeClient 會員三態", () => {
     expect(
       screen.getByRole("button", { name: MEMBERSHIP_CTA_UNLOCK_REPORT }),
     ).toBeTruthy();
-    expect(screen.queryByText("即將開放")).toBeNull();
+    const unlockCta = document.querySelector(
+      '[data-report-slot="slot-unlock-cta"]',
+    ) as HTMLElement;
+    expect(within(unlockCta).queryByText("即將開放")).toBeNull();
     expect(screen.queryByText("開通由講師受控流程處理，本版不收費")).toBeNull();
     expect(fetch).toHaveBeenCalledTimes(1);
   });
@@ -369,6 +372,9 @@ describe("HomeClient 會員三態", () => {
     expect(
       screen.getByRole("button", { name: MEMBERSHIP_CTA_UNLOCK_REPORT }),
     ).toBeTruthy();
-    expect(screen.queryByText("即將開放")).toBeNull();
+    const unlockCta = document.querySelector(
+      '[data-report-slot="slot-unlock-cta"]',
+    ) as HTMLElement;
+    expect(within(unlockCta).queryByText("即將開放")).toBeNull();
   });
 });
