@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import {
-  FOLLOWUP_API_UNIMPLEMENTED,
-  FOLLOWUP_PLACEHOLDER,
   MODE_CREDIT_LINE,
   MODE_SUBSCRIBE_LINE,
   MODE_UNLOCK_LINE,
+  POINT_UNLOCK_HINT,
+  POINT_UNLOCK_LABEL,
+  POINT_UNLOCK_UPCOMING,
+  PREVIEW_NO_DEDUCT,
+  PREVIEW_POINT_UNLOCKED,
   REPORT_SLOTS,
   SUBSCRIBE_HINT,
   UPCOMING_UNLOCK_NOTE,
@@ -18,10 +21,6 @@ export function CommercialSecondaryZone({ view }: { view: PreviewView }) {
 
   function showUpcoming() {
     setNote(UPCOMING_UNLOCK_NOTE);
-  }
-
-  function handleFollowupSubmit() {
-    setNote(FOLLOWUP_API_UNIMPLEMENTED);
   }
 
   return (
@@ -36,33 +35,33 @@ export function CommercialSecondaryZone({ view }: { view: PreviewView }) {
         {MODE_SUBSCRIBE_LINE}
       </p>
 
-      <div className="flex flex-col gap-1.5" data-report-slot={REPORT_SLOTS.followup}>
-        <label className="text-[13px] font-medium text-ink-soft" htmlFor="followup-preview">
-          {view.followupCaption}
-        </label>
-        <input
-          className="min-h-11 rounded-control border border-line bg-paper px-3 text-body text-ink-soft"
-          id="followup-preview"
-          onClick={view.followupLocked ? showUpcoming : undefined}
-          onFocus={view.followupLocked ? showUpcoming : undefined}
-          placeholder={FOLLOWUP_PLACEHOLDER}
-          readOnly={view.followupLocked}
-        />
-        {view.followupLocked ? null : (
-          <button
-            className="self-start rounded-control border border-line px-3 py-1.5 text-[13px] font-medium text-ink-soft"
-            onClick={handleFollowupSubmit}
-            type="button"
-          >
-            送出追問
-          </button>
-        )}
-      </div>
+      {view.pointUnlock === "hidden" ? null : (
+        <div className="flex flex-col gap-1.5" data-report-slot={REPORT_SLOTS.pointUnlock}>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              aria-disabled={view.pointUnlock === "locked" ? true : undefined}
+              className="min-h-11 self-start rounded-control border border-line bg-paper px-3 text-[13px] font-medium text-ink-soft"
+              onClick={view.pointUnlock === "locked" ? showUpcoming : undefined}
+              type="button"
+            >
+              {view.pointUnlock === "used" ? PREVIEW_POINT_UNLOCKED : POINT_UNLOCK_LABEL}
+            </button>
+            <span className="text-[13px] font-medium text-ink-soft">
+              {view.pointUnlock === "used" ? PREVIEW_NO_DEDUCT : POINT_UNLOCK_UPCOMING}
+            </span>
+          </div>
+          {view.pointUnlock === "locked" ? (
+            <p className="text-[12px] font-medium leading-snug text-ink-soft">
+              {POINT_UNLOCK_HINT}
+            </p>
+          ) : null}
+        </div>
+      )}
 
       <div className="flex flex-col gap-1.5" data-report-slot={REPORT_SLOTS.subscribe}>
         <button
           className="self-start text-left text-[13px] font-medium text-ink-soft underline decoration-line underline-offset-4"
-          onClick={view.followupLocked ? showUpcoming : undefined}
+          onClick={view.subscribeLocked ? showUpcoming : undefined}
           type="button"
         >
           {view.subscribeLabel}

@@ -42,7 +42,7 @@ describe("shared copy and error codes", () => {
       lockPathCompare: "slot-lock-path-compare",
       delivery: "slot-delivery",
       unlockCta: "slot-unlock-cta",
-      followup: "slot-followup",
+      pointUnlock: "slot-point-unlock",
       subscribe: "slot-subscribe",
     });
   });

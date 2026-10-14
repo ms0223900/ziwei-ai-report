@@ -18,7 +18,7 @@ export const REPORT_SLOTS = {
   lockPathCompare: "slot-lock-path-compare",
   delivery: "slot-delivery",
   unlockCta: "slot-unlock-cta",
-  followup: "slot-followup",
+  pointUnlock: "slot-point-unlock",
   subscribe: "slot-subscribe",
 } as const;
 
@@ -44,19 +44,18 @@ export const ERROR_MESSAGES = {
   PERSIST_FAILED: "儲存失敗，請再試一次。",
 } as const;
 
-export const FOLLOWUP_PLACEHOLDER = "追問需點數或訂閱";
-export const FOLLOWUP_HINT =
-  "點數只買 1 次追問；不解鎖報告、不重算命盤";
+export const POINT_UNLOCK_LABEL = "用 1 點解鎖";
+export const POINT_UNLOCK_UPCOMING = "即將開放";
+export const POINT_UNLOCK_HINT =
+  "用 1 點解鎖這 1 份報告；不重算命盤，也不等於永久解鎖";
 export const SUBSCRIBE_LABEL = "了解訂閱權益";
 export const SUBSCRIBE_HINT =
-  "訂閱有效可看進階報告，本月可追問 10 次；第一版不做月報";
-export const MODE_UNLOCK_LINE = "單次解鎖：這份 report 可看進階；不附贈追問";
-export const MODE_CREDIT_LINE = "點數：只買 1 次追問；不解鎖報告、不重算命盤";
-export const MODE_SUBSCRIBE_LINE =
-  "訂閱：可看進階＋本月追問 10 次；權限與用量分欄";
+  "訂閱有效期間內可看進階報告，本月可以進階解鎖；第一版不做月報";
+export const MODE_UNLOCK_LINE = "單次解鎖：這份 report 可看進階";
+export const MODE_CREDIT_LINE = "點數：1 點可解鎖 1 份自己的報告進階內容";
+export const MODE_SUBSCRIBE_LINE = "訂閱：有效期間內可看進階報告";
 export const PREVIEW_BANNER = "開發預覽｜尚未實作真實付款";
-export const FOLLOWUP_API_UNIMPLEMENTED = "追問 API 尚未實作";
+export const PREVIEW_POINT_UNLOCKED = "已用 1 點解鎖此報告（預覽）";
 export const PREVIEW_NO_DEDUCT = "預覽：尚未扣點";
-export const PREVIEW_MONTHLY_REMAINING = "本月剩餘 10 次（預覽）";
 export const SUBSCRIBE_ACTIVE_PREVIEW = "訂閱有效（預覽）";
 export const PREVIEW_EXAMPLE_MARK = "預覽用範例";
