@@ -122,7 +122,7 @@ where user_id = '<auth user uuid>';
 | --- | --- | --- |
 | 訪客 | 無痕／未登入 | 「{暱稱}的基本分析」；鎖定槽；即將開放；不收費 |
 | 已登入未開通 | 有註冊，**還沒** grant | 同免費摘要；CTA「升級／開通」；點了不改 DB；GET 該 `persist_id` → 403 |
-| 已開通 | grant 或 SQL 已寫 `unlocked` | 「{暱稱}的進階報告」；GET 真文；追問框仍鎖定；不贈點數 |
+| 已開通 | grant 或 SQL 已寫 `unlocked` | 「{暱稱}的進階報告」；GET 真文；不贈點數 |
 
 ---
 
@@ -169,4 +169,4 @@ limit 20;
 - 不要在產品 UI 加「一鍵開通」當正式功能。
 - 不要把 `MEMBERSHIP_GRANT_SECRET` 或 service role 放到 `NEXT_PUBLIC_*`。
 - 不要用 unit2 預覽 B／C／D 宣稱「已開通驗收通過」。
-- 本版不做金流、扣點、訂閱週期、追問 API。
+- 本版不做金流、扣點、訂閱週期。

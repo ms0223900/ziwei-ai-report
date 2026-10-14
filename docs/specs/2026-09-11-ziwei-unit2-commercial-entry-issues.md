@@ -9,10 +9,10 @@
 - **證據**：`docs/spec.md:53`；`lib/reports/store.ts:36,55` 型別僅 `"basic"`；`supabase/migrations/20260905000000_create_reports.sql:14,29`
 - **建議後續**：另開 ticket 統一前瞻值後回寫 `docs/spec.md`，或在單元 4 spec 開工前確認。
 
-## 問題 2：未標註 supersede unit1「追問不出現」條款
+## 問題 2：未標註 supersede unit1「用 1 點解鎖入口不出現」條款
 
 - **來源視角**：B／跨檔案一致性
-- **問題描述**：unit1 spec 定義追問框本版不出現；unit2 新增 `slot-followup` 鎖定框是刻意覆寫，但主 spec 未寫明取代關係，同時遵循兩份 spec 會得到矛盾指令。
+- **問題描述**：unit1 spec 定義「用 1 點解鎖」入口本版不出現；unit2 新增 `slot-point-unlock` 鎖定按鈕是刻意覆寫，但主 spec 未寫明取代關係，同時遵循兩份 spec 會得到矛盾指令。
 - **證據**：`docs/specs/2026-09-05-ziwei-unit1-mvp.md:174,183`
 - **建議後續**：在主 spec 或 unit1 spec 加一句 supersede 註記；不阻塞本次驗收。
 

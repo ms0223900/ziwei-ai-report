@@ -4,7 +4,7 @@
 > 非阻塞項：[`docs/specs/2026-09-21-ziwei-unit5-points-pack-unlock-issues.md`](../../specs/2026-09-21-ziwei-unit5-points-pack-unlock-issues.md)  
 > 前四版：[`ziwei-unit1-mvp`](../ziwei-unit1-mvp/README.md)、[`ziwei-unit2-commercial-entry`](../ziwei-unit2-commercial-entry/README.md)、[`ziwei-unit3-membership`](../ziwei-unit3-membership/README.md)、[`ziwei-unit4-ecpay-sandbox-unlock`](../ziwei-unit4-ecpay-sandbox-unlock/README.md)  
 > **本目錄覆蓋點數包加點、受控扣 1 點、單點解鎖單一報告。** 不重做單元 4 驗簽／Tunnel／`1|OK`；不把 grant 或終身開通當成加點。  
-> spec 第 7 節 5 項阻塞**不另開 US**，編入下表對應任務的驗收條件；`-issues.md` 非阻塞不進本目錄。本 spec **覆寫** `AGENTS.md`／`docs/spec.md`「本版不做扣點」以及單元 2「點數只買追問、不解鎖報告」——實作時以本檔來源 spec 為準。
+> spec 第 7 節 5 項阻塞**不另開 US**，編入下表對應任務的驗收條件；`-issues.md` 非阻塞不進本目錄。本 spec **覆寫** `AGENTS.md`／`docs/spec.md`「本版不做扣點」——實作時以本檔來源 spec 為準。
 
 ## 課堂前置（非 US）
 
@@ -17,7 +17,7 @@
 
 - 重做 CheckMacValue、Tunnel、測試特店、第二家金流、`PeriodReturnURL`
 - `orders.fulfilled_at`、用 `access_status` 或 `reports.status` 代表單點解鎖
-- 追問 API、訂閱、點數到期、退款、多包、浮動扣點
+- 訂閱、點數到期、退款、多包、浮動扣點
 - 結果頁、通知、管理後台、舊報告 `user_id` 回填
 - 完整單元 7 UI／單元 8 驗測劇本
 - `points_balance >= 0` check（Could Have，不排程）
