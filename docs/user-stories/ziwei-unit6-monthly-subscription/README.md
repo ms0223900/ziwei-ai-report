@@ -3,7 +3,7 @@
 > 來源：[`docs/specs/2026-09-25-ziwei-unit6-monthly-subscription.md`](../../specs/2026-09-25-ziwei-unit6-monthly-subscription.md)  
 > 非阻塞項：[`docs/specs/2026-09-25-ziwei-unit6-monthly-subscription-issues.md`](../../specs/2026-09-25-ziwei-unit6-monthly-subscription-issues.md)  
 > 前一版：[`ziwei-unit5-points-pack-unlock`](../ziwei-unit5-points-pack-unlock/README.md)  
-> **本目錄覆蓋月繳訂閱的建單、首次開通、週期續訂／失敗、取消／到期、權限判斷，以及移除追問。** 不重做單元 4 的驗簽、Tunnel、`1|OK`；訂閱不寫 `access_status`，也不寫 `report_unlocks`。  
+> **本目錄覆蓋月繳訂閱的建單、首次開通、週期續訂／失敗、取消／到期、權限判斷，以及清理次要區預留入口。** 不重做單元 4 的驗簽、Tunnel、`1|OK`；訂閱不寫 `access_status`，也不寫 `report_unlocks`。  
 > spec 第 7 節的阻塞項**不另開 US**，已編入下表對應任務的驗收條件；`-issues.md` 的非阻塞項不進本目錄。本 spec **覆寫** `docs/spec.md`「不建 subscriptions」，實作時以來源 spec 為準。
 
 ## PM 定案（2026-09-25）
@@ -19,7 +19,7 @@
 
 ## 不做（本版）
 
-- 追問、年繳、升降級、退款、換卡、催收、暫停／恢復
+- 年繳、升降級、退款、換卡、催收、暫停／恢復
 - 用 `access_status` 或 `report_unlocks` 代表訂閱
 - 呼叫綠界 `CreditCardPeriodAction` Cancel、定期定額訂單查詢補單（Should Have）
 - 我的報告清單、結果頁、通知、管理後台（單元 7）
@@ -60,7 +60,7 @@
 - [x] US-016 會員視圖訂閱態 測試（預期紅燈；待實作轉綠）
 - [x] US-017 會員視圖訂閱態 實作
 - [x] US-018 首頁訂閱接線與月繳入口
-- [x] US-019 移除追問文案與入口
+- [x] US-019 清理次要區預留入口
 
 ### Phase 8 — 素材與交棒
 - [x] US-020 固定 Payload 腳本 測試（預期紅燈；待實作轉綠）
@@ -105,7 +105,7 @@ US-023 ← US-019、US-022
 - Phase 4 完成條件：首次授權建立 active 訂閱；重送或已取消時不改期末。
 - Phase 5 完成條件：續訂只延一次；失敗設 past_due；cancelled／expired 不復活。
 - Phase 6 完成條件：權限順序為永久 → 點數 → 訂閱（只看期間）；單點解鎖在訂閱有效時不扣點。
-- Phase 7 完成條件：新報告在訂閱有效時顯示進階；403 時退回鎖定；畫面沒有追問。
+- Phase 7 完成條件：新報告在訂閱有效時顯示進階；403 時退回鎖定；次要區沒有預留入口殘留。
 - Phase 8 完成條件：腳本可重播六組事件；三位會員就緒；交棒清單與 `docs/spec.md` 已更新。
 
 ## spec Story 對照
@@ -120,7 +120,7 @@ US-023 ← US-019、US-022
 | 6 取消與到期 | US-004、US-014（S6-2／S6-4）、US-022 |
 | 7 權限判斷 | US-014／US-015、US-016／US-017、US-018 |
 | 8 單點解鎖 RPC | US-004（SQL＋套用後實跑）、US-005、US-014（回歸）／US-015、US-018（畫面） |
-| 9 移除追問 | US-019 |
+| 9 清理次要區預留入口 | US-019 |
 | 10 固定素材與三位會員 | US-020／US-021、US-022 |
 | 11 Client 不可寫 | US-003（S11-1 套用後實測）、US-004（S11-3 套用後實測）；S11-2 已由既有 guard 擋下 |
 | 12 交棒單元 7／8 | US-023 |

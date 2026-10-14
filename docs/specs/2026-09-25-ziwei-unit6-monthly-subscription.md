@@ -3,15 +3,15 @@
 > 來源 Ticket：[【Spec】unit 6 月繳訂閱 × 週期狀態與權限同步](https://app.notion.com/p/dbaa6c22fa1b4230819c8911a057cef7)（Notion，2026-09-25 擷取；無 JIRA／無 atlassian MCP）  
 > 父任務：[GTD【課程合作／AI 課程第二堂】實作訂閱週期狀態與權限同步最小閉環](https://app.notion.com/p/58a54609b6614e168d64ca005f0182a8)  
 > 前一版規格：[`2026-09-21-ziwei-unit5-points-pack-unlock.md`](2026-09-21-ziwei-unit5-points-pack-unlock.md)  
-> 類型：**開發類**（方案表第三筆、定期定額建單、ReturnURL 訂閱分支、新 `PeriodReturnURL`、`subscriptions`／`subscription_events`、權限判斷插入「訂閱有效期間」、移除追問）。  
-> **本單覆寫** `docs/spec.md`「不建 subscriptions／不做訂閱週期事件」與單元 2「訂閱可追問 10 次」文案。驗簽演算法、Tunnel、`ReturnURL` 驗證順序、`1|OK` 字串以單元 4 為準，本單不重做。  
+> 類型：**開發類**（方案表第三筆、定期定額建單、ReturnURL 訂閱分支、新 `PeriodReturnURL`、`subscriptions`／`subscription_events`、權限判斷插入「訂閱有效期間」、清理次要區預留入口）。  
+> **本單覆寫** `docs/spec.md`「不建 subscriptions／不做訂閱週期事件」與單元 2 次要區的訂閱預留文案。驗簽演算法、Tunnel、`ReturnURL` 驗證順序、`1|OK` 字串以單元 4 為準，本單不重做。  
 > 已經過獨立審查（3 視角），阻塞項見第 7 節，非阻塞盤點見 [`2026-09-25-ziwei-unit6-monthly-subscription-issues.md`](2026-09-25-ziwei-unit6-monthly-subscription-issues.md)。
 
 ---
 
 ## 0. Context
 
-- **Problem**: 單元 4 寫的是帳號級永久權益（`profiles.access_status`），單元 5 寫的是「使用者 × 報告」單點權益（`report_unlocks`），兩者都沒有期限。月繳若沿用這兩條路徑，到期後就收不回來。`ReturnURL` 目前只認兩個方案，也沒有接週期通知的端點。畫面上還寫著「訂閱可追問 10 次」，但產品已決定不做追問。
+- **Problem**: 單元 4 寫的是帳號級永久權益（`profiles.access_status`），單元 5 寫的是「使用者 × 報告」單點權益（`report_unlocks`），兩者都沒有期限。月繳若沿用這兩條路徑，到期後就收不回來。`ReturnURL` 目前只認兩個方案，也沒有接週期通知的端點。次要區還有只顯示「即將開放」的訂閱預留入口，需由真實月繳入口取代。
 - **Goal**: 已登入會員可建立 `subscribe_report_monthly`（TWD 19、月繳定期定額）。
   - 首次授權走既有 `ReturnURL`，建立有效訂閱與本期起訖。
   - 之後每期走新的 `PeriodReturnURL`：成功只延展期間，失敗不延展。
@@ -47,7 +47,7 @@
 - **Story 6 — 取消與到期收回**：As a 講師／受控後端, I want 取消時立即截斷本期、到期以時間判斷，且之後的週期通知不讓權益復活, So that 權益確實收回，歷史列也保留給單元 7／8 追查。
 - **Story 7 — 權限判斷插入訂閱有效期間**：As a 有效訂閱會員, I want 重整或重登後，自己的報告仍顯示進階內容, So that 權益以伺服器端的有效期間為準。
 - **Story 8 — 單點解鎖 RPC 認得訂閱**：As a 有效訂閱會員, I want 呼叫單點解鎖時不扣點並回 `reason=subscription`, So that 訂閱期間不會誤花點數。
-- **Story 9 — 移除追問**：As a 會員／學員, I want 畫面上沒有追問輸入框、按鈕或「可追問」文案, So that 不會誤以為月費包含聊天功能。
+- **Story 9 — 清理次要區預留入口**：As a 會員／學員, I want 次要區只剩真實可用的入口與三種收費模式的說明, So that 不會看到只顯示「即將開放」的預留按鈕。
 - **Story 10 — 固定素材與三位測試會員**：As a 講師, I want 可重播六組事件並預填三位會員的狀態, So that 課堂不必等真實的下期扣款。
 - **Story 11 — Client 不可寫訂閱**：As a 系統, I want 前端無法新增訂閱、修改狀態或把期間往後改, So that 權益只能由驗簽後的後端建立。
 - **Story 12 — 交棒單元 7／8**：As a 單元 7／8 實作者, I want 一份可讀欄位清單（方案、status、起訖、最近事件識別與時間），並能重用本版素材, So that 結果頁與驗測矩陣不必回頭猜資料結構。
@@ -163,16 +163,16 @@
   - `reason==='subscription'` → 設定 `subscriptionActive=true`，**不要** `setPointUnlocked(true)`，否則畫面會誤顯示「已用 1 點解鎖」。
   - 其餘 reason 維持單元 5 行為。
 
-### Story 9 — 移除追問
+### Story 9 — 清理次要區預留入口
 
 - `CommercialSecondaryZone.tsx`
-  - 刪除 `data-report-slot="slot-followup"` 整塊。
+  - 刪除 `data-report-slot="slot-point-unlock"` 預留區塊（已由單元 5 的真實單點解鎖按鈕取代）。
   - 「了解訂閱權益」按鈕（`slot-subscribe`，點擊後只顯示「即將開放」）一併刪除，由 Story 1 的真實月繳 CTA 取代。
 - `lib/constants.ts`
-  - 刪除 `FOLLOWUP_PLACEHOLDER`、`FOLLOWUP_HINT`、`FOLLOWUP_API_UNIMPLEMENTED`、`PREVIEW_MONTHLY_REMAINING`、`SUBSCRIBE_LABEL`、`SUBSCRIBE_HINT`。
+  - 刪除次要區預留入口專用的 placeholder／hint／預覽常數（含 `SUBSCRIBE_LABEL`、`SUBSCRIBE_HINT`）。
   - `MODE_SUBSCRIBE_LINE` 改為「訂閱：有效期間內可看進階報告」。
-  - `MODE_UNLOCK_LINE` 去掉「不附贈追問」。
-- `lib/commercial/preview.ts`、`lib/membership/view.ts`、`components/report/ReportCard.tsx`：移除 `followupLocked`／`followupCaption`／`subscribeLabel` 欄位與寫死的 `followupLocked: true`。
+  - `MODE_UNLOCK_LINE` 為「單次解鎖：這份 report 可看進階」。
+- `lib/commercial/preview.ts`、`lib/membership/view.ts`、`components/report/ReportCard.tsx`：移除預留入口專用的欄位（如 `subscribeLabel`）。
 - 同步更新受影響的測試。
 
 ### Story 10 — 固定素材與測試會員
@@ -286,10 +286,10 @@
 - S8-3: Given 訂閱已過期、點數餘額為 1 Then 扣 1 點，`reason=unlocked`。
 - S8-4: Given A When 解鎖他人的 `report_id` Then `ok=false`、`reason=forbidden`，不扣點。
 
-### Story 9 — 追問
+### Story 9 — 次要區預留入口
 
-- S9-1: Given 任一狀態 When 渲染報告 Then DOM 沒有 `slot-followup`、`slot-subscribe` 的「即將開放」按鈕、「送出追問」，也沒有任何「追問」字樣。
-- S9-2: Given `rg -n "追問" app components lib --glob '!*.test.*'` Then 沒有結果，或只剩「不做追問」的註解。
+- S9-1: Given 任一狀態 When 渲染報告 Then DOM 沒有 `slot-point-unlock`、`slot-subscribe` 這兩個只顯示「即將開放」的預留按鈕。
+- S9-2: Given 次要區 When 渲染 Then 只剩 `MODE_UNLOCK_LINE`／`MODE_CREDIT_LINE`／`MODE_SUBSCRIBE_LINE` 三行模式說明。
 
 ### Story 10／11／12
 
@@ -360,7 +360,7 @@
 | 7 權限判斷（含 403 退回鎖定） | true | |
 | 7 重整後重開舊報告／「我的報告清單」 | false | PM 定案：不做，只要求新報告可看進階 |
 | 8 RPC `reason=subscription` | true | |
-| 9 移除追問 | true | |
+| 9 清理次要區預留入口 | true | |
 | 10 固定素材與三位會員 | true | |
 | 11 Client 不可寫 | true | |
 | 12 交棒單元 7／8 | true | Ticket Must Have |

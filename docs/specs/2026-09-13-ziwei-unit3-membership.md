@@ -11,12 +11,12 @@
 ## 0. Context
 
 - **Problem**: 單元 1／2 已能讓訪客生成基本摘要並看到鎖定槽位，但產品不認得登入者，也沒有受 RLS 保護的會員列。後續單次解鎖／點數／訂閱沒有可信的更新對象；若用前端改狀態或用 unit2 預覽假文當成開通，課堂會誤判金流與權限已通。
-- **Goal**: 以 Supabase Auth 辨識「你是誰」、以 `profiles` 保存最小會員資料、以 `access_status` 回答「能不能用」。同一份報告功能依訪客／已登入未開通／已開通三態顯示正確內容；權益欄位只能由受控後端改寫。不重做單元 1 生成邏輯，不串金流、不扣點、不啟用追問。
+- **Goal**: 以 Supabase Auth 辨識「你是誰」、以 `profiles` 保存最小會員資料、以 `access_status` 回答「能不能用」。同一份報告功能依訪客／已登入未開通／已開通三態顯示正確內容；權益欄位只能由受控後端改寫。不重做單元 1 生成邏輯，不串金流、不扣點。
 - **Impacted Areas**:
   - 新建：`supabase/migrations/`（`profiles` + Auth trigger + 欄位 GRANT／RLS；檔名自訂、勿沿用 architecture 佔位名 `002_membership.sql` 若會與既有時間戳衝突）、`lib/supabase/client.ts`、`lib/supabase/session.ts`（cookie session）、`app/(auth)/login`、`app/(auth)/register`、根 `middleware.ts`、`app/api/reports/[persistId]/route.ts`、`app/api/dev/grant-access/route.ts`、頁首 session／登入入口元件
   - 改動：`lib/supabase/server.ts`（本版起讀 session）、`app/api/reports/route.ts`（POST 200 **附加** `persist_id`，遮罩規則不變）、`lib/masking/buildReportResponse.ts`（附加 `persist_id`）、`components/report/overlay.ts`／`ReportCard.tsx`／`AdvancedLockedPanel.tsx`／`HomeClient.tsx`／`app/layout.tsx`（三態與登入區）、`.env.example`
   - 沿用不改生成：`lib/generation/*`、`lib/schemas/*`、`lib/policy/high-risk.ts`、`lib/validation/birth.ts`；`COMMERCIAL_PREVIEW` 預覽條與假文規則仍受 unit2 約束
-  - 明確不做：`orders`／`credits`／`subscriptions`／`follow_ups` 表、ECPay、Webhook、追問 API、密碼重設、社群登入、完整會員中心、`reports.user_id` 綁定
+  - 明確不做：`orders`／`credits`／`subscriptions` 表、ECPay、Webhook、密碼重設、社群登入、完整會員中心、`reports.user_id` 綁定
 - **Stakeholders**: 訪客；已註冊未開通會員；已開通會員；課程學員／講師（受控模擬開通）；後續單元 4～6 的受控更新接點
 
 ---
@@ -42,7 +42,7 @@
   As a 會員 A, I want 只能讀寫自己的 `profiles`, So that 會員 B 的列對我不可見也不可改。
 
 - **Story 6 — 同一報告功能的三態畫面**  
-  As a 求測者, I want 訪客／已登入未開通／已開通在同一份報告功能上看到不同內容與下一步, So that 「能不能用」寫在畫面上，且已開通也不附贈追問。
+  As a 求測者, I want 訪客／已登入未開通／已開通在同一份報告功能上看到不同內容與下一步, So that 「能不能用」寫在畫面上，且已開通也不附贈點數。
 
 - **Story 7 — 受控模擬開通後權限仍在**  
   As a 講師／學員, I want 用受控後端（非正式 UI）把某帳號 `access_status` 改為已開通，且重新整理與重新登入後仍為已開通, So that 能驗收權限切換而不假裝付款成功。
@@ -56,7 +56,7 @@
 - 無 session 時，單元 1 表單 → `POST /api/reports` → 畫面 A 流程不變：基本摘要可見，進階三槽鎖定。
 - 頁首新增 `data-report-slot="slot-auth-entry"`：連結或按鈕「登入」「註冊」，分別到 `/login`、`/register`。訪客在表單頁與報告頁都要看得到入口。
 - 高風險畫面（unit1 07）與生成失敗畫面（unit1 06）也要看得到登入入口，但**不得**因此顯示解鎖 CTA 或命盤結論。
-- 訪客點 unit2 主 CTA／追問／訂閱：行為仍為「解鎖即將開放，本版不收費」；**不**因本單改成假登入成功或假開通。
+- 訪客點 unit2 主 CTA／「用 1 點解鎖」／訂閱：行為仍為「解鎖即將開放，本版不收費」；**不**因本單改成假登入成功或假開通。
 - 本版**不**改成「必須先登入才能生成」。這點覆寫 `docs/architecture.md` 陷阱 5「會員單元起先登入再生成」與 `docs/spec.md` §3.6 同句；本單 Ticket 要求訪客仍可完成免費摘要。
 
 ### For Story 2a — Email 註冊
@@ -125,7 +125,7 @@
 |---|---|---|---|
 | 訪客 | 無 session | 基本摘要；`slot-lock-*` 封條＋佔位；無進階真文 | `slot-auth-entry`；主 CTA 仍是 unit2「即將開放」 |
 | 已登入未開通 | 有 session 且 `access_status=locked` | 同免費摘要；進階鎖定 | 沿用 `slot-unlock-cta`（**不要**另造 `slot-upgrade` selector），文案改「升級／開通」；點擊只顯示「開通由講師受控流程處理，本版不收費」；不呼叫金流、不改 `access_status` |
-| 已開通 | 有 session 且 `access_status=unlocked` | 標題「{暱稱}的進階報告」；`slot-delivery` 填入**該份 report 的** `rationale`／`path_compare`／`action_plan` 真文 | 主 CTA 隱藏或改「已開通」；`slot-followup` 仍鎖定；不附贈點數、不啟用追問 API |
+| 已開通 | 有 session 且 `access_status=unlocked` | 標題「{暱稱}的進階報告」；`slot-delivery` 填入**該份 report 的** `rationale`／`path_compare`／`action_plan` 真文 | 主 CTA 隱藏或改「已開通」；`slot-point-unlock` 隱藏或標示已開通；不附贈點數 |
 
 - 已開通進階真文**禁止**使用 unit2 `EXAMPLE_BLOCKS` 預覽假文。來源必須是 DB 該列：`rationale`／`path_compare`／`action_plan` 取 `advanced_json`；`action`／`overall`／`work`／`relationship` 取 `basic_json`（Mock 的 `advanced_json` 沒有 `action`，見第 7 節問題 6）。
 - 取得真文的唯一新通道：`GET /api/reports/[persistId]`（見下）。訪客與未開通呼叫此 API 不得拿到進階三欄。這條 GET 是本單核准的 **unlocked 變體**，**只**放寬「已開通 + 有效 session」這一個端點；`POST /api/reports` 與 `buildReportResponse` 的禁止清單不變。`AGENTS.md`／`.cursor/rules/nextjs.mdc` 的「對外永不帶進階三欄」以本檔此段為準做範圍限縮（見第 7 節問題 2）。
@@ -251,10 +251,10 @@
 
 - **訪客**: Given 無 session 且示範報告在頁面 When 檢視 Then 基本摘要＋鎖定槽＋`slot-auth-entry`；`GET /api/reports/{persist_id}` 回 401 且無進階三欄。
 - **已登入未開通**: Given 已登入且 `locked` When 再送出示範輸入 Then 進階仍鎖定；可見 `slot-unlock-cta`（文案可為「升級／開通」）；點擊不改 `access_status`、不開金流。`GET` 該次 `persist_id` 回 403 且無進階三欄。（此 AC 需先處理第 7 節問題 3：不要用訪客離頁登入後的舊報告。）
-- **已開通**: Given 已登入且 `unlocked` When 再送出示範輸入並 GET 該次 `persist_id` Then 標題為「小圓的進階報告」、三槽為該列進階真文（含 7 天 `action_plan`），不是「預覽用範例」；追問框仍鎖定。（此 AC 需先處理第 7 節問題 2、5、6。）
+- **已開通**: Given 已登入且 `unlocked` When 再送出示範輸入並 GET 該次 `persist_id` Then 標題為「小圓的進階報告」、三槽為該列進階真文（含 7 天 `action_plan`），不是「預覽用範例」。（此 AC 需先處理第 7 節問題 2、5、6。）
 - **POST 仍遮罩**: Given 已開通會員 When 再 `POST /api/reports` Then 200 body **沒有** `rationale`／`path_compare`／`action_plan`／`advanced_json`，但有 `persist_id`；接著 GET 才出現進階。
 - **邊界 — 預覽不算開通**: Given `NEXT_PUBLIC_COMMERCIAL_PREVIEW=1` 切到 B When 驗收「已開通」 Then 判定未通過；須 `access_status=unlocked` 且 GET 真文。
-- **邊界 — 已開通無追問**: Given 已開通 When 檢視 Then 無可用追問送出；`points_balance` 仍 0。
+- **邊界 — 已開通不贈點**: Given 已開通 When 檢視 Then `points_balance` 仍 0。
 - **邊界 — persist_id**: Given Mock `valid` 連續兩次成功 POST When 兩次 GET Then 各用不同 `persist_id`（uuid），不得都打 `rpt_demo_001`。
 
 ### For Story 7
@@ -343,7 +343,7 @@
 - **密碼重設**: MVP: false — Ticket Could Have
 - **`reports.user_id` 綁定與 owner-only reports RLS**: MVP: false — Ticket Could Have；假設本版不強制
 - **會員中心頁、社群登入**: MVP: false — Ticket Could Have／Won't Have
-- **真實付款／訂單／Webhook／扣點／訂閱週期／追問主流程／以前端開通當正式開通**: MVP: false — Ticket Won't Have
+- **真實付款／訂單／Webhook／扣點／訂閱週期／以前端開通當正式開通**: MVP: false — Ticket Won't Have
 
 ---
 
@@ -372,7 +372,7 @@
 
 - 若 UAT 要求訪客生成改為必須登入：暫停，對齊本檔 Story 1，勿自行改成 architecture 陷阱 5。
 - 若 UAT 用預覽 B 或前端切態主張已開通：暫停，以 `access_status` + GET 真文為準。
-- 若課堂臨時要扣點、訂閱週期、追問、金流：暫停，屬後續單元與本單 Won't Have。
+- 若課堂臨時要扣點、訂閱週期、金流：暫停，屬後續單元與本單 Won't Have。
 - 若要求把 GET 改成對未開通也回進階再由前端藏：暫停，違反單元 1 遮罩與本單 403 規則。
 
 ---

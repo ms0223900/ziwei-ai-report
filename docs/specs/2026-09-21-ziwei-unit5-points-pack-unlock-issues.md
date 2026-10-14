@@ -28,7 +28,7 @@
 ## 問題 4：殘餘文案與 AGENTS.md 禁區句
 
 - **來源視角**：B／C
-- **問題描述**：主路徑除 `MODE_CREDIT_LINE`／`FOLLOWUP_HINT` 外，`ERROR_MESSAGES.ADVANCED_LOCKED`（「尚未開通，無法讀取進階報告。」）、`MODE_UNLOCK_LINE`、`AGENTS.md`「真正解鎖或扣點」Won't Have 仍可能誤導。
+- **問題描述**：主路徑除 `MODE_CREDIT_LINE` 外，`ERROR_MESSAGES.ADVANCED_LOCKED`（「尚未開通，無法讀取進階報告。」）、`MODE_UNLOCK_LINE`、`AGENTS.md`「真正解鎖或扣點」Won't Have 仍可能誤導。
 - **證據**：`lib/constants.ts`、`AGENTS.md`。
 - **建議後續**：單點 403 文案改成「尚未解鎖此報告」類；`AGENTS.md` 在單元 5 實作時比照單元 4 覆寫禁區句。
 
