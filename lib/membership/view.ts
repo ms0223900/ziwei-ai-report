@@ -44,7 +44,6 @@ export type MembershipView = {
   showCta: boolean;
   ctaLabel: string;
   ctaNote: string | null;
-  followupLocked: boolean;
   authSlot: string;
   advanced: MembershipAdvanced | null;
   unlockMode: MembershipUnlockMode;
@@ -72,7 +71,6 @@ export function resolveMembershipView(
       showCta: true,
       ctaLabel: MEMBERSHIP_CTA_UNLOCK_REPORT,
       ctaNote: null,
-      followupLocked: true,
       authSlot: REPORT_SLOTS.authEntry,
       advanced: null,
       unlockMode: "none",
@@ -85,7 +83,6 @@ export function resolveMembershipView(
   }
 
   const memberFlags = {
-    followupLocked: true,
     ctaNote: null,
     authSlot: REPORT_SLOTS.authSession,
     showPointsPackCta: true,
