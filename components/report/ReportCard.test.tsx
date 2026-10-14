@@ -213,10 +213,7 @@ describe("ReportCard", () => {
     expect(container.textContent).not.toContain(PREVIEW_EXAMPLE_MARK);
     expect(screen.getByText("已開通")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "解鎖完整報告" })).toBeNull();
-    expect(screen.getByPlaceholderText(FOLLOWUP_PLACEHOLDER)).toHaveProperty(
-      "readOnly",
-      true,
-    );
+    expect(screen.queryByRole("button", { name: POINT_UNLOCK_LABEL })).toBeNull();
   });
 
   it("shows the instructor-controlled note for a locked member CTA", async () => {

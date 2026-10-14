@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -364,6 +364,9 @@ describe("HomeClient 會員三態", () => {
 
     expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
     expect(screen.queryByText(advancedValid.rationale)).toBeNull();
-    expect(screen.getByText("即將開放")).toBeTruthy();
+    const unlockCta = document.querySelector(
+      '[data-report-slot="slot-unlock-cta"]',
+    ) as HTMLElement;
+    expect(within(unlockCta).getByText("即將開放")).toBeTruthy();
   });
 });

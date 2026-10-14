@@ -16,7 +16,7 @@
 
 - 密碼重設、社群登入、完整會員中心
 - `reports.user_id`、reports owner-only RLS
-- 訂單／ECPay／Webhook／扣點／訂閱週期／追問 API
+- 訂單／ECPay／Webhook／扣點／訂閱週期
 - 放寬 `POST /api/reports` 或 `buildReportResponse` 帶進階三欄
 - 以前端或 Client SDK 開通當正式開通
 - 把 `/` 做成未登入不能進

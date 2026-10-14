@@ -49,7 +49,8 @@ export function ReportCard({
         title: membership.title,
         advancedLocked: false,
         showCta: false,
-        followupLocked: true,
+        pointUnlock: "hidden" as const,
+        subscribeLocked: true,
         exampleBlocks: null,
       }
     : preview;
