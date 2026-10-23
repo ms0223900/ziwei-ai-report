@@ -68,3 +68,7 @@ alter table public.admin_actions enable row level security;
 revoke all on table public.admin_actions from anon;
 revoke all on table public.admin_actions from public;
 revoke all on table public.admin_actions from authenticated;
+
+-- 10/30 起新專案不再自動授權 service_role：伺服器端 API 需要的最小權限（不含 delete）。
+grant select, insert, update on table public.notifications to service_role;
+grant select, insert on table public.admin_actions to service_role;

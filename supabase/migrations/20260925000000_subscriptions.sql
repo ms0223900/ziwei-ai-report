@@ -94,3 +94,7 @@ revoke all on table public.subscription_events from anon;
 revoke insert, update, delete on table public.subscription_events from public;
 revoke insert, update, delete on table public.subscription_events from authenticated;
 grant select on table public.subscription_events to authenticated;
+
+-- 10/30 起新專案不再自動授權 service_role：伺服器端 API 需要的最小權限（不含 delete）。
+grant select on table public.subscriptions to service_role;
+grant select on table public.subscription_events to service_role;

@@ -78,6 +78,8 @@ repo 的 `docs/specs/*-unitN-*` 與 `docs/user-stories/ziwei-unitN-*` 用的是 
 | cp-06 | 加 `20260925000000_subscriptions.sql`、`20260925000001_subscriptions_rpc.sql` |
 | cp-07～cp-09 | 加 `20260928000000_notifications_admin_actions.sql`（cp-08 起不再新增遷移） |
 
+> **`service_role` 授權**：Supabase 自 2026-10-30 起，新專案（含 preview branch、`supabase db reset`）不再自動把新表的權限給 `service_role`。上表每支遷移的最後面都已明確 `grant` 伺服器端實際用到的最小權限（不含 `delete`）；`anon`／`authenticated` 的設定不變。已套用過舊版遷移的資料庫不會因為改檔而更新，需手動執行同樣的 `grant`（可重複執行）。
+
 ## 每個 cp 的驗收入口與還原工具
 
 | cp | 驗收入口 | 還原／重播工具 |
