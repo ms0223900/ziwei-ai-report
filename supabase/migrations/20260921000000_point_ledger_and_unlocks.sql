@@ -98,3 +98,7 @@ revoke all on table public.report_unlocks from anon;
 revoke insert, update, delete on table public.report_unlocks from public;
 revoke insert, update, delete on table public.report_unlocks from authenticated;
 grant select on table public.report_unlocks to authenticated;
+
+-- 10/30 起新專案不再自動授權 service_role：伺服器端 API 需要的最小權限（不含 delete）。
+grant select on table public.point_transactions to service_role;
+grant select on table public.report_unlocks to service_role;
