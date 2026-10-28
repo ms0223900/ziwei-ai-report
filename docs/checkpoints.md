@@ -27,29 +27,31 @@ repo 的 `docs/specs/*-unitN-*` 與 `docs/user-stories/ziwei-unitN-*` 用的是 
 
 | cp | 課程單元 | repo 單元 | 起始版（`cp-NN-start`） | 完成版（`cp-NN-done`） | 舊 SHA（legacy tag）起始 → 完成 | 完成版對應的合併（舊鏈） |
 | --- | --- | --- | --- | --- | --- | --- |
-| cp-01 | 1 共用起點 | unit1＋unit2 | `df400d3` | `36bd062` | `df400d3` → `eca1478` | unit2 #24 之後的 `chore: enable commercial preview on production builds` |
-| cp-02 | 2 會員／資料／權限 | unit3 | `36bd062` | `74a4735` | `eca1478` → `141bc26` | `feat(grant-access): enhance grant access functionality and tests` |
-| cp-03 | 3 收費模式與方案規格 | （無） | `74a4735` | `74a4735` | `141bc26` → `141bc26` | 沿用 cp-02 完成版，只多講方案卡與付款交棒表 |
-| cp-04 | 4 訂單／付款／Webhook | unit4 | `74a4735` | `6ed29a2` | `141bc26` → `11e1622` | #50 unit4 US-023 |
-| cp-05 | 5 點數制 | unit5 | `6ed29a2` | `c115a40` | `11e1622` → `85f56da` | #65 剩 1 點解鎖修正 |
-| cp-06 | 6 訂閱制 | unit6 | `c115a40` | `7ab9507` | `85f56da` → `7028644` | #79 訂閱 reset SQL（A/B/C/D 固定 UUID） |
-| cp-07 | 7 付款後交付與最小營運 | unit7 | `7ab9507` | `49cc866` | `7028644` → `cd7d5b1` | #93 頁首帳號連首頁 |
-| cp-08 | 8 成功／失敗驗測與處置 | unit8 | `49cc866` | `30bf73a` | `cd7d5b1` → `5883f8d` | #98 單元 8 驗測 playbook |
-| cp-09 | 9 商業模式演練與缺口 | （無） | `30bf73a` | `1e730c0` | `5883f8d` → `a77b641` | #99 cp 對照表、Rescue Kit 與單元 9 素材 |
+| cp-01 | 1 共用起點 | unit1＋unit2 | `df400d3` | `9e8cb86` | `df400d3` → `eca1478` | unit2 #24 之後的 `chore: enable commercial preview on production builds` |
+| cp-02 | 2 會員／資料／權限 | unit3 | `9e8cb86` | `bb957ac` | `eca1478` → `141bc26` | `feat(grant-access): enhance grant access functionality and tests` |
+| cp-03 | 3 收費模式與方案規格 | （無） | `bb957ac` | `bb957ac` | `141bc26` → `141bc26` | 沿用 cp-02 完成版，只多講方案卡與付款交棒表 |
+| cp-04 | 4 訂單／付款／Webhook | unit4 | `bb957ac` | `dcf68a6` | `141bc26` → `11e1622` | #50 unit4 US-023 |
+| cp-05 | 5 點數制 | unit5 | `dcf68a6` | `981bf28` | `11e1622` → `85f56da` | #65 剩 1 點解鎖修正 |
+| cp-06 | 6 訂閱制 | unit6 | `981bf28` | `585d519` | `85f56da` → `7028644` | #79 訂閱 reset SQL（A/B/C/D 固定 UUID） |
+| cp-07 | 7 付款後交付與最小營運 | unit7 | `585d519` | `ca53f47` | `7028644` → `cd7d5b1` | #93 頁首帳號連首頁 |
+| cp-08 | 8 成功／失敗驗測與處置 | unit8 | `ca53f47` | `ecc892b` | `cd7d5b1` → `5883f8d` | #98 單元 8 驗測 playbook |
+| cp-09 | 9 商業模式演練與缺口 | （無） | `ecc892b` | `ad7c64c` | `5883f8d` → `a77b641` | #99 cp 對照表、Rescue Kit 與單元 9 素材 |
+
+> **SHA 注意（2026-10-30 `service_role` backport）**：上表「起始版／完成版」欄位是各 cp 分支在 **fast-forward 合併** service-role grants PR 後的預期 tip（PR head）。若改用 squash 或 merge commit，tip SHA 會變，必須再更新本表。合併方式見〈2026-10-30 service_role grants〉。`cp-01-start` 仍為 `df400d3`（該 tip 尚無 migrations，未加 grant）。
 
 ### 切點判斷
 
-> 切點的判斷理由沿用重切前的舊鏈；括號內是新鏈 SHA。cp-01、cp-02、cp-04、cp-05 的完成版多了一個修正 commit（見〈2026-10 重切〉），cp-06～cp-09 的內容與舊鏈完全相同。
+> 切點的判斷理由沿用重切前的舊鏈；括號內是重切鏈 tip，再經 2026-10-30 `service_role` grant 一筆 commit 後的 tip 見上表。cp-01、cp-02、cp-04、cp-05 的完成版多了一個修正 commit（見〈2026-10 重切〉），cp-06～cp-09 的內容與舊鏈完全相同（grant 除外）。
 
-- **cp-01 起始版** `df400d3`（新鏈不變）：Next.js scaffold（AGENTS.md 的 Checkpoint A1）。之前的 commit 只有 spec 與 skill。
-- **cp-01 完成版** `eca1478`（新 `36bd062`）：unit2 最後一個 commit；下一個是 unit3 spec（#25）。
-- **cp-02 完成版** `141bc26`（新 `74a4735`）：unit3 最後一個 commit（grant 金手指補強）；下一個是 unit4 spec（#39）。
-- **cp-04 完成版** `11e1622`（新 `6ed29a2`）：unit4 最後一個合併；下一個是 unit5 spec。
-- **cp-05 完成版** `85f56da`（新 `c115a40`）：unit5 最後一個修正；下一個是 unit6 spec（#66）。
-- **cp-06 完成版** `7028644`（新 `7ab9507`）：unit6 最後一個合併是 #75（`f0e54fa`），但訂閱 reset SQL（#79）在 unit7 spec（#78）之後才合併。#78 只加 spec 文件、#77 只更新 agent skills，不影響程式，所以把完成版切在 #79。之後的 #80（`a760d18`）內容與 #79 相同。
-- **cp-07 完成版** `cd7d5b1`（新 `49cc866`）：unit7 最後一個合併是 #92（`df0fe2c`），#93 是 unit8 開始前的小 UI 修正，一併算進 cp-07，讓 cp-08 起始版等於 cp-07 完成版。
-- **cp-08 完成版** `5883f8d`（新 `30bf73a`）：單元 8 真機驗收（2026-10-07）全部通過後的 `main`。
-- **cp-09 完成版** `a77b641`（新 `1e730c0`）：#99 合併，新增 cp 對照表、Rescue Kit 與 `docs/unit9/`。
+- **cp-01 起始版** `df400d3`（不變）：Next.js scaffold（AGENTS.md 的 Checkpoint A1）。之前的 commit 只有 spec 與 skill；無 migrations，未加 `service_role` grant。
+- **cp-01 完成版** `eca1478`（重切 `36bd062` → grant 後 `9e8cb86`）：unit2 最後一個 commit；下一個是 unit3 spec（#25）。
+- **cp-02 完成版** `141bc26`（重切 `74a4735` → grant 後 `bb957ac`）：unit3 最後一個 commit（grant 金手指補強）；下一個是 unit4 spec（#39）。
+- **cp-04 完成版** `11e1622`（重切 `6ed29a2` → grant 後 `dcf68a6`）：unit4 最後一個合併；下一個是 unit5 spec。
+- **cp-05 完成版** `85f56da`（重切 `c115a40` → grant 後 `981bf28`）：unit5 最後一個修正；下一個是 unit6 spec（#66）。
+- **cp-06 完成版** `7028644`（重切 `7ab9507` → grant 後 `585d519`）：unit6 最後一個合併是 #75（`f0e54fa`），但訂閱 reset SQL（#79）在 unit7 spec（#78）之後才合併。#78 只加 spec 文件、#77 只更新 agent skills，不影響程式，所以把完成版切在 #79。之後的 #80（`a760d18`）內容與 #79 相同。
+- **cp-07 完成版** `cd7d5b1`（重切 `49cc866` → grant 後 `ca53f47`）：unit7 最後一個合併是 #92（`df0fe2c`），#93 是 unit8 開始前的小 UI 修正，一併算進 cp-07，讓 cp-08 起始版等於 cp-07 完成版。
+- **cp-08 完成版** `5883f8d`（重切 `30bf73a` → grant 後 `ecc892b`）：單元 8 真機驗收（2026-10-07）全部通過後的 `main`。
+- **cp-09 完成版** `a77b641`（重切 `1e730c0` → grant 後 `ad7c64c`）：#99 合併，新增 cp 對照表、Rescue Kit 與 `docs/unit9/`。
 
 ## 2026-10 重切
 
@@ -78,7 +80,25 @@ repo 的 `docs/specs/*-unitN-*` 與 `docs/user-stories/ziwei-unitN-*` 用的是 
 | cp-06 | 加 `20260925000000_subscriptions.sql`、`20260925000001_subscriptions_rpc.sql` |
 | cp-07～cp-09 | 加 `20260928000000_notifications_admin_actions.sql`（cp-08 起不再新增遷移） |
 
-> **`service_role` 授權**：Supabase 自 2026-10-30 起，新專案（含 preview branch、`supabase db reset`）不再自動把新表的權限給 `service_role`。上表每支遷移的最後面都已明確 `grant` 伺服器端實際用到的最小權限（不含 `delete`）；`anon`／`authenticated` 的設定不變。已套用過舊版遷移的資料庫不會因為改檔而更新，需手動執行同樣的 `grant`（可重複執行）。
+> **`service_role` 授權**：Supabase 自 2026-10-30 起，新專案（含 preview branch、`supabase db reset`）不再自動把新表的權限給 `service_role`。上表每支遷移的最後面都已明確 `grant` 伺服器端實際用到的最小權限（不含 `delete`）；`anon`／`authenticated` 的設定不變。已套用過舊版遷移的資料庫不會因為改檔而更新，需手動執行同樣的 `grant`（可重複執行）。`main` 見 #106；各 `cp-*` 分支見〈2026-10-30 service_role grants〉。
+
+## 2026-10-30 service_role grants
+
+**原因**：#106 只修了 `main`。課堂切到 `cp-*` 再 `supabase db reset` 仍會缺 `service_role` 權限。
+
+**做法**：對每個有 migrations 的 `cp-*` tip 加一筆與 #106 同風格的 grant commit（只 grant 該 tip 已有的表；永不 grant `delete`），並加 scoped `service-role-grants.migration.test.ts`。曾共用同一 tip 的分支（例如 `cp-01-done`／`cp-02-start`）指向**同一個 commit 物件**，FF 合併後仍共用 tip。
+
+**合併方式（為了讓上表 SHA 正確）**：
+
+1. 每個 cp PR 請用 **fast-forward only**（不要 squash、不要 merge commit）：
+   ```bash
+   git fetch origin
+   git checkout cp-04-done
+   git merge --ff-only origin/cursor/cp-04-done-service-role-grants-b659
+   git push origin cp-04-done
+   ```
+2. 若改用 GitHub UI 的 squash／create a merge commit，合併後 tip ≠ 上表 SHA，請再開 PR 把本檔改成實際 tip。
+3. 本檔目前寫的是 **PR head SHA**（FF 後即為分支 tip）。合併完成後可用 `git rev-parse --short=7 origin/cp-NN-done` 核對。
 
 ## 每個 cp 的驗收入口與還原工具
 
