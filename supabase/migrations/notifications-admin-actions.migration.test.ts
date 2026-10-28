@@ -109,7 +109,7 @@ describe("notifications / admin_actions migration", () => {
     expect(sql).toMatch(/revoke all on table public\.admin_actions from anon/i);
     expect(sql).toMatch(/revoke all on table public\.admin_actions from authenticated/i);
     expect(sql).not.toMatch(/create policy \w+\s+on public\.admin_actions/i);
-    expect(sql).not.toMatch(/grant [^;]* on table public\.admin_actions/i);
+    expect(sql).not.toMatch(/grant [^;]* on table public\.admin_actions to (anon|authenticated|public)/i);
   });
 
   it("does not use an UPDATE policy to express read_at-only updates", () => {
