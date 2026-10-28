@@ -74,3 +74,6 @@ create trigger orders_guard_status
   before update on public.orders
   for each row
   execute function public.orders_guard_status();
+
+-- 10/30 起新專案不再自動授權 service_role：伺服器端 API 需要的最小權限（不含 delete）。
+grant select, insert, update on table public.orders to service_role;

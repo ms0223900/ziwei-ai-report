@@ -34,3 +34,6 @@ alter table public.reports enable row level security;
 
 -- 刻意不建立任何 POLICY（零 policy）。
 -- 刻意不建立 users／orders／credits／subscriptions／follow_ups。
+
+-- 10/30 起新專案不再自動授權 service_role：伺服器端 API 需要的最小權限（不含 delete）。
+grant select, insert on table public.reports to service_role;
