@@ -8,7 +8,9 @@
   - 時辰：選了時辰，報告內容不變。`AI_PROVIDER=mock`（預設）回傳固定 fixture，`overall` 永遠以「（未知時辰，準確度較低）」開頭，即使使用者選了時辰。OpenRouter 路徑把 `birth_time` 放進 user prompt，但 system prompt 沒有任何依時辰撰寫的規則。
   - 通知：`POST /api/payments/checkout` 建單成功就寫入 `order_pending`（「付款已受理，正在確認中」）。使用者到綠界放棄付款，通知仍在，客服與使用者都會誤以為已付款。
 - **Goal**
-  - 選了時辰的報告會點名該時辰、不出現「未知時辰」字樣，且不同時辰的 `overall` 文字不同；未選時辰維持現行「未知時辰」標示。
+  - Mock：選了時辰的報告全文不出現「未知時辰」，且不同時辰的 `overall` 文字不同。
+  - Live：prompt 要求同上；伺服器只保證 `overall` 前綴正確，其他欄位依模型遵循度，不列為本單驗收。
+  - 未選時辰維持現行「未知時辰」標示。
   - 建單時不寫任何通知；付款結果通知仍只由 webhook 寫入（現行行為不變）。
 - **Impacted Areas**
   - `lib/generation/mock.ts`、`lib/generation/provider.ts`、`lib/generation/fixtures/*.json`
@@ -54,6 +56,7 @@
   - `PROMPT_VERSION` 改為 `"zwds-v2"`。
   - `userPrompt` 不變（已傳 `birth_time`、`time_unknown`）。
 - **Story A3 — 寫入前防呆（mock 與 live 共用同一個前綴規則）**
+  - 防呆實作為純函式 `applyBirthTimePrefix(overall: unknown, birth: ValidatedBirth): unknown`，放在 `lib/generation/birth-time-prefix.ts` 並 export。
   - 套用位置：
     - Live：在 `validateComplete(complete)` 之後、`splitCompleteForPersist` 之前，對 `complete` 防呆。
     - Mock：對 `basic` 與 `advanced` 各自防呆，再進既有三項驗證。
@@ -86,8 +89,8 @@
   - Scenario 2：Given 模型回傳 `overall="今天…"`（無前綴）、`birth_time="寅"` When 寫入 Then `overall` 為「（寅時）今天…」。
   - Scenario 3：Given 模型回傳 `overall="（寅時）今天…"` When 寫入 Then `overall` 不重複加前綴。
   - Scenario 4：Given `birth_time=null`、模型回傳無前綴 `overall` When 寫入 Then `overall` 以「（未知時辰，準確度較低）」開頭。
-  - Scenario 5（邊界）：Given 以 mock 掉 provider 的方式讓 live 回傳缺 `rationale` 的 `complete`、`birth_time="寅"` When 寫入 Then 依既有流程回 schema 錯誤、不寫 DB。
-  - Scenario 6（邊界）：Given `overall` 非字串、`birth_time="寅"` When 防呆 Then `overall` 原樣不變（不產生「（寅時）undefined」），交由 ajv 判定失敗。
+  - Scenario 5（邊界，回歸測試：確認防呆不改變既有 schema 失敗流程）：Given 以 mock 掉 provider 的方式讓 live 回傳缺 `rationale` 的 `complete`、`birth_time="寅"` When 寫入 Then 依既有流程回 schema 錯誤、不寫 DB。
+  - Scenario 6（邊界，單元測試直接呼叫 `applyBirthTimePrefix`）：Given `overall` 非字串、`birth_time="寅"` When 防呆 Then `overall` 原樣不變（不產生「（寅時）undefined」），交由 ajv 判定失敗。
 - **FR-1／FR-2（Story B／C）**
   - Scenario 1：Given 已登入使用者 When `POST /api/payments/checkout` 建單成功 Then `notifications` 新增 0 筆，回應與綠界欄位與現行相同。
   - Scenario 2：Given 建單後使用者在綠界放棄付款（無 webhook） When 查 `GET /api/notifications` Then 該訂單沒有任何通知。
@@ -113,7 +116,7 @@
 
 - Story A1：MVP: true — 預設 provider 為 mock，驗收問題直接來自此路徑。
 - Story A2：MVP: true — 正式環境走 live 時的同一問題。
-- Story A3：MVP: true — LLM 不保證遵守 prompt，伺服器端保證「選了時辰不會顯示未知時辰」。
+- Story A3：MVP: true — LLM 不保證遵守 prompt，伺服器端保證 `overall` 前綴與所選時辰一致。
 - FR-1／FR-2：MVP: true。
 - 真實排盤引擎（命宮主星計算）：MVP: false — 使用者決定本單不做。
 - 把既有 `order_pending` 通知清除或改標已讀：MVP: false — 本單不動歷史資料。
@@ -128,10 +131,8 @@
 - **二、規格與需求灰區**
   - Mock 的 12 句時辰基調內容沒有產品提供的文案來源，由實作者撰寫；若需品牌口吻審稿，需另行確認。
   - 未選時辰的報告仍與現行一樣全員相同（mock）；本單只處理「選了時辰卻被忽略」。
-  - （獨立審查 IMPORTANT）Story A3 防呆函式未定名稱與位置，A3 Scenario 6 在 route 層測不到（live 的非字串 `overall` 會先被 `openrouter.ts:81` 與 `route.ts:203` 擋下；mock fixture 一定是字串）。替換方向：「防呆實作為純函式 `applyBirthTimePrefix(overall: unknown, birth: ValidatedBirth): unknown`，放在 `lib/generation/birth-time-prefix.ts` 並 export；S6 以單元測試直接呼叫；S5 為回歸測試，確認防呆不改變既有 schema 失敗流程。」
-  - （獨立審查 IMPORTANT）第 0 節 Goal「選了時辰不出現『未知時辰』」未區分 mock／live；live 伺服器只保證 `overall` 前綴，其他欄位無保證也無 AC。替換方向：Goal 改為「Mock：選了時辰的報告全文不出現『未知時辰』且不同時辰 `overall` 不同。Live：prompt 要求同上；伺服器只保證 `overall` 前綴正確，其他欄位依模型遵循度，不列為本單驗收。」
 - **三、動態詢問與邊界調整**
-  - Live 驗收時若模型常常不遵守「依時辰寫出不同敘述」，防呆只能保證前綴；是否需加重試或改模型，屆時再議。
+  - Live 驗收時若模型常常不遵守「依時辰寫出不同敘述」，或在 `overall` 以外欄位寫出「未知時辰」，防呆只能保證 `overall` 前綴；是否需加重試或改模型，屆時再議。
   - 舊報告（`prompt_version=zwds-v1`）不重新生成。
   - 另見 `2026-10-09-ziwei-birth-time-and-pending-notice-issues.md`，盤點到的非阻塞問題。
 
