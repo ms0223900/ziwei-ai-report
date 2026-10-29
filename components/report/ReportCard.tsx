@@ -67,16 +67,16 @@ export function ReportCard({
   const unlocked = membership !== undefined && !membership.advancedLocked;
   const view = unlocked
     ? {
-        ...preview,
-        title: membership.title,
-        advancedLocked: false,
-        showCta: false,
-        exampleBlocks: null,
-      }
+      ...preview,
+      title: membership.title,
+      advancedLocked: false,
+      showCta: false,
+      exampleBlocks: null,
+    }
     : preview;
 
   return (
-    <article className="animate-report-enter w-full max-w-[350px] rounded-sheet border border-line bg-sheet px-6 py-6 md:max-w-[576px] md:p-6 lg:max-w-[900px]">
+    <article className="animate-report-enter w-full max-w-[350px] rounded-sheet border border-line bg-sheet px-6 py-6 md:max-w-[576px] md:p-6 lg:max-w-[1080px]">
       {policy.showAlert ? (
         <p
           className="mb-4 text-[13px] font-medium leading-snug text-ink"
@@ -90,7 +90,7 @@ export function ReportCard({
         <CommercialPreviewBar onChange={setLocalState} state={localState} />
       ) : null}
 
-      <header className="mb-5 flex items-start justify-between gap-4 lg:grid lg:grid-cols-[2.375rem_minmax(0,1fr)_2.375rem] lg:items-center">
+      <header className="mb-7 flex items-start justify-between gap-4 lg:grid lg:grid-cols-[2.375rem_minmax(0,1fr)_2.375rem] lg:items-center">
         <span aria-hidden="true" className="hidden lg:block" />
         <h1 className="font-serif text-display text-ink lg:text-center">
           {pcReportTitle(view.title, isPc)}

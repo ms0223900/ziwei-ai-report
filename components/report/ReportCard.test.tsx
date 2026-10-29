@@ -6,13 +6,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   DISCLAIMER,
   LOCK_CAPTION,
+  MEMBERSHIP_CTA_UNLOCK_REPORT,
   MODE_CREDIT_LINE,
   MODE_SUBSCRIBE_LINE,
   MODE_UNLOCK_LINE,
   PREVIEW_BANNER,
   PREVIEW_EXAMPLE_MARK,
   REPORT_SLOTS,
-  MEMBERSHIP_CTA_UNLOCK_REPORT,
 } from "../../lib/constants";
 import advancedValid from "../../lib/generation/fixtures/advanced.valid.json";
 import { resolveMembershipView } from "../../lib/membership/view";
@@ -114,15 +114,15 @@ describe("ReportCard", () => {
     vi.stubGlobal("matchMedia", (query: string) => ({
       matches: query === "(min-width: 64rem)",
       media: query,
-      addEventListener: () => {},
-      removeEventListener: () => {},
+      addEventListener: () => { },
+      removeEventListener: () => { },
     }));
     const user = userEvent.setup();
     const { container } = render(
       <ReportCard commercialPreviewEnabled report={demoReport} />,
     );
 
-    expect(container.querySelector("article")?.className).toContain("lg:max-w-[900px]");
+    expect(container.querySelector("article")?.className).toContain("lg:max-w-[1080px]");
     expect(container.querySelector("article")?.className).toContain("max-w-[350px]");
     await user.selectOptions(screen.getByRole("combobox", { name: "預覽態" }), "B");
 

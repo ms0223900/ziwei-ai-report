@@ -184,10 +184,10 @@ export function HomeClient({
         json === null
           ? null
           : maskedReportFromApi(json, {
-              nickname: item?.nickname ?? "",
-              birth_date: "",
-              birth_time: null,
-            });
+            nickname: item?.nickname ?? "",
+            birth_date: "",
+            birth_time: null,
+          });
       if (!nextReport || nextReport.persist_id !== persistId) {
         setMenuError(REPORT_UNLOCKS_OPEN_FAILED);
         return;
@@ -362,14 +362,14 @@ export function HomeClient({
       return (
         <>
           {subscriptionNotice ? (
-            <p className="w-full max-w-[350px] text-[13px] font-medium text-ink md:max-w-[576px] lg:max-w-[900px]" role="status">
+            <p className="w-full max-w-[350px] text-[13px] font-medium text-ink md:max-w-[576px] lg:max-w-[1080px]" role="status">
               {subscriptionNotice}
             </p>
           ) : null}
           <ReportCard
-          membership={membership}
-          onPointUnlocked={handlePointUnlocked}
-          report={report}
+            membership={membership}
+            onPointUnlocked={handlePointUnlocked}
+            report={report}
           />
         </>
       );
