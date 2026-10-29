@@ -43,6 +43,7 @@ const lockedMembership = resolveMembershipView({
 afterEach(() => {
   cleanup();
   vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
 });
 
 const demoReport = overlayCannedReport({
@@ -107,6 +108,27 @@ describe("ReportCard", () => {
 
     expect(screen.queryByText(PREVIEW_BANNER)).toBeNull();
     expect(screen.getByRole("heading", { name: "小圓的基本分析" })).toBeTruthy();
+  });
+
+  it("rewrites the advanced title when the PC breakpoint matches", async () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query === "(min-width: 64rem)",
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }));
+    const user = userEvent.setup();
+    const { container } = render(
+      <ReportCard commercialPreviewEnabled report={demoReport} />,
+    );
+
+    expect(container.querySelector("article")?.className).toContain("lg:max-w-[900px]");
+    expect(container.querySelector("article")?.className).toContain("max-w-[350px]");
+    await user.selectOptions(screen.getByRole("combobox", { name: "預覽態" }), "B");
+
+    expect(
+      await screen.findByRole("heading", { name: "小圓的紫微斗數進階報告" }),
+    ).toBeTruthy();
   });
 
   it("switches preview B to example copy", async () => {

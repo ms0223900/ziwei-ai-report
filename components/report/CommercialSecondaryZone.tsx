@@ -7,7 +7,7 @@ import {
 // Three paid modes all deliver the same advanced report; there is no follow-up chat.
 export function CommercialSecondaryZone() {
   return (
-    <aside className="flex flex-col gap-3 border-t border-line pt-5">
+    <aside className="flex flex-col gap-3 border-t border-line pt-5 lg:gap-6 lg:pt-8">
       <p className="text-[12px] font-medium leading-snug text-ink-soft">
         {MODE_UNLOCK_LINE}
       </p>

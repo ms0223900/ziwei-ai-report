@@ -362,7 +362,7 @@ export function HomeClient({
       return (
         <>
           {subscriptionNotice ? (
-            <p className="w-full max-w-[350px] text-[13px] font-medium text-ink md:max-w-[576px]" role="status">
+            <p className="w-full max-w-[350px] text-[13px] font-medium text-ink md:max-w-[576px] lg:max-w-[900px]" role="status">
               {subscriptionNotice}
             </p>
           ) : null}

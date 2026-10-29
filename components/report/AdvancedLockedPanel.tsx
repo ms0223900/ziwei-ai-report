@@ -104,87 +104,93 @@ export function AdvancedLockedPanel({
     (membership.showUnlockWithPoint || membership.pointsInsufficient);
 
   return (
-    <div className="flex flex-col gap-5">
-      {view.advancedLocked && !realAdvanced ? (
-        <div className="flex h-14 items-center justify-center">
-          <div
-            aria-hidden="true"
-            className="-rotate-2 bg-seal px-6 py-1.5 text-center font-serif text-[13px] font-bold text-sheet"
-          >
-            未開封
+    <div className="contents">
+      <div className="flex min-w-0 flex-col gap-5 lg:col-start-2 lg:row-start-1">
+        {view.advancedLocked && !realAdvanced ? (
+          <div className="flex h-14 items-center justify-center">
+            <div
+              aria-hidden="true"
+              className="-rotate-2 bg-seal px-6 py-1.5 text-center font-serif text-[13px] font-bold text-sheet"
+            >
+              未開封
+            </div>
           </div>
+        ) : null}
+
+        <p className="text-[13px] font-medium leading-snug text-ink-soft">
+          {LOCK_CAPTION}
+        </p>
+
+        <div className="flex flex-col gap-5" data-report-slot={REPORT_SLOTS.delivery}>
+          {LOCKED_BLOCKS.map((block) => (
+            <section
+              aria-label={block.title}
+              className="flex flex-col gap-2.5 rounded-sheet bg-night p-4"
+              data-report-slot={block.slot}
+              key={block.slot}
+            >
+              <h3 className="text-[13px] font-medium leading-snug text-sheet">
+                {block.title}
+              </h3>
+              {realAdvanced ? (
+                <RealAdvancedBody advanced={realAdvanced} field={block.field} />
+              ) : view.advancedLocked || !view.exampleBlocks ? (
+                <PlaceholderBars />
+              ) : (
+                <p className="text-[13px] font-medium leading-snug text-sheet">
+                  {view.exampleBlocks[block.field]}
+                </p>
+              )}
+            </section>
+          ))}
         </div>
-      ) : null}
-
-      <p className="text-[13px] font-medium leading-snug text-ink-soft">
-        {LOCK_CAPTION}
-      </p>
-
-      <div className="flex flex-col gap-5" data-report-slot={REPORT_SLOTS.delivery}>
-        {LOCKED_BLOCKS.map((block) => (
-          <section
-            aria-label={block.title}
-            className="flex flex-col gap-2.5 rounded-sheet bg-night p-4"
-            data-report-slot={block.slot}
-            key={block.slot}
-          >
-            <h3 className="text-[13px] font-medium leading-snug text-sheet">
-              {block.title}
-            </h3>
-            {realAdvanced ? (
-              <RealAdvancedBody advanced={realAdvanced} field={block.field} />
-            ) : view.advancedLocked || !view.exampleBlocks ? (
-              <PlaceholderBars />
-            ) : (
-              <p className="text-[13px] font-medium leading-snug text-sheet">
-                {view.exampleBlocks[block.field]}
-              </p>
-            )}
-          </section>
-        ))}
       </div>
 
-      {showUnlockedLabel ? (
-        <p className="text-[13px] font-medium text-ink-soft">
-          {membership.ctaLabel}
-        </p>
-      ) : null}
+      <div className="flex min-w-0 flex-col gap-5 lg:col-span-2 lg:gap-8">
+        {showUnlockedLabel ? (
+          <p className="text-[13px] font-medium text-ink-soft">
+            {membership.ctaLabel}
+          </p>
+        ) : null}
 
-      {showCta ? (
-        <UnlockCheckoutCta ctaLabel={ctaLabel} hasSession={hasSession} />
-      ) : null}
+        <div className="flex flex-col gap-5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-10 lg:gap-y-4">
+          {showCta ? (
+            <UnlockCheckoutCta ctaLabel={ctaLabel} hasSession={hasSession} />
+          ) : null}
 
-      {showUnlockWithPoint && persistId ? (
-        <UnlockWithPointCta
-          key={`${persistId}:${membership.pointsInsufficient}`}
-          onUnlocked={onPointUnlocked}
-          persistId={persistId}
-          pointsBalance={membership.pointsBalance}
-          pointsInsufficient={membership.pointsInsufficient}
-        />
-      ) : null}
+          {showUnlockWithPoint && persistId ? (
+            <UnlockWithPointCta
+              key={`${persistId}:${membership.pointsInsufficient}`}
+              onUnlocked={onPointUnlocked}
+              persistId={persistId}
+              pointsBalance={membership.pointsBalance}
+              pointsInsufficient={membership.pointsInsufficient}
+            />
+          ) : null}
 
-      {membership && membership.unlockMode !== "subscription" ? (
-        <UnlockCheckoutCta
-          ctaLabel={SUBSCRIPTION_CTA}
-          hasSession={!membership.purchaseRequiresLogin}
-          planId={SUBSCRIPTION_CLIENT_PLAN_ID}
-          slot={REPORT_SLOTS.subscriptionCta}
-          variant="secondary"
-        />
-      ) : null}
+          {membership && membership.unlockMode !== "subscription" ? (
+            <UnlockCheckoutCta
+              ctaLabel={SUBSCRIPTION_CTA}
+              hasSession={!membership.purchaseRequiresLogin}
+              planId={SUBSCRIPTION_CLIENT_PLAN_ID}
+              slot={REPORT_SLOTS.subscriptionCta}
+              variant="secondary"
+            />
+          ) : null}
 
-      {membership?.showPointsPackCta ? (
-        <UnlockCheckoutCta
-          ctaLabel={POINTS_PACK_CTA}
-          hasSession={!membership.purchaseRequiresLogin}
-          planId={POINTS_PACK_CLIENT_PLAN_ID}
-          slot={REPORT_SLOTS.pointsPackCta}
-          variant="secondary"
-        />
-      ) : null}
+          {membership?.showPointsPackCta ? (
+            <UnlockCheckoutCta
+              ctaLabel={POINTS_PACK_CTA}
+              hasSession={!membership.purchaseRequiresLogin}
+              planId={POINTS_PACK_CLIENT_PLAN_ID}
+              slot={REPORT_SLOTS.pointsPackCta}
+              variant="secondary"
+            />
+          ) : null}
+        </div>
 
-      <CommercialSecondaryZone />
+        <CommercialSecondaryZone />
+      </div>
     </div>
   );
 }

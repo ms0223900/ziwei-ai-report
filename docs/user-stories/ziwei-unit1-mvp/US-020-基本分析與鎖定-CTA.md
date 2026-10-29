@@ -34,7 +34,7 @@
 - B／C／D 只預留同一 DOM 位置
 
 **驗收條件**：
-- [x] 標題區、ChartMatrix、三段完整小標、封條「未開封」、鎖定三塊、CTA 對齊 `.pen` 04／05；desktop 1440／箋 576 與 mobile 390／箋 350
+- [x] 標題區、ChartMatrix、三段完整小標、封條「未開封」、鎖定三塊、CTA 對齊 `.pen` 04／05；`lg` 以下箋寬 desktop 576、mobile 350。`lg` 以上改看 GTD PC US-001
 - [x] ChartMatrix 是暫定命盤表，不是空白 placeholder、不是三張卡
 - [x] 無性別欄；「女命」僅示範小圓的 ChartMatrix
 - [x] 示範標題「小圓的基本分析」；短 overall／work／relationship
@@ -56,8 +56,8 @@
 
 狀態：✅ 通過
 
-- `ReportCard` `max-w-[350px] md:max-w-[576px]`，與表單箋同寬
-- 瀏覽器 1440 與 390 已看到標題、封條、鎖定三塊與 CTA；非逐像素
+- `ReportCard` 在 `lg` 以下維持 `max-w-[350px] md:max-w-[576px]`
+- `lg` 以上 900px 並排版面改由 `docs/user-stories/gtd-pc-result-page/US-001-結果頁-PC-版面.md` 驗收
 
 ---
 
