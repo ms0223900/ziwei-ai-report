@@ -30,12 +30,12 @@ repo 的 `docs/specs/*-unitN-*` 與 `docs/user-stories/ziwei-unitN-*` 用的是 
 | cp-01 | 1 共用起點 | unit1＋unit2 | `df400d3` | `9e8cb86` | `df400d3` → `eca1478` | unit2 #24 之後的 `chore: enable commercial preview on production builds` |
 | cp-02 | 2 會員／資料／權限 | unit3 | `9e8cb86` | `bb957ac` | `eca1478` → `141bc26` | `feat(grant-access): enhance grant access functionality and tests` |
 | cp-03 | 3 收費模式與方案規格 | （無） | `bb957ac` | `bb957ac` | `141bc26` → `141bc26` | 沿用 cp-02 完成版，只多講方案卡與付款交棒表 |
-| cp-04 | 4 訂單／付款／Webhook | unit4 | `bb957ac` | `dcf68a6` | `141bc26` → `11e1622` | #50 unit4 US-023 |
-| cp-05 | 5 點數制 | unit5 | `dcf68a6` | `981bf28` | `11e1622` → `85f56da` | #65 剩 1 點解鎖修正 |
-| cp-06 | 6 訂閱制 | unit6 | `981bf28` | `585d519` | `85f56da` → `7028644` | #79 訂閱 reset SQL（A/B/C/D 固定 UUID） |
-| cp-07 | 7 付款後交付與最小營運 | unit7 | `585d519` | `ca53f47` | `7028644` → `cd7d5b1` | #93 頁首帳號連首頁 |
-| cp-08 | 8 成功／失敗驗測與處置 | unit8 | `ca53f47` | `ecc892b` | `cd7d5b1` → `5883f8d` | #98 單元 8 驗測 playbook |
-| cp-09 | 9 商業模式演練與缺口 | （無） | `ecc892b` | `ad7c64c` | `5883f8d` → `a77b641` | #99 cp 對照表、Rescue Kit 與單元 9 素材 |
+| cp-04 | 4 訂單／付款／Webhook | unit4 | `0941d96` | `3218850` | `141bc26` → `11e1622` | #50 unit4 US-023 |
+| cp-05 | 5 點數制 | unit5 | `3218850` | `6e14dc0` | `11e1622` → `85f56da` | #65 剩 1 點解鎖修正 |
+| cp-06 | 6 訂閱制 | unit6 | `6e14dc0` | `761c8f6` | `85f56da` → `7028644` | #79 訂閱 reset SQL（A/B/C/D 固定 UUID） |
+| cp-07 | 7 付款後交付與最小營運 | unit7 | `761c8f6` | `6788d8f` | `7028644` → `cd7d5b1` | #93 頁首帳號連首頁 |
+| cp-08 | 8 成功／失敗驗測與處置 | unit8 | `6788d8f` | `0b502a9` | `cd7d5b1` → `5883f8d` | #98 單元 8 驗測 playbook |
+| cp-09 | 9 商業模式演練與缺口 | （無） | `0b502a9` | `6d8776e` | `5883f8d` → `a77b641` | #99 cp 對照表、Rescue Kit 與單元 9 素材 |
 
 > **SHA 注意（2026-10-30 `service_role` backport）**：上表「起始版／完成版」欄位是各 cp 分支在 **fast-forward 合併** service-role grants PR 後的預期 tip（PR head）。若改用 squash 或 merge commit，tip SHA 會變，必須再更新本表。合併方式見〈2026-10-30 service_role grants〉。`cp-01-start` 仍為 `df400d3`（該 tip 尚無 migrations，未加 grant）。
 
@@ -66,6 +66,14 @@ repo 的 `docs/specs/*-unitN-*` 與 `docs/user-stories/ziwei-unitN-*` 用的是 
 - cp-01 錄影畫面的文字不變：主按鈕「解鎖完整報告」與「即將開放」、點擊後的「解鎖即將開放，本版不收費。」、封條「未開封」、三個「密批封存」標題與 `LOCK_CAPTION`。
 
 **舊 SHA**：舊鏈的每個 SHA 都建了 tag，命名為 `legacy/cp-NN-{start|done}-<舊 SHA>`，例如 `legacy/cp-01-done-eca1478`。舊 SHA 本身也是 `main` 的 first-parent commit，tag 不存在時直接用舊 SHA 即可追溯。
+
+## 2026-11 單元 4 US 檔案包與測試通知小工具
+
+**US 檔案包**：`cp-04-start` 比 `cp-03-done`（`bb957ac`）多一個 commit（`0941d96`），內容是單元 4 規格（`docs/specs/2026-09-17-ziwei-unit4-ecpay-sandbox-unlock*.md`）與**乾淨版**User Story（`docs/user-stories/ziwei-unit4-ecpay-sandbox-unlock/`：README 與 US-001～017、020、023，驗收條件全未勾、不含驗收說明）。學員用這包搭配 AI 依序實作。這是「起始版 = 上一個 cp 完成版」的唯一例外。其餘 cp 的 start 是否比照，見課程規劃。
+
+**測試通知小工具**：`scripts/ecpay-notify-payload.mjs` 與其測試（PR #125）補進 cp-04-done，並以 backport 合併（PR #126～#130）補進 cp-05～cp-09，檔名與 cp-06 起的 `ecpay-subscription-payload.*` 不同，無衝突。
+
+**鏈的接法**：為了讓每個 `cp-NN-start` 仍是 `cp-NN-done` 的祖先，`cp-04-done`（`3218850`）是 `cp-04-done` 舊 tip（`f8256e2`）與 `cp-04-start`（`0941d96`）的 merge commit，tree 與舊 tip 相同；cp-05～cp-09 完成版同樣是 merge commit，tree 只比重切鏈的完成版多小工具兩個檔案。以上皆以 fast-forward 完成，沒有改寫歷史。
 
 ## 每個 cp 需要的資料庫狀態
 
@@ -106,7 +114,7 @@ repo 的 `docs/specs/*-unitN-*` 與 `docs/user-stories/ziwei-unitN-*` 用的是 
 | --- | --- | --- |
 | cp-01 | [`ziwei-unit1-mvp/README.md`](./user-stories/ziwei-unit1-mvp/README.md)、[`ziwei-unit2-commercial-entry/README.md`](./user-stories/ziwei-unit2-commercial-entry/README.md) | 環境變數 `MOCK_AI_MODE`：`valid`／`invalid-json`／`schema-missing-field`（改完重啟或 Redeploy） |
 | cp-02、cp-03 | [`howto-controlled-unlock.md`](./user-stories/ziwei-unit3-membership/howto-controlled-unlock.md) | `scripts/grant-access.sh`（只用來看三態，不算付款） |
-| cp-04 | [`howto-ecpay-sandbox.md`](./user-stories/ziwei-unit4-ecpay-sandbox-unlock/howto-ecpay-sandbox.md) §6 五類驗測 | 固定 Payload：`scripts/ecpay-subscription-payload.mjs --kind return --amount 99` |
+| cp-04 | [`howto-ecpay-sandbox.md`](./user-stories/ziwei-unit4-ecpay-sandbox-unlock/howto-ecpay-sandbox.md) §6 五類驗測 | 測試通知：`node scripts/ecpay-notify-payload.mjs --mtn <訂單編號>`（cp-04-done 起內建；cp-06 起另有 `scripts/ecpay-subscription-payload.mjs`，檔名不同、互不影響） |
 | cp-05 | [`howto-points-pack.md`](./user-stories/ziwei-unit5-points-pack-unlock/howto-points-pack.md) | 固定 Payload：`--kind return --amount 49` |
 | cp-06 | [`howto-monthly-subscription.md`](./user-stories/ziwei-unit6-monthly-subscription/howto-monthly-subscription.md) | `scripts/subscription-checkpoint/reset-checkpoint.sql`、`expire.sql`、`cancel.sql`；period payload |
 | cp-07 | [`howto-post-payment-delivery.md`](./user-stories/ziwei-unit7-post-payment-delivery/howto-post-payment-delivery.md) | `scripts/post-payment-checkpoint/fixture-paid-no-credit.sql`、`mark-failed.sql` |
