@@ -31,11 +31,11 @@ repo 的 `docs/specs/*-unitN-*` 與 `docs/user-stories/ziwei-unitN-*` 用的是 
 | cp-02 | 2 會員／資料／權限 | unit3 | `9e8cb86` | `bb957ac` | `eca1478` → `141bc26` | `feat(grant-access): enhance grant access functionality and tests` |
 | cp-03 | 3 收費模式與方案規格 | （無） | `bb957ac` | `bb957ac` | `141bc26` → `141bc26` | 沿用 cp-02 完成版，只多講方案卡與付款交棒表 |
 | cp-04 | 4 訂單／付款／Webhook | unit4 | `0941d96` | `3218850` | `141bc26` → `11e1622` | #50 unit4 US-023 |
-| cp-05 | 5 點數制 | unit5 | `3218850` | `6e14dc0` | `11e1622` → `85f56da` | #65 剩 1 點解鎖修正 |
-| cp-06 | 6 訂閱制 | unit6 | `6e14dc0` | `761c8f6` | `85f56da` → `7028644` | #79 訂閱 reset SQL（A/B/C/D 固定 UUID） |
-| cp-07 | 7 付款後交付與最小營運 | unit7 | `761c8f6` | `6788d8f` | `7028644` → `cd7d5b1` | #93 頁首帳號連首頁 |
-| cp-08 | 8 成功／失敗驗測與處置 | unit8 | `6788d8f` | `0b502a9` | `cd7d5b1` → `5883f8d` | #98 單元 8 驗測 playbook |
-| cp-09 | 9 商業模式演練與缺口 | （無） | `0b502a9` | `6d8776e` | `5883f8d` → `a77b641` | #99 cp 對照表、Rescue Kit 與單元 9 素材 |
+| cp-05 | 5 點數制 | unit5 | `0c1a129` | `133b012` | `11e1622` → `85f56da` | #65 剩 1 點解鎖修正 |
+| cp-06 | 6 訂閱制 | unit6 | `dc012a7` | `686fa82` | `85f56da` → `7028644` | #79 訂閱 reset SQL（A/B/C/D 固定 UUID） |
+| cp-07 | 7 付款後交付與最小營運 | unit7 | `bf5cb8b` | `37dfd70` | `7028644` → `cd7d5b1` | #93 頁首帳號連首頁 |
+| cp-08 | 8 成功／失敗驗測與處置 | unit8 | `a14c4f9` | `40f9424` | `cd7d5b1` → `5883f8d` | #98 單元 8 驗測 playbook |
+| cp-09 | 9 商業模式演練與缺口 | （無） | `40f9424` | `285cf5e` | `5883f8d` → `a77b641` | #99 cp 對照表、Rescue Kit 與單元 9 素材 |
 
 > **SHA 注意（2026-10-30 `service_role` backport）**：上表「起始版／完成版」欄位是各 cp 分支在 **fast-forward 合併** service-role grants PR 後的預期 tip（PR head）。若改用 squash 或 merge commit，tip SHA 會變，必須再更新本表。合併方式見〈2026-10-30 service_role grants〉。`cp-01-start` 仍為 `df400d3`（該 tip 尚無 migrations，未加 grant）。
 
@@ -67,13 +67,13 @@ repo 的 `docs/specs/*-unitN-*` 與 `docs/user-stories/ziwei-unitN-*` 用的是 
 
 **舊 SHA**：舊鏈的每個 SHA 都建了 tag，命名為 `legacy/cp-NN-{start|done}-<舊 SHA>`，例如 `legacy/cp-01-done-eca1478`。舊 SHA 本身也是 `main` 的 first-parent commit，tag 不存在時直接用舊 SHA 即可追溯。
 
-## 2026-11 單元 4 US 檔案包與測試通知小工具
+## 2026-11 US 檔案包與測試通知小工具
 
-**US 檔案包**：`cp-04-start` 比 `cp-03-done`（`bb957ac`）多一個 commit（`0941d96`），內容是單元 4 規格（`docs/specs/2026-09-17-ziwei-unit4-ecpay-sandbox-unlock*.md`）與**乾淨版**User Story（`docs/user-stories/ziwei-unit4-ecpay-sandbox-unlock/`：README 與 US-001～017、020、023，驗收條件全未勾、不含驗收說明）。學員用這包搭配 AI 依序實作。這是「起始版 = 上一個 cp 完成版」的唯一例外。其餘 cp 的 start 是否比照，見課程規劃。
+**US 檔案包（cp-04～cp-08）**：`cp-04-start`～`cp-08-start` 各比上一個 cp 的完成版多一個 commit，內容是該單元規格（`docs/specs/*-unitN-*`）與**乾淨版** User Story（`docs/user-stories/ziwei-unitN-*/`：README 與各 US，驗收條件全未勾、不含驗收說明與完成狀態註記；`howto-*` 與重構計畫不放入，由對應 US 交付）。學員用這包搭配 AI 依序實作。單元 4 只放課程範圍內的 US-001～017、020、023，並在 README 註明；其餘單元放入該單元全部 US。這是「起始版 = 上一個 cp 完成版」的例外；cp-09-start 仍等於 cp-08-done（單元 8 的 US 已在 cp-09-start，無需再補）。cp-01～cp-03 的起始版尚未補自己單元的 US 檔案包。
 
 **測試通知小工具**：`scripts/ecpay-notify-payload.mjs` 與其測試（PR #125）補進 cp-04-done，並以 backport 合併（PR #126～#130）補進 cp-05～cp-09，檔名與 cp-06 起的 `ecpay-subscription-payload.*` 不同，無衝突。
 
-**鏈的接法**：為了讓每個 `cp-NN-start` 仍是 `cp-NN-done` 的祖先，`cp-04-done`（`3218850`）是 `cp-04-done` 舊 tip（`f8256e2`）與 `cp-04-start`（`0941d96`）的 merge commit，tree 與舊 tip 相同；cp-05～cp-09 完成版同樣是 merge commit，tree 只比重切鏈的完成版多小工具兩個檔案。以上皆以 fast-forward 完成，沒有改寫歷史。
+**鏈的接法**：為了讓每個 `cp-NN-start` 仍是 `cp-NN-done` 的祖先，各 cp 完成版是原完成版與該 cp 起始版的 merge commit，tree 與原完成版（含小工具者為 backport 版）相同；`cp-(N+1)-start` 以上一個完成版為父。全程 fast-forward，沒有改寫歷史。
 
 ## 每個 cp 需要的資料庫狀態
 
