@@ -9,6 +9,8 @@
 > **課程範圍**：本課使用 US-001～017、020、023。US-018／019（正式環境預覽警告）與 US-021／022（grant 與付款互動）不在本課範圍，依賴圖中涉及它們的箭頭可略過。
 > **起點狀態**：所有 Checklist 皆未勾選；請依「依賴鏈摘要」與課程順序，一次完成一張 US。
 
+> **提供品**：US-001、005、006、007 的成果已放在 cp-04-start（`.env.example` 金流槽位、`lib/ecpay/check-mac.ts` 與測試、記憶體 fake 的 `orders`），依賴它們的 US 視為已滿足，請直接從 US-004 起做。
+
 ## 課堂前置（非 US）
 
 - **沙盒怎麼測**：見 [howto-ecpay-sandbox.md](./howto-ecpay-sandbox.md)（US-020 交付；Tunnel 或既有公開 HTTPS；禁止 ngrok）。
@@ -29,19 +31,19 @@
 
 ### Phase 0 — env 與 matcher
 
-- [ ] US-001 金流環境變數與機密守門
+- [x] US-001 金流環境變數與機密守門（提供品：cp-04-start 起手即有，跳過）
 - [ ] US-002 proxy 排除 webhook 測試（預期紅燈；待實作轉綠）
 - [ ] US-003 proxy 排除 webhook 實作
 
 ### Phase 1 — orders 與 fake
 
 - [ ] US-004 建立 orders 遷移
-- [ ] US-005 記憶體 fake orders
+- [x] US-005 記憶體 fake orders（提供品：cp-04-start 起手即有，跳過）
 
 ### Phase 2 — 簽章與方案
 
-- [ ] US-006 CheckMacValue 測試
-- [ ] US-007 CheckMacValue 實作
+- [x] US-006 CheckMacValue 測試（提供品：cp-04-start 起手即有，跳過）
+- [x] US-007 CheckMacValue 實作（提供品：cp-04-start 起手即有，跳過）
 - [ ] US-008 方案表與交易編號 測試
 - [ ] US-009 方案表與交易編號 實作
 
