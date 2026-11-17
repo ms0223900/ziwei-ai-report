@@ -31,15 +31,19 @@ migration 有 `grant select on profiles to authenticated` 與 policy `profiles_s
 2. **畫面外**在 SQL Editor 查 B 的 `user_id`，貼進輸入框。輸入框會顯示 ID，用 OpenScreen 的 Blur 蓋住。
 3. 先按「讀取自己」，看到 1 列。
 4. 再按「讀取別人」，看到 `count: 0`、`rows: []`、沒有錯誤。旁白重點：看的是資料結果，不是有沒有報錯；沒有報錯不代表規則沒生效。
-5. （建議）回 SQL Editor 跑下面的查詢，證明 B 那列確實存在，且這是管理者視角，與瀏覽器的 A session 不同：
+5. **不要把 SQL Editor 錄進片子。** 2-3 分鏡（S6-3 與 R4 規格）要求管理者視角只用概念圖說明，存在性核對在**畫外**做、不入片。
+
+**畫外前置核對（錄之前，保留核對紀錄）：** `rows: []` 也可能只是 B 的 ID 貼錯或 B 根本不存在，那樣不能算隔離通過。在 SQL Editor 確認 A、B 的 profile 都存在、且在同一個專案：
 
 ```sql
 select user_id, display_name, access_status
 from public.profiles
-where user_id = '<B 的 user_id>';
+where user_id in ('<A 的 user_id>', '<B 的 user_id>');
 ```
 
-**彩排必做：** `rows: []` 也可能只是 B 的 ID 貼錯或 B 根本不存在。錄之前先用上面的查詢確認 B 那列存在，否則這個對照沒有意義。
+**R4 通過條件（分鏡）：** A 的一般 session、B 確實存在、查詢正常完成且未回傳 B，三者同時成立。登入或查詢錯誤、空目標、未執行都不算通過；讀到 B 就停錄。更新 B 零列、管理者看得到兩列都不能代替這次 SELECT。
+
+> 按鈕文字（「讀取自己的 profile（對照）」「讀取別人的 profile（RLS）」）是暫定的；分鏡寫明「不發明讀取按鈕文字」，請彩排後和你的畫面文字總表對一下再定稿。
 
 ## 步驟
 
