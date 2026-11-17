@@ -47,6 +47,8 @@ order by 1,2;
 
 預期：`reports` 有 `insert`、`select`；`profiles` 有 `insert`、`select`、`update`（`bb957ac` 的 migration 內容）。缺的話先補 grant 再錄。
 
+**陷阱：** `app/page.tsx` 在 server 端呼叫 `ensureProfile`，失敗時會被 `catch` 吞掉並**靜默當成 `locked`**。所以 `service_role` 權限缺失時，就算 grant 回 200、DB 已是 `unlocked`，重整後畫面仍是鎖定，而且沒有任何錯誤訊息。遇到「grant 成功但畫面仍鎖定」，先查這一節。
+
 ## 4. 生成內容（mock）彩排
 
 - [ ] `AI_PROVIDER=mock` 下，用示範輸入（小圓／`1993-07-12`／時辰未填／聚焦工作）送出一次，確認資料庫那列的 `advanced_json` 不是空的。`GET /api/reports/[persistId]` 在進階欄位為空時回 **404**，不是 200。
