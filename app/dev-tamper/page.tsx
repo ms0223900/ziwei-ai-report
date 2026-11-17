@@ -68,6 +68,41 @@ export default function DevTamperPage() {
     );
   }
 
+  // 2-3 R4：用 A 的 session 讀 profiles（user_id 為空 → 讀自己；否則讀指定的別人）
+  // 讀自己預期：200 / count 1；讀別人預期：200 / code null / count 0 / rows []（RLS 過濾，不報錯）
+  async function tryRead(target: "self" | "other") {
+    const supabase = createBrowserSupabaseClient();
+    let userId = otherUserId.trim();
+    if (target === "self") {
+      const { data: userData } = await supabase.auth.getUser();
+      userId = userData.user?.id ?? "";
+      if (!userId) {
+        setResult("沒有登入：請先登入再試");
+        return;
+      }
+    } else if (!userId) {
+      setResult("請先貼上另一個帳號的 user_id");
+      return;
+    }
+    const { data, error, status } = await supabase
+      .from("profiles")
+      .select("user_id, display_name, access_status")
+      .eq("user_id", userId);
+    setResult(
+      JSON.stringify(
+        {
+          status,
+          code: error?.code ?? null,
+          message: error?.message ?? null,
+          count: data?.length ?? null,
+          rows: data,
+        },
+        null,
+        2,
+      ),
+    );
+  }
+
   return (
     <main className="mx-auto max-w-[576px] px-5 py-10">
       <h1 className="font-serif text-display text-ink">前端直接改權益欄位</h1>
@@ -92,6 +127,20 @@ export default function DevTamperPage() {
           type="button"
         >
           （選用）改別人的顯示名稱
+        </button>
+        <button
+          className="min-h-11 rounded-control border border-line px-5 py-3 text-button text-ink"
+          onClick={() => void tryRead("self")}
+          type="button"
+        >
+          讀取自己的 profile（對照）
+        </button>
+        <button
+          className="min-h-11 rounded-control border border-line px-5 py-3 text-button text-ink"
+          onClick={() => void tryRead("other")}
+          type="button"
+        >
+          讀取別人的 profile（RLS）
         </button>
       </div>
       <pre className="mt-6 whitespace-pre-wrap text-label text-ink">{result}</pre>

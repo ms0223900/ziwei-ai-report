@@ -16,6 +16,31 @@
 
 第二道防線 `profiles_guard_entitlements`（L61–84）：只有欄位權限被放寬時才會走到，會報 `profiles entitlement columns are read-only`（`P0001`）。示範畫面若出現這句而非 `42501`，代表資料庫權限和 migration 不一致。
 
+## R4：用 A 的 session 讀 B（唯讀 SELECT，對應 2-3 分鏡 S6-2）
+
+migration 有 `grant select on profiles to authenticated` 與 policy `profiles_select_own`（`auth.uid() = user_id`）。所以讀別人的列**不報錯**，RLS 只是把它過濾掉。
+
+| 按鈕 | 預期畫面 |
+| --- | --- |
+| 讀取自己的 profile（對照） | `status: 200`、`count: 1`、`rows` 內是 A 自己、`access_status: "locked"` |
+| 讀取別人的 profile（RLS） | `status: 200`、`code: null`、`count: 0`、`rows: []` |
+
+錄製流程：
+
+1. 一般視窗以 A 登入，開 `/dev-tamper`。頁首（`AppHeader`）顯示的就是 A，用來證明「發出查詢的是 A，不是殘留的其他登入狀態」。
+2. **畫面外**在 SQL Editor 查 B 的 `user_id`，貼進輸入框。輸入框會顯示 ID，用 OpenScreen 的 Blur 蓋住。
+3. 先按「讀取自己」，看到 1 列。
+4. 再按「讀取別人」，看到 `count: 0`、`rows: []`、沒有錯誤。旁白重點：看的是資料結果，不是有沒有報錯；沒有報錯不代表規則沒生效。
+5. （建議）回 SQL Editor 跑下面的查詢，證明 B 那列確實存在，且這是管理者視角，與瀏覽器的 A session 不同：
+
+```sql
+select user_id, display_name, access_status
+from public.profiles
+where user_id = '<B 的 user_id>';
+```
+
+**彩排必做：** `rows: []` 也可能只是 B 的 ID 貼錯或 B 根本不存在。錄之前先用上面的查詢確認 B 那列存在，否則這個對照沒有意義。
+
 ## 步驟
 
 1. 切分支並啟動：
