@@ -8,6 +8,8 @@ export type EcpayCheckoutEnv = {
   checkoutUrl: string;
   returnUrl: string;
   clientBackUrl: string;
+  // 月繳方案才需要；空字串時只有月繳建單不可用，不影響其他方案。
+  periodReturnUrl: string;
 };
 
 function composeFromAppBase(path: string): string {
@@ -33,6 +35,9 @@ export function readEcpayCheckoutEnv(): EcpayCheckoutEnv | null {
   const clientBackUrl =
     process.env.ECPAY_CLIENT_BACK_URL?.trim() ||
     composeFromAppBase("/orders/processing");
+  const periodReturnUrl =
+    process.env.ECPAY_PERIOD_RETURN_URL?.trim() ||
+    composeFromAppBase("/api/payments/ecpay/period-webhook");
   if (!merchantId || !returnUrl || !clientBackUrl) {
     return null;
   }
@@ -43,5 +48,6 @@ export function readEcpayCheckoutEnv(): EcpayCheckoutEnv | null {
     checkoutUrl,
     returnUrl,
     clientBackUrl,
+    periodReturnUrl,
   };
 }
