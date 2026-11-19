@@ -6,6 +6,9 @@
 > **本目錄覆蓋月繳訂閱的建單、首次開通、週期續訂／失敗、取消／到期、權限判斷，以及移除追問。** 不重做單元 4 的驗簽、Tunnel、`1|OK`；訂閱不寫 `access_status`，也不寫 `report_unlocks`。  
 > spec 第 7 節的阻塞項**不另開 US**，已編入下表對應任務的驗收條件；`-issues.md` 的非阻塞項不進本目錄。本 spec **覆寫** `docs/spec.md`「不建 subscriptions」，實作時以來源 spec 為準。
 
+> **提供品**：US-001～007（方案表、訂閱表與 RPC 遷移、記憶體 fake、proxy 排除週期 Webhook）與 US-020～021（固定 Payload 腳本）的成果已放在 cp-06-start，依賴它們的 US 視為已滿足，請直接從 US-008 起做。US-003／004 的遷移檔已在，但需自行在 Supabase 套用（待實測 ⚠️）。
+> **課程範圍**：本課學員做 US-008→009、010→011、012→013、014→015；US-016～019（會員視圖、首頁月繳入口、移除追問）本課略過，依賴圖中涉及它們的箭頭可略過；US-022（取消 Checkpoint 與三位測試會員）與 US-023（交棒文件）由講師在 cp-06-done 示範，`howto-monthly-subscription.md` 與 `scripts/subscription-checkpoint/` 學員起點沒有。
+
 ## PM 定案（2026-09-25）
 
 - 訂閱只要求**新產生**的報告能看進階；重整後重開舊報告不做。
@@ -28,17 +31,17 @@
 ## 全域驗收 Checklist
 
 ### Phase 0 — 方案表
-- [ ] US-001 方案表第三筆 測試（預期紅燈；待實作轉綠）
-- [ ] US-002 方案表第三筆 實作
+- [x] US-001 方案表第三筆 測試（預期紅燈；待實作轉綠）（提供品：cp-06-start 起手即有，跳過）
+- [x] US-002 方案表第三筆 實作（提供品：cp-06-start 起手即有，跳過）
 
 ### Phase 1 — schema 與 fake
-- [ ] US-003 建立訂閱表遷移
-- [ ] US-004 訂閱 RPC 遷移
-- [ ] US-005 記憶體 fake 訂閱表與 RPC
+- [x] US-003 建立訂閱表遷移（提供品：cp-06-start 起手即有，跳過）
+- [x] US-004 訂閱 RPC 遷移（提供品：cp-06-start 起手即有，跳過）
+- [x] US-005 記憶體 fake 訂閱表與 RPC（提供品：cp-06-start 起手即有，跳過）
 
 ### Phase 2 — proxy
-- [ ] US-006 proxy 排除週期 Webhook 測試（預期紅燈；待實作轉綠）
-- [ ] US-007 proxy 排除週期 Webhook 實作
+- [x] US-006 proxy 排除週期 Webhook 測試（預期紅燈；待實作轉綠）（提供品：cp-06-start 起手即有，跳過）
+- [x] US-007 proxy 排除週期 Webhook 實作（提供品：cp-06-start 起手即有，跳過）
 
 ### Phase 3 — 建單閘門
 - [ ] US-008 月繳建單與閘門 測試（預期紅燈；待實作轉綠）
@@ -63,8 +66,8 @@
 - [ ] US-019 移除追問文案與入口
 
 ### Phase 8 — 素材與交棒
-- [ ] US-020 固定 Payload 腳本 測試（預期紅燈；待實作轉綠）
-- [ ] US-021 固定 Payload 腳本 實作
+- [x] US-020 固定 Payload 腳本 測試（預期紅燈；待實作轉綠）（提供品：cp-06-start 起手即有，跳過）
+- [x] US-021 固定 Payload 腳本 實作（提供品：cp-06-start 起手即有，跳過）
 - [ ] US-022 取消 Checkpoint 與三位測試會員
 - [ ] US-023 交棒與文件更新
 
