@@ -32,10 +32,10 @@ repo 的 `docs/specs/*-unitN-*` 與 `docs/user-stories/ziwei-unitN-*` 用的是 
 | cp-03 | 3 收費模式與方案規格 | （無） | `bb957ac` | `bb957ac` | `141bc26` → `141bc26` | 沿用 cp-02 完成版，只多講方案卡與付款交棒表 |
 | cp-04 | 4 訂單／付款／Webhook | unit4 | `37b196b` | `3c4813c` | `141bc26` → `11e1622` | #50 unit4 US-023 |
 | cp-05 | 5 點數制 | unit5 | `a51dabe` | `6db3168` | `11e1622` → `85f56da` | #65 剩 1 點解鎖修正 |
-| cp-06 | 6 訂閱制 | unit6 | `8dc4c0b` | `c00a5ad` | `85f56da` → `7028644` | #79 訂閱 reset SQL（A/B/C/D 固定 UUID） |
-| cp-07 | 7 付款後交付與最小營運 | unit7 | `db6fdd1` | `e1cf58d` | `7028644` → `cd7d5b1` | #93 頁首帳號連首頁 |
-| cp-08 | 8 成功／失敗驗測與處置 | unit8 | `74b5902` | `03167ae` | `cd7d5b1` → `5883f8d` | #98 單元 8 驗測 playbook |
-| cp-09 | 9 商業模式演練與缺口 | （無） | `03167ae` | `646ab8c` | `5883f8d` → `a77b641` | #99 cp 對照表、Rescue Kit 與單元 9 素材 |
+| cp-06 | 6 訂閱制 | unit6 | `8c7333e` | `b6fff4a` | `85f56da` → `7028644` | #79 訂閱 reset SQL（A/B/C/D 固定 UUID） |
+| cp-07 | 7 付款後交付與最小營運 | unit7 | `311be47` | `590dc12` | `7028644` → `cd7d5b1` | #93 頁首帳號連首頁 |
+| cp-08 | 8 成功／失敗驗測與處置 | unit8 | `155866d` | `022b110` | `cd7d5b1` → `5883f8d` | #98 單元 8 驗測 playbook |
+| cp-09 | 9 商業模式演練與缺口 | （無） | `022b110` | `6dfead5` | `5883f8d` → `a77b641` | #99 cp 對照表、Rescue Kit 與單元 9 素材 |
 
 > **SHA 注意（2026-10-30 `service_role` backport）**：上表「起始版／完成版」欄位是各 cp 分支在 **fast-forward 合併** service-role grants PR 後的預期 tip（PR head）。若改用 squash 或 merge commit，tip SHA 會變，必須再更新本表。合併方式見〈2026-10-30 service_role grants〉。`cp-01-start` 仍為 `df400d3`（該 tip 尚無 migrations，未加 grant）。
 
@@ -69,7 +69,7 @@ repo 的 `docs/specs/*-unitN-*` 與 `docs/user-stories/ziwei-unitN-*` 用的是 
 
 ## 2026-11 US 檔案包與測試通知小工具
 
-**US 檔案包（cp-04～cp-08）**：`cp-04-start`～`cp-08-start` 各比上一個 cp 的完成版多一個 commit，內容是該單元規格（`docs/specs/*-unitN-*`）與**乾淨版** User Story（`docs/user-stories/ziwei-unitN-*/`：README 與各 US，驗收條件全未勾、不含驗收說明與完成狀態註記；`howto-*` 與重構計畫不放入，由對應 US 交付）。學員用這包搭配 AI 依序實作。單元 4 只放課程範圍內的 US-001～017、020、023，並在 README 註明；其餘單元放入該單元全部 US。**單元 4 另有「提供品」**：US-001（`.env.example` 金流槽位與機密守門測試）、US-005（記憶體 fake 的 `orders`）、US-006／007（`lib/ecpay/check-mac.ts` 與測試）的成果已放在 cp-04-start，學員從 US-004 起做；`constants.ts`／`errors.ts` 的錯誤字串屬 US-011，由學員實作。這是「起始版 = 上一個 cp 完成版」的例外；cp-09-start 仍等於 cp-08-done（單元 8 的 US 已在 cp-09-start，無需再補）。cp-01～cp-03 的起始版尚未補自己單元的 US 檔案包。
+**US 檔案包（cp-04～cp-08）**：`cp-04-start`～`cp-08-start` 各比上一個 cp 的完成版多一個 commit，內容是該單元規格（`docs/specs/*-unitN-*`）與**乾淨版** User Story（`docs/user-stories/ziwei-unitN-*/`：README 與各 US，驗收條件全未勾、不含驗收說明與完成狀態註記；`howto-*` 與重構計畫不放入，由對應 US 交付）。學員用這包搭配 AI 依序實作。單元 4 只放課程範圍內的 US-001～017、020、023，並在 README 註明；其餘單元放入該單元全部 US。**單元 4、單元 6 另有「提供品」**：US-001（`.env.example` 金流槽位與機密守門測試）、US-005（記憶體 fake 的 `orders`）、US-006／007（`lib/ecpay/check-mac.ts` 與測試）的成果已放在 cp-04-start，學員從 US-004 起做；`constants.ts`／`errors.ts` 的錯誤字串屬 US-011，由學員實作。這是「起始版 = 上一個 cp 完成版」的例外；**單元 6 的提供品**（2026-11-19 補入 cp-06-start，兩個 commit：補入與 README 標註）：US-001～007（方案表第三筆與 `.env.example` 的 `ECPAY_PERIOD_RETURN_URL`、訂閱表與 RPC 遷移、記憶體 fake 的訂閱表與內建 RPC、proxy 排除整段 `api/payments/ecpay/`）與 US-020～021（`scripts/ecpay-subscription-payload.mjs`），學員從 US-008 起做；US-016～019 本課略過；`howto-monthly-subscription.md` 與 `scripts/subscription-checkpoint/` 不放入 start，由講師在 cp-06-done 示範。補入後 cp-06-done 以 `-s ours` merge 接上新的 cp-06-start，cp-07-start 起每個 cp 也以同樣方式 merge 上一個完成版，樹與補入前完全相同、只有 SHA 不同，全程 fast-forward。cp-09-start 仍等於 cp-08-done（單元 8 的 US 已在 cp-09-start，無需再補）。cp-01～cp-03 的起始版尚未補自己單元的 US 檔案包。
 
 **測試通知小工具**：`scripts/ecpay-notify-payload.mjs` 與其測試（PR #125）補進 cp-04-done，並以 backport 合併（PR #126～#130）補進 cp-05～cp-09，檔名與 cp-06 起的 `ecpay-subscription-payload.*` 不同，無衝突。
 
