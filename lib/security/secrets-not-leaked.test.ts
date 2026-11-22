@@ -10,6 +10,7 @@ const SECRET_ENV_KEYS = [
   "ECPAY_HASH_KEY",
   "ECPAY_HASH_IV",
   "MEMBERSHIP_GRANT_SECRET",
+  "ADMIN_USER_IDS",
 ] as const;
 
 const ECPAY_EXAMPLE_KEYS = [
@@ -126,7 +127,7 @@ describe("secrets stay off the public surface", () => {
     for (const file of files) {
       const text = readFileSync(file, "utf8");
       expect(text, file).not.toMatch(
-        /process\.env\.NEXT_PUBLIC_(OPENROUTER|SUPABASE_SERVICE_ROLE|ECPAY|MEMBERSHIP)/,
+        /process\.env\.NEXT_PUBLIC_(OPENROUTER|SUPABASE_SERVICE_ROLE|ECPAY|MEMBERSHIP|ADMIN)/,
       );
     }
   });
