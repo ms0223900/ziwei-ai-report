@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { verifyCheckMacValue } from "../../../../lib/ecpay/check-mac";
+import { insertNotification } from "../../../../lib/notifications/insert-notification";
 import {
   createFakeServiceRoleClient,
   createFakeSupabaseMemory,
+  failNextNotificationInsert,
   seedFakeSubscription,
   seedFakeUser,
   type FakeSupabaseMemory,
@@ -40,7 +42,7 @@ function setPaymentEnv(overrides: Record<string, string | undefined> = {}) {
     ECPAY_CLIENT_BACK_URL: "https://example.test/orders/processing",
     ECPAY_PERIOD_RETURN_URL:
       "https://example.test/api/payments/ecpay/period-webhook",
-    APP_BASE_URL: undefined,
+    APP_BASE_URL: "https://example.test",
     ...overrides,
   };
   for (const [key, value] of Object.entries(values)) {
@@ -216,15 +218,15 @@ describe("POST /api/payments/checkout", () => {
     expect(fields.ReturnURL).toBe(
       "https://example.test/api/payments/ecpay/webhook",
     );
+    const order = [...state.memory.orders.values()][0];
     expect(fields.ClientBackURL).toBe(
-      "https://example.test/orders/processing",
+      `https://example.test/orders/processing?order=${order?.id}`,
     );
     expect(fields.TradeDesc).toBe("紫微斗數完整解讀");
     expect(fields.ItemName).toBe("紫微斗數完整解讀");
     expect(fields.ChoosePayment).toBe("Credit");
     expect(String(fields.EncryptType)).toBe("1");
     expect(fields.CheckMacValue).toMatch(/^[A-F0-9]{64}$/);
-    const order = [...state.memory.orders.values()][0];
     expect(order?.merchant_trade_no).toBe(fields.MerchantTradeNo);
     expect(order?.status).toBe("pending");
   });
@@ -407,5 +409,128 @@ describe("POST /api/payments/checkout — subscribe_report_monthly", () => {
 
     expect(response.status).toBe(400);
     expect((await readJson(response)).message).toBe("不支援的方案。");
+  });
+});
+
+describe("POST /api/payments/checkout — ClientBackURL and pending notification", () => {
+  const originalPaymentEnv = Object.fromEntries(
+    PAYMENT_ENV_KEYS.map((key) => [key, process.env[key]]),
+  ) as Record<(typeof PAYMENT_ENV_KEYS)[number], string | undefined>;
+
+  beforeEach(() => {
+    state.memory = createFakeSupabaseMemory();
+    state.userId = USER_ID;
+    seedFakeUser(state.memory, { id: USER_ID, email: "yuan@example.com" });
+    setPaymentEnv();
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    for (const key of PAYMENT_ENV_KEYS) {
+      const value = originalPaymentEnv[key];
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+    state.userId = USER_ID;
+  });
+
+  function onlyOrder() {
+    const orders = [...state.memory.orders.values()];
+    expect(orders).toHaveLength(1);
+    return orders[0]!;
+  }
+
+  async function checkout(planId: string) {
+    const response = await postCheckout({ plan_id: planId });
+    return {
+      response,
+      fields: checkoutFields(await readJson(response)) as Record<string, string>,
+    };
+  }
+
+  it("S1-1: ClientBackURL carries the new order id and CheckMacValue matches", async () => {
+    const { response, fields } = await checkout("unlock_report_lifetime");
+
+    expect(response.status).toBe(200);
+    expect(fields.ClientBackURL).toBe(
+      `https://example.test/orders/processing?order=${onlyOrder().id}`,
+    );
+    expect(
+      verifyCheckMacValue(fields, fields.CheckMacValue, HASH_KEY, HASH_IV),
+    ).toBe(true);
+  });
+
+  it("does not send a whole ECPAY_CLIENT_BACK_URL that lacks the order id", async () => {
+    setPaymentEnv({
+      ECPAY_CLIENT_BACK_URL: "https://legacy.example.test/orders/processing",
+    });
+
+    const { fields } = await checkout("unlock_report_lifetime");
+
+    expect(fields.ClientBackURL).not.toBe(
+      "https://legacy.example.test/orders/processing",
+    );
+    expect(fields.ClientBackURL).toBe(
+      `https://example.test/orders/processing?order=${onlyOrder().id}`,
+    );
+  });
+
+  it("writes exactly one order_pending notification after the order insert", async () => {
+    await checkout("unlock_report_lifetime");
+
+    const order = onlyOrder();
+    const notifications = [...state.memory.notifications.values()];
+    expect(notifications).toHaveLength(1);
+    expect(notifications[0]).toMatchObject({
+      user_id: USER_ID,
+      type: "order_pending",
+      source_type: "order",
+      source_id: order.id,
+      idempotency_key: `order-pending:${order.id}`,
+    });
+  });
+
+  it("S1-2: keeps the order and a successful response when the notification insert fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    failNextNotificationInsert(state.memory);
+
+    const { response, fields } = await checkout("unlock_report_lifetime");
+
+    expect(response.status).toBe(200);
+    expect(fields.CheckMacValue).toMatch(/^[A-F0-9]{64}$/);
+    expect(onlyOrder().status).toBe("pending");
+    expect(state.memory.notifications.size).toBe(0);
+    vi.restoreAllMocks();
+  });
+
+  it("S1-2: writing the pending notification again for the same order stays at one row", async () => {
+    await checkout("unlock_report_lifetime");
+    const order = onlyOrder();
+
+    const client = createFakeServiceRoleClient(state.memory);
+    const again = await insertNotification(client as never, {
+      userId: USER_ID,
+      type: "order_pending",
+      sourceType: "order",
+      sourceId: order.id,
+      idempotencyKey: `order-pending:${order.id}`,
+    });
+
+    expect(again).toBe("skipped");
+    expect(state.memory.notifications.size).toBe(1);
+  });
+
+  it("regression: monthly checkout keeps ReturnURL and PeriodReturnURL unchanged", async () => {
+    const { fields } = await checkout("subscribe_report_monthly");
+
+    expect(fields.ReturnURL).toBe(
+      "https://example.test/api/payments/ecpay/webhook",
+    );
+    expect(fields.PeriodReturnURL).toBe(
+      "https://example.test/api/payments/ecpay/period-webhook",
+    );
   });
 });

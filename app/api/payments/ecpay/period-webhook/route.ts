@@ -93,6 +93,22 @@ export async function POST(request: Request): Promise<Response> {
     return ok();
   }
 
+  // 首期訂單已 failed：不寫週期事件，只回 1|OK。order_id 為 null 時不視為 failed。
+  const orderId = (subscription as { order_id?: string | null }).order_id;
+  if (orderId) {
+    const { data: order, error: orderError } = await client
+      .from("orders")
+      .select()
+      .eq("id", orderId)
+      .maybeSingle();
+    if (orderError) {
+      return reject("linked order read failed");
+    }
+    if ((order as { status?: string } | null)?.status === "failed") {
+      return ok();
+    }
+  }
+
   const rtnCode = trimField(fields, "RtnCode");
   const totalSuccessTimes = toDecimalInt(fields.TotalSuccessTimes);
   // Official docs spell it gwsr; older SDK samples send Gwsr.
