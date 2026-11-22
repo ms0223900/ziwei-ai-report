@@ -6,8 +6,8 @@
 > **本目錄覆蓋回跳帶訂單 id、七態結果頁、`failed` 終態、八種 App 內通知、管理者補點，以及報告頁不採信回跳。** 不重做驗簽、加點、扣點、訂閱起訖；通知只做 App 內，不接 Email。  
 > spec 第 7 節兩項阻塞已在 spec 內給出處理方式，**不另開 US**，編入對應任務驗收；`-issues.md` 的非阻塞項不進本目錄。
 
-> **提供品**：US-001～012（通知與管理紀錄遷移、記憶體 fake、通知寫入 helper、`ClientBackURL` 帶訂單 id、`mark_order_failed` 與 failed 終態短路）與 US-015～017（單點解鎖與取消 Checkpoint 的通知）的成果已放在 cp-07-start，依賴它們的 US 視為已滿足，請直接從 US-013 與 US-018 起做。US-001 的遷移檔已在，但需自行在 Supabase 套用（待實測 ⚠️）。  
-> **課程範圍**：7-1 學員做 US-013→014（履約成功通知）與 US-018→019（結果讀取 API）；US-020（結果頁畫面）與 US-023（通知頁）由講師在 cp-07-done 示範，學員起點沒有畫面，驗收以 API 回應與 `notifications` 資料列為準；US-021～022、US-024～030 不在 7-1 範圍（7-2 另行規劃），`howto-post-payment-delivery.md` 與 `scripts/post-payment-checkpoint/` 學員起點沒有。
+> **提供品**：US-001～012（通知與管理紀錄遷移、記憶體 fake、通知寫入 helper、`ClientBackURL` 帶訂單 id、`mark_order_failed` 與 failed 終態短路）與 US-015～017（單點解鎖與取消 Checkpoint 的通知），以及 7-2 用的 US-024～025（補償 API、處置原因推導、`ADMIN_USER_IDS` 白名單）的成果已放在 cp-07-start，依賴它們的 US 視為已滿足，7-1 請直接從 US-013 與 US-018 起做，7-2 從 US-026 起做。US-001 的遷移檔已在，但需自行在 Supabase 套用（待實測 ⚠️）。  
+> **課程範圍**：7-1 學員做 US-013→014（履約成功通知）與 US-018→019（結果讀取 API）；US-020（結果頁畫面）與 US-023（通知頁）由講師在 cp-07-done 示範，學員起點沒有畫面，驗收以 API 回應與 `notifications` 資料列為準；7-2 學員做 US-026（管理者查詢頁，Test-After，驗收以 `/admin/orders` 與補償 API 的結果為準）；US-021～022、US-027～030 不在 7-1、7-2 範圍，`howto-post-payment-delivery.md` 與 `scripts/post-payment-checkpoint/` 學員起點沒有。
 
 ## 實作前的共同約定
 
@@ -59,8 +59,8 @@
 - [ ] US-023 通知頁面
 
 ### Phase 6 — 管理者補償
-- [ ] US-024 補償 API 與處置原因 測試（預期紅燈；待實作轉綠 → 已由 US-025 轉綠）
-- [ ] US-025 補償 API 與處置原因 實作
+- [x] US-024 補償 API 與處置原因 測試（預期紅燈；待實作轉綠 → 已由 US-025 轉綠）（提供品：cp-07-start 起手即有，跳過）
+- [x] US-025 補償 API 與處置原因 實作（提供品：cp-07-start 起手即有，跳過）
 - [ ] US-026 管理者查詢頁
 
 ### Phase 7 — 報告頁
