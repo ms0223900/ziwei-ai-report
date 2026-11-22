@@ -6,6 +6,9 @@
 > **本目錄覆蓋回跳帶訂單 id、七態結果頁、`failed` 終態、八種 App 內通知、管理者補點，以及報告頁不採信回跳。** 不重做驗簽、加點、扣點、訂閱起訖；通知只做 App 內，不接 Email。  
 > spec 第 7 節兩項阻塞已在 spec 內給出處理方式，**不另開 US**，編入對應任務驗收；`-issues.md` 的非阻塞項不進本目錄。
 
+> **提供品**：US-001～012（通知與管理紀錄遷移、記憶體 fake、通知寫入 helper、`ClientBackURL` 帶訂單 id、`mark_order_failed` 與 failed 終態短路）與 US-015～017（單點解鎖與取消 Checkpoint 的通知）的成果已放在 cp-07-start，依賴它們的 US 視為已滿足，請直接從 US-013 與 US-018 起做。US-001 的遷移檔已在，但需自行在 Supabase 套用（待實測 ⚠️）。  
+> **課程範圍**：7-1 學員做 US-013→014（履約成功通知）與 US-018→019（結果讀取 API）；US-020（結果頁畫面）與 US-023（通知頁）由講師在 cp-07-done 示範，學員起點沒有畫面，驗收以 API 回應與 `notifications` 資料列為準；US-021～022、US-024～030 不在 7-1 範圍（7-2 另行規劃），`howto-post-payment-delivery.md` 與 `scripts/post-payment-checkpoint/` 學員起點沒有。
+
 ## 實作前的共同約定
 
 - `mark_order_failed` 做成 **server 端 TS 函式**（`lib/payments/mark-order-failed.ts`），不做成 SQL RPC：spec 要求「通知 INSERT 失敗不把 `failed` 改回 `pending`」，放進同一個 SQL 函式會一起回滾。
@@ -22,29 +25,29 @@
 ## 全域驗收 Checklist
 
 ### Phase 0 — schema、fake 與通知寫入
-- [ ] US-001 建立 notifications 與 admin_actions 遷移
-- [ ] US-002 記憶體 fake 通知與管理紀錄
-- [ ] US-003 通知寫入 helper 測試（預期紅燈；待實作轉綠 → 已由 US-004 轉綠）
-- [ ] US-004 通知寫入 helper 實作
+- [x] US-001 建立 notifications 與 admin_actions 遷移（提供品：cp-07-start 起手即有，跳過）
+- [x] US-002 記憶體 fake 通知與管理紀錄（提供品：cp-07-start 起手即有，跳過）
+- [x] US-003 通知寫入 helper 測試（預期紅燈；待實作轉綠 → 已由 US-004 轉綠）（提供品：cp-07-start 起手即有，跳過）
+- [x] US-004 通知寫入 helper 實作（提供品：cp-07-start 起手即有，跳過）
 
 ### Phase 1 — 回跳帶訂單 id
-- [ ] US-005 ClientBackURL 與 pending 通知 測試（預期紅燈；待實作轉綠 → 已由 US-006 轉綠）
-- [ ] US-006 ClientBackURL 與 pending 通知 實作
+- [x] US-005 ClientBackURL 與 pending 通知 測試（預期紅燈；待實作轉綠 → 已由 US-006 轉綠）（提供品：cp-07-start 起手即有，跳過）
+- [x] US-006 ClientBackURL 與 pending 通知 實作（提供品：cp-07-start 起手即有，跳過）
 
 ### Phase 2 — failed 終態
-- [ ] US-007 mark_order_failed 測試（預期紅燈；待實作轉綠 → 已由 US-008 轉綠）
-- [ ] US-008 mark_order_failed 實作
-- [ ] US-009 ReturnURL failed 終態 測試（預期紅燈；待實作轉綠 → 已由 US-010 轉綠）
-- [ ] US-010 ReturnURL failed 終態 實作
-- [ ] US-011 PeriodReturnURL failed 短路 測試（預期紅燈；待實作轉綠 → 已由 US-012 轉綠）
-- [ ] US-012 PeriodReturnURL failed 短路 實作
+- [x] US-007 mark_order_failed 測試（預期紅燈；待實作轉綠 → 已由 US-008 轉綠）（提供品：cp-07-start 起手即有，跳過）
+- [x] US-008 mark_order_failed 實作（提供品：cp-07-start 起手即有，跳過）
+- [x] US-009 ReturnURL failed 終態 測試（預期紅燈；待實作轉綠 → 已由 US-010 轉綠）（提供品：cp-07-start 起手即有，跳過）
+- [x] US-010 ReturnURL failed 終態 實作（提供品：cp-07-start 起手即有，跳過）
+- [x] US-011 PeriodReturnURL failed 短路 測試（預期紅燈；待實作轉綠 → 已由 US-012 轉綠）（提供品：cp-07-start 起手即有，跳過）
+- [x] US-012 PeriodReturnURL failed 短路 實作（提供品：cp-07-start 起手即有，跳過）
 
 ### Phase 3 — 履約與扣點通知
 - [ ] US-013 履約成功通知 測試（預期紅燈；待實作轉綠 → 已由 US-014 轉綠）
 - [ ] US-014 履約成功通知 實作
-- [ ] US-015 單點解鎖通知 測試（預期紅燈；待實作轉綠 → 已由 US-016 轉綠）
-- [ ] US-016 單點解鎖通知 實作
-- [ ] US-017 取消 Checkpoint 補失效通知
+- [x] US-015 單點解鎖通知 測試（預期紅燈；待實作轉綠 → 已由 US-016 轉綠）（提供品：cp-07-start 起手即有，跳過）
+- [x] US-016 單點解鎖通知 實作（提供品：cp-07-start 起手即有，跳過）
+- [x] US-017 取消 Checkpoint 補失效通知（提供品：cp-07-start 起手即有，跳過）
 
 ### Phase 4 — 結果頁
 - [ ] US-018 結果讀取 API 測試（預期紅燈；待實作轉綠 → 已由 US-019 轉綠）
