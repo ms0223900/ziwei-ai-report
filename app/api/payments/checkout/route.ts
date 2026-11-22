@@ -9,6 +9,7 @@ import {
   subscriptionInProgressError,
   validationError,
 } from "../../../../lib/errors";
+import { insertNotification } from "../../../../lib/notifications/insert-notification";
 import { generateMerchantTradeNo } from "../../../../lib/payments/merchant-trade-no";
 import { readEcpayCheckoutEnv } from "../../../../lib/payments/checkout-env";
 import {
@@ -122,19 +123,33 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const merchantTradeNo = generateMerchantTradeNo();
-  const { error: insertError } = await client.from("orders").insert({
-    user_id: user.id,
-    plan_id: plan.planId,
-    merchant_trade_no: merchantTradeNo,
-    amount: plan.amount,
-    currency: plan.currency,
-    status: "pending",
-    trade_no: null,
-    payment_date: null,
-  });
-  if (insertError) {
+  const { data: insertedOrder, error: insertError } = await client
+    .from("orders")
+    .insert({
+      user_id: user.id,
+      plan_id: plan.planId,
+      merchant_trade_no: merchantTradeNo,
+      amount: plan.amount,
+      currency: plan.currency,
+      status: "pending",
+      trade_no: null,
+      payment_date: null,
+    })
+    .select()
+    .single();
+  const orderId = (insertedOrder as { id?: string } | null)?.id;
+  if (insertError || !orderId) {
     return jsonError(persistFailedError());
   }
+
+  // 訂單已提交後才寫通知；失敗只留 log，不回滾訂單、不改結帳回應。
+  await insertNotification(client, {
+    userId: user.id,
+    type: "order_pending",
+    sourceType: "order",
+    sourceId: orderId,
+    idempotencyKey: `order-pending:${orderId}`,
+  });
 
   const fields: Record<string, string> = {
     MerchantID: env.merchantId,
@@ -145,7 +160,7 @@ export async function POST(request: Request): Promise<Response> {
     TradeDesc: plan.tradeDesc,
     ItemName: plan.itemName,
     ReturnURL: env.returnUrl,
-    ClientBackURL: env.clientBackUrl,
+    ClientBackURL: `${env.appBaseUrl}/orders/processing?order=${encodeURIComponent(orderId)}`,
     ChoosePayment: "Credit",
     EncryptType: "1",
   };

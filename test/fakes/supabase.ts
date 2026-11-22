@@ -94,6 +94,32 @@ export type FakeSubscriptionEvent = {
   processed_at: string;
 };
 
+export type FakeNotification = {
+  id: string;
+  user_id: string;
+  type: string;
+  source_type: string;
+  source_id: string;
+  idempotency_key: string;
+  created_at?: string;
+  read_at?: string | null;
+};
+
+export type FakeAdminAction = {
+  id: string;
+  admin_user_id: string;
+  action: string;
+  reason: string;
+  source_order_id: string;
+  idempotency_key: string;
+  before_state: Record<string, unknown>;
+  after_state: Record<string, unknown>;
+  result: "ok" | "skipped_already_fulfilled" | "rejected";
+  created_at?: string;
+};
+
+export type FakeInsertError = { code?: string; message: string };
+
 export type FakeSupabaseMemory = {
   users: Map<string, FakeUser>;
   profiles: Map<string, FakeProfile>;
@@ -103,6 +129,10 @@ export type FakeSupabaseMemory = {
   reportUnlocks: Map<string, FakeReportUnlock>;
   subscriptions: Map<string, FakeSubscription>;
   subscriptionEvents: Map<string, FakeSubscriptionEvent>;
+  notifications: Map<string, FakeNotification>;
+  adminActions: Map<string, FakeAdminAction>;
+  // One-shot errors consumed by the next `notifications` insert (see failNextNotificationInsert).
+  notificationInsertErrors: FakeInsertError[];
   rpc: Map<string, FakeRpcHandler>;
 };
 
@@ -118,6 +148,9 @@ export function createFakeSupabaseMemory(): FakeSupabaseMemory {
     reportUnlocks: new Map(),
     subscriptions: new Map(),
     subscriptionEvents: new Map(),
+    notifications: new Map(),
+    adminActions: new Map(),
+    notificationInsertErrors: [],
     rpc: new Map(),
   };
 }
@@ -128,6 +161,13 @@ export function setFakeRpc(
   result: FakeRpcHandler,
 ) {
   memory.rpc.set(name, result);
+}
+
+export function failNextNotificationInsert(
+  memory: FakeSupabaseMemory,
+  error: FakeInsertError = { message: "fake notification insert failed" },
+) {
+  memory.notificationInsertErrors.push(error);
 }
 
 export function seedFakeUser(
@@ -160,7 +200,9 @@ type FakeTable =
   | "point_transactions"
   | "report_unlocks"
   | "subscriptions"
-  | "subscription_events";
+  | "subscription_events"
+  | "notifications"
+  | "admin_actions";
 
 const FAKE_TABLES: readonly FakeTable[] = [
   "profiles",
@@ -170,10 +212,17 @@ const FAKE_TABLES: readonly FakeTable[] = [
   "report_unlocks",
   "subscriptions",
   "subscription_events",
+  "notifications",
+  "admin_actions",
 ];
 
 // Tables whose inserts get a default created_at, mirroring `default now()`.
-const CREATED_AT_DEFAULT: readonly FakeTable[] = ["orders", "subscriptions"];
+const CREATED_AT_DEFAULT: readonly FakeTable[] = [
+  "orders",
+  "subscriptions",
+  "notifications",
+  "admin_actions",
+];
 
 function tableConfig(memory: FakeSupabaseMemory, table: FakeTable) {
   if (table === "profiles") {
@@ -219,6 +268,22 @@ function tableConfig(memory: FakeSupabaseMemory, table: FakeTable) {
   if (table === "subscription_events") {
     return {
       store: memory.subscriptionEvents,
+      idKey: "id",
+      uniqueKeys: ["idempotency_key"],
+      uniqueComposites: [] as string[][],
+    };
+  }
+  if (table === "notifications") {
+    return {
+      store: memory.notifications,
+      idKey: "id",
+      uniqueKeys: ["idempotency_key"],
+      uniqueComposites: [] as string[][],
+    };
+  }
+  if (table === "admin_actions") {
+    return {
+      store: memory.adminActions,
       idKey: "id",
       uniqueKeys: ["idempotency_key"],
       uniqueComposites: [] as string[][],
@@ -346,6 +411,15 @@ function createTableApi(memory: FakeSupabaseMemory, table: FakeTable) {
         if (CREATED_AT_DEFAULT.includes(table) && pendingInsert.created_at == null) {
           pendingInsert.created_at = new Date().toISOString();
         }
+        if (table === "notifications") {
+          const injected = memory.notificationInsertErrors.shift();
+          if (injected) {
+            return { data: null, error: injected };
+          }
+          if (pendingInsert.read_at === undefined) {
+            pendingInsert.read_at = null;
+          }
+        }
         const existing = store.get(id);
         if (existing && upsertIgnoreDuplicates) {
           return { data: existing, error: null };
@@ -430,6 +504,7 @@ export function createFakeServiceRoleClient(memory: FakeSupabaseMemory) {
       }
       throw new Error(`fake supabase: unsupported table ${table}`);
     },
+    // Fake notifications / admin_actions success does not prove the unit 7 migration was applied.
     // Fake .rpc() stubs do not prove Story 4 / 5 / 8 migrations were applied,
     // nor do the built-in subscription RPCs prove the unit 6 migrations were.
     async rpc(fn: string, args?: Record<string, unknown>) {
