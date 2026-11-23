@@ -11,7 +11,8 @@
     "test": "vitest run",
     "ai:prototype": "node scripts/switch-ai-mode.mjs prototype",
     "ai:production": "node scripts/switch-ai-mode.mjs production",
-    "ai:mode": "node scripts/switch-ai-mode.mjs"
+    "ai:mode": "node scripts/switch-ai-mode.mjs",
+    "course:recording-reset": "node --env-file=.env.local scripts/course-recording-reset.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",
