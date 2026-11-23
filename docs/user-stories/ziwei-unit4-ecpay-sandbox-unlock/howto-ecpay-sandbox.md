@@ -90,6 +90,10 @@ ECPAY_ENV=stage
 4. ReturnURL 是綠界打得到的 HTTPS
 5. 課堂展示建議 `NEXT_PUBLIC_COMMERCIAL_PREVIEW=0`，避免跟預覽 B 搞混
 
+錄影重置（把測試會員設回未解鎖、預建 pending、切換 4-2／4-3b Webhook）見  
+[`scripts/README-course-recording-reset.md`](../../../scripts/README-course-recording-reset.md)  
+與 `npm run course:recording-reset -- --help`。僅本機／ziwei-demo；**禁止**打正式專案。
+
 ---
 
 ## 6. 五類驗測（對應 Story 4～9）
