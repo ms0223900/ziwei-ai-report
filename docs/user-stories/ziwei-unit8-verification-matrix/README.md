@@ -5,6 +5,20 @@
 > 前一版：[`ziwei-unit7-post-payment-delivery`](../ziwei-unit7-post-payment-delivery/README.md)  
 > **本目錄只交付驗測素材**：矩陣、處置卡、`scripts/unit8-checkpoint/` 的 fixture SQL、`probe.mjs` 與 README。不改 `app/`、`lib/`、`supabase/migrations/`。
 
+## 本單元的提供品與學員角色（cp-08-start）
+
+單元 8 偏驗收檢驗：**11 張 US 全部當提供品，學員以看課程影片、對照矩陣驗收為主，不用 AI 實作任何 US。** 想跟做實跑的學員在自己的專案（或複製講師的專案）跑，先照 `scripts/unit8-checkpoint/setup-accounts.md` 建出 `checkpoint.a～d` 測試帳號。
+
+起點已放入的提供品（內容與各 US 的輸出一致）：
+
+- `docs/unit8/verification-matrix.md`：13 列驗測矩陣的**學員版**。前 10 欄已預填；「實際結果／證據位置」只列要跑的檔案或指令；「通過／未通過」全部未勾；「選定模式紀錄」為空。學員跑完後自己填後三欄。
+- `docs/unit8/disposition-cards.md`：處置卡模板與三張預填卡。
+- `scripts/unit8-checkpoint/`：README、四支 fixture、`probe.mjs` 與測試、帳號建置腳本 `create-checkpoint-users.sql` 與 `setup-accounts.md`。
+
+不放入起點：`howto-verification-matrix.md`、`docs/playbooks/` 的單元 8 playbook、`docs/unit8/live-acceptance-2026-10-07.md` 與截圖（含答案，或由講師示範）。
+
+下面各 US 的驗收條件維持未勾（乾淨 US 包）；對應的成果檔案已在上面，不需要學員再做。
+
 ## 實作前的共同約定
 
 - 測試帳號沿用 `checkpoint.a~d@aaa.com`。單次、點數、通知固定包預設用 D；D 無法靠「reset＋fixture」還原時才改用獨立帳號，並在 README 記錄原因。
