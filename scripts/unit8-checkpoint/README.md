@@ -11,6 +11,7 @@
 | `fixture-points-replay.sql` | 點數包 pending 單 `TESTU8PTS0001`，加點只由 ReturnURL 觸發 | U8-P-S、U8-P-D | D | 無 |
 | `fixture-notification-missing.sql` | 已履約（credit 1 筆）但沒有 `credit:{id}` 通知 | U8-N-F | D | 無 |
 | `probe.mjs` | 以會員 Cookie 呼叫進階 GET 或點數解鎖 API，只印判讀欄位 | U8-P-F、U8-S-* | 依案例 | `<report_id>`、Cookie |
+| `create-checkpoint-users.sql` | 在自己的專案建出 A～D 與 ADMIN 登入帳號（固定 UUID；步驟見 `setup-accounts.md`） | 全部 | A～D | 無 |
 | `../subscription-checkpoint/reset-checkpoint.sql` | 還原 A／B／C／D（沿用單元 6） | 全部 | A～D | 無 |
 | `../subscription-checkpoint/expire.sql`、`cancel.sql` | 單一會員到期或取消（沿用單元 6） | U8-S-F2、U8-S-F3 | A／C | `<USER uuid>` |
 | `../post-payment-checkpoint/mark-failed.sql` | pending 單改 failed＋`order_failed` 通知（沿用單元 7） | U8-L-F | D | `<ORDER uuid>` |
@@ -24,6 +25,8 @@
 | B | `checkpoint.b@aaa.com` | `84ca06c5-10fb-4478-a6d9-ab52973f7c2f` |
 | C | `checkpoint.c@aaa.com` | `4dc205b3-b4a8-43ce-ba3c-8727fe027a03` |
 | D | `checkpoint.d@aaa.com` | `fc5f35a3-8e99-416b-a422-cb645feb0031` |
+
+> 在自己的 Supabase 專案跑、還沒有這四個帳號？先照 [`setup-accounts.md`](./setup-accounts.md) 跑 `create-checkpoint-users.sql`。
 
 ## 開始前
 
