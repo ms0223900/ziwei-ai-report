@@ -6,11 +6,12 @@
 
 | 檔案 | 用途 | 案例 ID | 帳號 | 需替換 |
 | --- | --- | --- | --- | --- |
-| `fixture-lifetime-pending.sql` | 單次解鎖 pending 單＋`order_pending` 通知；D 還原成 locked | U8-L-S、U8-L-F、U8-L-D、U8-L-F2、U8-L-F3 | D | 無 |
+| `fixture-lifetime-pending.sql` | 單次解鎖 pending 單＋`order_pending` 通知；D 還原成 locked | U8-L-S、U8-L-F、U8-L-D | D | 無 |
 | `fixture-points-zero.sql` | D 歸零（0 點、locked、無訂閱），並建一份報告 R | U8-P-F | D | 無 |
 | `fixture-points-replay.sql` | 點數包 pending 單 `TESTU8PTS0001`，加點只由 ReturnURL 觸發 | U8-P-S、U8-P-D | D | 無 |
 | `fixture-notification-missing.sql` | 已履約（credit 1 筆）但沒有 `credit:{id}` 通知 | U8-N-F | D | 無 |
 | `probe.mjs` | 以會員 Cookie 呼叫進階 GET 或點數解鎖 API，只印判讀欄位 | U8-P-F、U8-S-* | 依案例 | `<report_id>`、Cookie |
+| `create-checkpoint-users.sql` | 在自己的專案建出 A～D 與 ADMIN 登入帳號（固定 UUID；步驟見 `setup-accounts.md`） | 全部 | A～D | 無 |
 | `../subscription-checkpoint/reset-checkpoint.sql` | 還原 A／B／C／D（沿用單元 6） | 全部 | A～D | 無 |
 | `../subscription-checkpoint/expire.sql`、`cancel.sql` | 單一會員到期或取消（沿用單元 6） | U8-S-F2、U8-S-F3 | A／C | `<USER uuid>` |
 | `../post-payment-checkpoint/mark-failed.sql` | pending 單改 failed＋`order_failed` 通知（沿用單元 7） | U8-L-F | D | `<ORDER uuid>` |
@@ -24,6 +25,8 @@
 | B | `checkpoint.b@aaa.com` | `84ca06c5-10fb-4478-a6d9-ab52973f7c2f` |
 | C | `checkpoint.c@aaa.com` | `4dc205b3-b4a8-43ce-ba3c-8727fe027a03` |
 | D | `checkpoint.d@aaa.com` | `fc5f35a3-8e99-416b-a422-cb645feb0031` |
+
+> 在自己的 Supabase 專案跑、還沒有這四個帳號？先照 [`setup-accounts.md`](./setup-accounts.md) 跑 `create-checkpoint-users.sql`。
 
 ## 開始前
 
@@ -70,16 +73,8 @@ post() { curl -sS -X POST "$BASE$1" -H 'Content-Type: application/x-www-form-url
    ```
    預期回 `1|OK`，D 變成 unlocked，`unlock:{order_id}` 1 筆。
 5. **U8-L-D**：同一指令再送一次，仍回 `1|OK`，`unlock:{order_id}` 仍是 1 筆。
-6. **U8-L-F2／U8-L-F3**：重跑 fixture 回到 pending，依序送：
-   ```bash
-   # U8-L-F2 金額不符：回 0|Error（400），訂單仍 pending、D 仍 locked
-   post /api/payments/ecpay/webhook "$(payload --kind return --mtn TESTU8LIFE0001 --amount 1)"
-   # U8-L-F3 取消／失敗：送兩次，都回 1|OK，訂單變 failed、D 仍 locked
-   post /api/payments/ecpay/webhook "$(payload --kind return --mtn TESTU8LIFE0001 --amount 99 --rtn-code 10100058)"
-   ```
-   F3 之後 `order-failed:{order_id}` 1 筆（送第二次仍 1 筆）、`unlock:{order_id}` 0 筆。順序不能反：failed 是終態，要重跑 fixture 才能回到 pending。
-7. **選做**：在 pending 狀態下改送 `--simulate --amount 99`（回 `1|OK`）或 `--bad-mac --amount 99`（回 `0|Error`），兩者訂單都不變。
-8. **收尾**：重跑 `fixture-lifetime-pending.sql`，把 D 還原成 locked。
+6. **選做**：在 pending 狀態下改送 `--simulate --amount 99`（回 `1|OK`）或 `--bad-mac --amount 99`（回 `0|Error`），兩者訂單都不變。
+7. **收尾**：重跑 `fixture-lifetime-pending.sql`，把 D 還原成 locked。
 
 ## 點數（U8-P-*）
 
