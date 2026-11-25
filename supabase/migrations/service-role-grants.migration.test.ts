@@ -10,6 +10,8 @@ const EXPECTED: [file: string, table: string, privileges: string][] = [
   ["20260905000000_create_reports.sql", "reports", "select, insert"],
   ["20260913000000_create_profiles.sql", "profiles", "select, insert, update"],
   ["20260918000000_create_orders.sql", "orders", "select, insert, update"],
+  ["20260921000000_point_ledger_and_unlocks.sql", "point_transactions", "select"],
+  ["20260921000000_point_ledger_and_unlocks.sql", "report_unlocks", "select"],
 ];
 
 function stripComments(sql: string) {
