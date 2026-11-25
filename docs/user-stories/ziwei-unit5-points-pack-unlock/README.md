@@ -22,18 +22,23 @@
 - 完整單元 7 UI／單元 8 驗測劇本
 - `points_balance >= 0` check（Could Have，不排程）
 
+## 課前提供品
+
+- 起點已提供 US-001～005、US-010～011 的程式與測試，以下以「提供品」標記；學員不必重做。遷移檔仍需自行套用到資料庫。
+- [howto-points-pack.md](./howto-points-pack.md) 是完成版的參考範例；其中的端點與畫面須完成後續 US 才可使用。US-023 仍須依自己的環境實作、實測與交棒，不能因有範例就視為完成。
+
 ## 全域驗收 Checklist
 
 ### Phase 0 — 方案表
 
-- [ ] US-001 方案表第二筆 測試（預期紅燈；待實作轉綠）
-- [ ] US-002 方案表第二筆 實作
+- [x] US-001 方案表第二筆 測試（預期紅燈；待實作轉綠）（起點提供）
+- [x] US-002 方案表第二筆 實作（起點提供）
 
 ### Phase 1 — schema 與 fake
 
-- [ ] US-003 建立點數與解鎖關聯遷移
-- [ ] US-004 加點與扣點 RPC 遷移
-- [ ] US-005 記憶體 fake 點數與 RPC
+- [x] US-003 建立點數與解鎖關聯遷移（起點提供）
+- [x] US-004 加點與扣點 RPC 遷移（起點提供）
+- [x] US-005 記憶體 fake 點數與 RPC（起點提供）
 
 ### Phase 2 — 建單閘門
 
@@ -47,8 +52,8 @@
 
 ### Phase 4 — reports.user_id
 
-- [ ] US-010 POST reports.user_id 測試（預期紅燈；待實作轉綠）
-- [ ] US-011 POST reports.user_id 實作
+- [x] US-010 POST reports.user_id 測試（預期紅燈；待實作轉綠）（起點提供）
+- [x] US-011 POST reports.user_id 實作（起點提供）
 
 ### Phase 5 — 單點解鎖 RPC
 
